@@ -1,0 +1,102 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-size: clamp(1rem, 1.3vw, 1.375rem);
+  line-height: clamp(1.4, 1.8vw, 2);
+  font-weight: 400;
+
+  background-color: rgb(104, 211, 142);
+  opacity: 1;
+  box-sizing: border-box;
+  color: #171515;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  min-height: 100vh; /* Legalább a teljes viewport magasságát foglalja el */
+  width: 100%; /* Mindig a teljes szélességet foglalja el */
+  box-sizing: border-box; /* Fontos: padding és border is beleszámít a szélességbe */
+  padding: 15px; /* Kisebb padding mobilra */
+  margin: 0 auto; /* Középre igazítás és nincs felesleges margó */
+  position: relative;
+  display: flex;
+  flex-direction: column; /* Egymás alá rendeződnek a gyermekek */
+  align-items: flex-start;
+
+
+  --extra-vertical-padding02: 0.2em;
+  --extra-vertical-padding05: 0.5em;
+  --extra-vertical-padding1: 1em;
+}
+
+/* --- Small Breakpoint (sm): 640px-től felfelé --- */
+@media (min-width: 640px) {
+  #main-container {
+    padding: 20px;
+    max-width: 640px; /* Max szélesség a sm breakpointig */
+  }
+}
+
+/* --- Medium Breakpoint (md): 768px-től felfelé --- */
+@media (min-width: 768px) {
+  #main-container {
+    padding: 25px;
+    max-width: 768px; /* Max szélesség az md breakpointig */
+  }
+}
+
+/* --- Large Breakpoint (lg): 1024px-től felfelé --- */
+@media (min-width: 1024px) {
+  #main-container {
+    padding: 30px;
+    max-width: 1024px; /* Max szélesség az lg breakpointig */
+  }
+}
+
+/* --- Extra Large Breakpoint (xl): 1280px-től felfelé --- */
+@media (min-width: 1280px) {
+  #main-container {
+    padding: 35px; /* Még nagyobb padding */
+    max-width: 1280px; /* Max szélesség az xl breakpointig */
+  }
+}
+
+/* --- Double Extra Large Breakpoint (2xl): 1536px-től felfelé --- */
+@media (min-width: 1536px) {
+  #main-container {
+    padding: 40px; /* A legnagyobb padding a legnagyobb képernyőkhöz */
+    max-width: 1536px; /* Max szélesség a 2xl breakpointig */
+  }
+}
+
+/* Esetlegesen fix szélességű tartalom mobilra igazítása, ha van */
+.content-wrapper {
+  width: 100%;
+  max-width: 600px; /* Pl. egy tartalom blokk max szélessége mobil nézetben */
+}
+
+.title1 {
+  font-size: clamp(0.325rem, 3vw, 1.375rem);
+  line-height: 1;
+  padding-top: 1em;
+  margin: 0;
+  text-align: left;
+}
+.title2 {
+  font-size: clamp(2.4rem, 8vw, 3.45rem);
+  line-height: 1;
+  font-weight: 600;
+  padding-bottom: 0.5em;
+  margin: 0;
+  text-align: left;
+}
+.red-suit {
+  color: #d41515;
+}
+.black-suit {
+  color: black;
+}
+.grey-suit {
+  color: rgb(53, 154, 74);
+}
