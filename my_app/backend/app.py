@@ -17,7 +17,10 @@ BUST = 9
 UNDER_21 = 10
 
 
-app = Flask(__name__)
+app = Flask(__name__,
+    static_folder='../react/dist',
+    template_folder='../react/dist'
+)
 app.config["SECRET_KEY"] = os.environ.get(
     "FLASK_SECRET_KEY", "default-dev-secret-key-NEVER-USE-IN-PROD"
 )
