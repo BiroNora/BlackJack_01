@@ -1,6 +1,21 @@
-import type { GameState, GameStateData } from "../types/game-types";
+// frontend/src/hooks/useGameStateMachine.ts
 
-let gameState: GameStateData = {
+import { useState, useEffect, useCallback } from 'react';
+import {
+  initializeSessionAPI,
+  getTokensAPI,
+  getDeckLenAPI,
+} from '../api/api-calls';
+import type {
+  DeckLenResponse,
+  GameState,
+  GameStateData,
+  SessionInitResponse,
+  TokensResponse,
+} from '../types/game-types';
+
+// Kezdeti állapot a játékgép számára
+const initialGameState: GameStateData = {
   currentGameState: 'LOADING',
   player: [[], 0, 0, false, false, 0, 0],
   dealer: [[], [], 0, 0, false, 0],
@@ -14,76 +29,84 @@ let gameState: GameStateData = {
   is_round_active: false,
 };
 
-export function setGameState(
-  newState: GameState,
-  newData?: Partial<GameStateData>
-): void {
-  //console.log(`>>> setGameState hívva! Célállapot: ${newState}, bejövő adatok (newData):`, JSON.parse(JSON.stringify(newData || {})));
-  //console.trace("setGameState HÍVÁS HELYE:");
-  gameState = {
-    ...gameState, // Másolja a jelenlegi globális állapotot
-    ...(newData || {}), // Másolja az új adatokat, felülírva az előzőket, ha van egyezés
-    currentGameState: newState, // <--- EZ A GARANCIA: Ez felülírja a newData.currentGameState-et!
+// A hook visszatérési típusa most inline van deklarálva, nincs külön 'type' definíció.
+export function useGameStateMachine(): { gameState: GameStateData; transitionToState: (newState: GameState, newData?: Partial<GameStateData>) => void; } {
+  const [gameState, setLocalGameState] = useState<GameStateData>(initialGameState);
+
+  // Állapotváltó funkció
+  const transitionToState = useCallback((
+    newState: GameState,
+    newData?: Partial<GameStateData>
+  ) => {
+    setLocalGameState(prev => {
+      const updatedState = {
+        ...prev,
+        ...newData,
+        currentGameState: newState,
+      };
+      console.log(`>>> Állapotváltás: ${prev.currentGameState} -> ${newState}`, updatedState);
+      return updatedState;
+    });
+  }, []);
+
+  useEffect(() => {
+    // --- LOADING ÁLLAPOT KEZELÉSE ---
+    if (gameState.currentGameState === 'LOADING') {
+      const initializeApplicationOnLoad = async () => {
+        try {
+          const minLoadingTimePromise = new Promise(resolve => setTimeout(resolve, 4000));
+
+          const [sessionData] = await Promise.all([
+            initializeSessionAPI(),
+            minLoadingTimePromise
+          ]);
+          console.log("Session data loaded:", sessionData);
+
+          const tokensResponse = await getTokensAPI() as TokensResponse;
+          const deckLenResponse = await getDeckLenAPI() as DeckLenResponse;
+
+          const userTokens = tokensResponse.user_tokens;
+          const deckLength = deckLenResponse.deckLen;
+
+          console.log("Alkalmazás inicializálva. Tokenek:", userTokens, "Pakli hossza:", deckLength);
+
+          if (userTokens === 0) {
+            transitionToState('RESTART_GAME', {
+              tokens: userTokens,
+              deckLen: deckLength,
+            });
+          } else {
+            transitionToState('BETTING', {
+              tokens: userTokens,
+              deckLen: deckLength,
+            });
+          }
+        } catch (error) {
+          console.error("ERROR: ", error);
+          transitionToState('ERROR', {
+            tokens: 0,
+            deckLen: 0,
+          });
+        }
+      };
+
+      initializeApplicationOnLoad();
+    }
+
+    // --- A BETTING ÁLLAPOT KEZELÉSE ---
+    else if (gameState.currentGameState === 'BETTING') {
+        // Például: Itt történne valami, amikor a játékos tétet tett, és át kell váltani a kártyaosztásra.
+        // Ezt valószínűleg egy külön függvény (pl. handlePlaceBet) hívná meg,
+        // ami aztán a transitionToState-tel váltana.
+        console.log("Játék a BETTING állapotban. Várjuk a tétet...");
+        // Ebben a fázisban valószínűleg nem történik automatikus állapotváltás a useEffect-ből,
+        // hanem egy felhasználói interakció (tétrakás gomb megnyomása) indítja el.
+        // AZONBAN: ha valamilyen időzítő vagy automatikus folyamat van itt, azt ide írnád.
+    }
+  }, [gameState.currentGameState, transitionToState]);
+
+  return {
+    gameState,
+    transitionToState,
   };
-
-  //console.log(`DEBUG: gameState.currentGameState értéke KÖZVETLENÜL BEÁLLÍTÁS UTÁN: ${gameState.currentGameState}`);
-  //console.log(`DEBUG: Teljes gameState objektum KÖZVETLENÜL BEÁLLÍTÁS UTÁN:`, JSON.parse(JSON.stringify(gameState)));
-
-  updateGameUI(gameState);
-}
-
-async function updateGameUI(
-  state: GameStateData,
-): Promise<void> {
-  //console.log("--> updateGameUI received state:", state);
-  //console.trace("Call stack for updateGameUI"); // Also helpful
-
-  switch (state.currentGameState) {
-    case 'LOADING':
-      //console.log("Entering LOADING state with data:", state);
-      //console.log("Entering LOADING state with data JSON:", JSON.parse(JSON.stringify(state)));
-      
-      break;
-
-    case 'BETTING':
-      break;
-
-    case 'MAIN_TURN':
-      break;
-
-    case 'MAIN_STAND':
-      break;
-
-    case 'MAIN_NAT21':
-      break;
-
-    case 'MAIN_NAT21_DEALER':
-      break;
-
-    case 'SPLIT_START':
-      break;
-
-    case 'SPLIT_TURN':
-      break;
-
-    case 'SPLIT_FINISH':
-      break;
-
-    case 'SPLIT_NAT21':
-      break;
-
-    case 'ROUND_END':
-      break;
-
-    case 'RESTART_GAME':
-      break;
-
-    case 'ERROR':
-      break;
-
-    default:
-      console.warn("UNKNOWN STATE:", state);
-      setGameState('ERROR');
-      break;
-  }
 }

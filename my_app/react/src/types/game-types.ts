@@ -63,6 +63,16 @@ export type SessionInitResponse = {
   client_id: string;
 }
 
+export type TokensResponse = {
+    user_tokens: number;
+    message: string;
+};
+
+export type DeckLenResponse = {
+    deckLen: number;
+    message: string;
+};
+
 export type ErrorResponse = {
   message?: string; // Az üzenet opcionális, ha a backend nem mindig küld ilyet
   code?: string | number; // Lehet, hogy a backend küld hibakódot is
