@@ -1,0 +1,17 @@
+#cards,
+#start-button,
+#deal-bank,
+#chips {
+  display: flex;
+}
+
+/* Példa: Ha láthatóvá akarod tenni a Deal Bank szekciót egy bizonyos állapotban */
+/* Ezt egy React komponenssel vagy JavaScripttel adnád hozzá az elemhez */
+/* .deal-bank.active {
+  display: flex;
+} */
+
+/* Példa: Láthatóvá tesszük a chips szekciót */
+/* .chips.active {
+  display: flex;
+} */
