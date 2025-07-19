@@ -323,7 +323,9 @@ def bet(user, game):
     db.session.commit()
 
     session["game"] = game.serialize()
-
+    serialized_game_data = game.serialize()
+    print(serialized_game_data)              # Kiírjuk a konzolra
+    print(game)
     return (
         jsonify(
             {
@@ -368,21 +370,13 @@ def retake_bet(user, game):
 
     db.session.commit()
 
-    response_data_for_client = {
-        "bet": game.bet,
-        "betList": game.bet_list,
-        "deckLen": game.get_deck_len(),
-        "tokens": user.tokens,
-        "player": game.player,
-        "dealer": game.dealer,
-    }
-
     return (
         jsonify(
             {
                 "status": "success",
                 "bet_retaken": amount_to_return,
-                "data": response_data_for_client,
+                "current_tokens": user.tokens,
+                "game_state": game.serialize(),
                 "game_state_hint": "BET_SUCCESSFULLY_RETRAKEN",
             }
         ),
@@ -403,7 +397,7 @@ def get_tokens_from_db(user, game):
             {
                 "status": "success",
                 "message": "Tokens retrieved.",
-                "user_tokens": user_tokens,
+                "current_tokens": user_tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "TOKENS_RETRIEVED",
             }
@@ -418,21 +412,13 @@ def get_tokens_from_db(user, game):
 @game_session_required
 @api_error_handler
 def get_game_data(user, game):
-    response_data_for_client = {
-        "bet": game.bet,
-        "betList": game.bet_list,
-        "deckLen": game.get_deck_len(),
-        "tokens": user.tokens,
-        "player": game.player,
-        "dealer": game.dealer,
-    }
 
     return (
         jsonify(
             {
                 "status": "success",
                 "message": "Game data retrieved.",
-                "data": response_data_for_client,
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "GAME_DATA_RETRIEVED",
             }

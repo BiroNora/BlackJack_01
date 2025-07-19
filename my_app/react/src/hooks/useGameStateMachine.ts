@@ -5,14 +5,18 @@ import {
   initializeSessionAPI,
   getTokensAPI,
   getDeckLenAPI,
+  setBet,
+  takeBackDeal,
 } from '../api/api-calls';
 import type {
   DeckLenResponse,
   GameState,
   GameStateData,
-  SessionInitResponse,
+  GameStateMachineHookResult,
   TokensResponse,
 } from '../types/game-types';
+import { extractGameStateData } from '../utilities/utils';
+
 
 // Kezdeti állapot a játékgép számára
 const initialGameState: GameStateData = {
@@ -23,14 +27,14 @@ const initialGameState: GameStateData = {
   tokens: 0,
   splitReq: 0,
   bet: 0,
-  betList: [],
+  bet_list: [],
   players: [],
   winner: 0,
   is_round_active: false,
 };
 
 // A hook visszatérési típusa most inline van deklarálva, nincs külön 'type' definíció.
-export function useGameStateMachine(): { gameState: GameStateData; transitionToState: (newState: GameState, newData?: Partial<GameStateData>) => void; } {
+export function useGameStateMachine(): GameStateMachineHookResult {
   const [gameState, setLocalGameState] = useState<GameStateData>(initialGameState);
 
   // Állapotváltó funkció
@@ -48,6 +52,38 @@ export function useGameStateMachine(): { gameState: GameStateData; transitionToS
       return updatedState;
     });
   }, []);
+
+  const handlePlaceBet = useCallback(async (amount: number) => {
+    if (gameState.tokens >= amount && amount > 0) {
+      try {
+        const data = await setBet(amount);
+        const response = extractGameStateData(data);
+
+        if (response) {
+          console.log("handlePlaceBet - Feldolgozott GameState adat (ezt kapja az állapot):", response);
+          transitionToState('BETTING', response);
+        }
+      } catch {
+        transitionToState('ERROR');
+      }
+    }
+  }, [gameState.tokens, transitionToState]);
+
+  const handleRetakeBet = useCallback(async () => {
+    if (gameState.bet_list) {
+      try {
+        const data = await takeBackDeal();
+        const response = extractGameStateData(data);
+
+        if (response) {
+          console.log("handleRetakeBet - Feldolgozott GameState adat (ezt kapja az állapot):", response);
+          transitionToState('BETTING', response);
+        }
+      } catch {
+        transitionToState('ERROR');
+      }
+    }
+  }, [gameState.bet_list, transitionToState]);
 
   useEffect(() => {
     // --- LOADING ÁLLAPOT KEZELÉSE ---
@@ -95,18 +131,20 @@ export function useGameStateMachine(): { gameState: GameStateData; transitionToS
 
     // --- A BETTING ÁLLAPOT KEZELÉSE ---
     else if (gameState.currentGameState === 'BETTING') {
-        // Például: Itt történne valami, amikor a játékos tétet tett, és át kell váltani a kártyaosztásra.
-        // Ezt valószínűleg egy külön függvény (pl. handlePlaceBet) hívná meg,
-        // ami aztán a transitionToState-tel váltana.
-        console.log("Játék a BETTING állapotban. Várjuk a tétet...");
-        // Ebben a fázisban valószínűleg nem történik automatikus állapotváltás a useEffect-ből,
-        // hanem egy felhasználói interakció (tétrakás gomb megnyomása) indítja el.
-        // AZONBAN: ha valamilyen időzítő vagy automatikus folyamat van itt, azt ide írnád.
+      // Például: Itt történne valami, amikor a játékos tétet tett, és át kell váltani a kártyaosztásra.
+      // Ezt valószínűleg egy külön függvény (pl. handlePlaceBet) hívná meg,
+      // ami aztán a transitionToState-tel váltana.
+      console.log("Játék a BETTING állapotban. Várjuk a tétet...");
+      // Ebben a fázisban valószínűleg nem történik automatikus állapotváltás a useEffect-ből,
+      // hanem egy felhasználói interakció (tétrakás gomb megnyomása) indítja el.
+      // AZONBAN: ha valamilyen időzítő vagy automatikus folyamat van itt, azt ide írnád.
     }
   }, [gameState.currentGameState, transitionToState]);
 
   return {
     gameState,
     transitionToState,
+    handlePlaceBet,
+    handleRetakeBet,
   };
 }

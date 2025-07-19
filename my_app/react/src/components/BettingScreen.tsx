@@ -5,15 +5,13 @@ import "../styles/betting.css";
 interface BettingScreenProps {
   gameState: GameStateData;
   onPlaceBet: (amount: number) => void;
-  onClearBet: () => void;
-  onStartGame: () => void;
+  retakeBet: () => void;
 }
 
 const BettingScreen: React.FC<BettingScreenProps> = ({
   gameState,
   onPlaceBet,
-  onClearBet,
-  onStartGame,
+  retakeBet,
 }) => {
   const { tokens, bet, deckLen } = gameState;
 
@@ -23,21 +21,17 @@ const BettingScreen: React.FC<BettingScreenProps> = ({
     onPlaceBet(tokens);
   };
 
-  const canPlaceAnyBet = tokens > 0;
-
   return (
     <div className="betting-screen-container">
       <div className="cards" id="cards">
         Cards: {deckLen}
       </div>
 
-      <button id="start-button" onClick={onStartGame}>
-        Start Game
-      </button>
+      <button id="start-button">Start Game</button>
 
       <div id="deal-bank" className="deal-bank">
-        <button id="deal-button" onClick={onClearBet} disabled={bet === 0}>
-          Deal: {bet}
+        <button id="deal-button" disabled={bet === 0} onClick={() => retakeBet()}>
+          Bet: {bet}
         </button>
         <div id="bank">Tokens: {tokens}</div>
       </div>
@@ -47,7 +41,6 @@ const BettingScreen: React.FC<BettingScreenProps> = ({
           id="all-in"
           type="button"
           onClick={handleAllIn}
-          disabled={!canPlaceAnyBet}
         >
           All In
         </button>
@@ -59,7 +52,6 @@ const BettingScreen: React.FC<BettingScreenProps> = ({
             type="button"
             data-bet={amount}
             onClick={() => onPlaceBet(amount)}
-            disabled={tokens < amount || !canPlaceAnyBet}
           >
             {amount.toLocaleString("hu-HU")}
           </button>

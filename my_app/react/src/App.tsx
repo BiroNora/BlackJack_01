@@ -5,7 +5,7 @@ import { LoadingScreen } from "./components/LoadingScreen";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 
 function App() {
-  const { gameState } = useGameStateMachine();
+  const { gameState, handlePlaceBet, handleRetakeBet } = useGameStateMachine();
   console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
   // A React itt dönti el, mit jelenítsen meg az aktuális állapot alapján
@@ -22,7 +22,11 @@ function App() {
       return (
         <div>
           <HeaderTitles />
-          <BettingScreen gameState={gameState} />
+          <BettingScreen
+            gameState={gameState}
+            onPlaceBet={handlePlaceBet}
+            retakeBet={handleRetakeBet}
+          />
         </div>
       );
     case "MAIN_TURN":

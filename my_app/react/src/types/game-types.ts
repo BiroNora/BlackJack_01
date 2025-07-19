@@ -21,7 +21,7 @@ export interface GameStateData {
   tokens: number;
   splitReq: number;
   bet: number;
-  betList: number[];
+  bet_list: number[];
   players: PlayerData[];
   winner: number;
   is_round_active: boolean;
@@ -38,24 +38,6 @@ export type PlayerData = [
 ];
 
 export type DealerData = [string[], string[], number, number, boolean, number];
-
-export interface BetResponse {
-  bet: number;
-  betList: number[];
-  deckLen: number;
-  tokens: number;
-  player: PlayerData;
-  dealer: DealerData;
-}
-
-export interface PlayersData {
-  player: PlayerData;
-  dealer: DealerData;
-  tokens: number;
-  splitReq: number;
-  players: PlayerData[];
-  deckLen: number;
-}
 
 export type SessionInitResponse = {
   message: string;
@@ -77,4 +59,13 @@ export type ErrorResponse = {
   message?: string; // Az üzenet opcionális, ha a backend nem mindig küld ilyet
   code?: string | number; // Lehet, hogy a backend küld hibakódot is
   details?: string | object; // További részletek
+};
+
+export type GameStateMachineHookResult = {
+  gameState: GameStateData;
+  transitionToState: (newState: GameState, newData?: Partial<GameStateData>) => void;
+  handlePlaceBet: (amount: number) => Promise<void>;
+  handleDeal: () => Promise<void>; // Hozzáadva a visszatérési típushoz
+  handleStartGame: () => Promise<void>; // Hozzáadva a visszatérési típushoz
+  handleRetakeBet: () => Promise<void>;
 };
