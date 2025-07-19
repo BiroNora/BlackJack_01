@@ -131,13 +131,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     // --- A BETTING ÁLLAPOT KEZELÉSE ---
     else if (gameState.currentGameState === 'BETTING') {
-      // Például: Itt történne valami, amikor a játékos tétet tett, és át kell váltani a kártyaosztásra.
-      // Ezt valószínűleg egy külön függvény (pl. handlePlaceBet) hívná meg,
-      // ami aztán a transitionToState-tel váltana.
       console.log("Játék a BETTING állapotban. Várjuk a tétet...");
-      // Ebben a fázisban valószínűleg nem történik automatikus állapotváltás a useEffect-ből,
-      // hanem egy felhasználói interakció (tétrakás gomb megnyomása) indítja el.
-      // AZONBAN: ha valamilyen időzítő vagy automatikus folyamat van itt, azt ide írnád.
+    }
+
+    // --- A SHUFFLING ÁLLAPOT KEZELÉSE ---
+    else if (gameState.currentGameState === 'SHUFFLING') {
+      console.log("Játék a SHUFFLING állapotban.");
     }
   }, [gameState.currentGameState, transitionToState]);
 

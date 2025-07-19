@@ -1,7 +1,8 @@
 import "./App.css";
-import BettingScreen from "./components/BettingScreen";
+import Betting from "./components/Betting";
 import HeaderTitles from "./components/HeaderTitles";
-import { LoadingScreen } from "./components/LoadingScreen";
+import { Loading } from "./components/Loading";
+import { Shuffling } from "./components/Shuffling";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 
 function App() {
@@ -15,14 +16,21 @@ function App() {
       return (
         <div>
           <HeaderTitles />
-          <LoadingScreen />
+          <Loading />
+        </div>
+      );
+    case "SHUFFLING":
+      return (
+        <div>
+          <HeaderTitles />
+          <Shuffling />
         </div>
       );
     case "BETTING":
       return (
         <div>
           <HeaderTitles />
-          <BettingScreen
+          <Betting
             gameState={gameState}
             onPlaceBet={handlePlaceBet}
             retakeBet={handleRetakeBet}

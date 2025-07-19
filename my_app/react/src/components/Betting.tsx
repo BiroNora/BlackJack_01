@@ -1,14 +1,13 @@
-import React, { useState } from "react";
 import type { GameStateData } from "../types/game-types";
 import "../styles/betting.css";
 
-interface BettingScreenProps {
+interface BettingProps {
   gameState: GameStateData;
   onPlaceBet: (amount: number) => void;
   retakeBet: () => void;
 }
 
-const BettingScreen: React.FC<BettingScreenProps> = ({
+const Betting: React.FC<BettingProps> = ({
   gameState,
   onPlaceBet,
   retakeBet,
@@ -27,10 +26,16 @@ const BettingScreen: React.FC<BettingScreenProps> = ({
         Cards: {deckLen}
       </div>
 
-      <button id="start-button" disabled={bet === 0}>Start Game</button>
+      <button id="start-button" disabled={bet === 0}>
+        Start Game
+      </button>
 
       <div id="deal-bank" className="deal-bank">
-        <button id="deal-button" disabled={bet === 0} onClick={() => retakeBet()}>
+        <button
+          id="deal-button"
+          disabled={bet === 0}
+          onClick={() => retakeBet()}
+        >
           Bet: {bet}
         </button>
         <div id="bank">Tokens: {tokens}</div>
@@ -63,4 +68,4 @@ const BettingScreen: React.FC<BettingScreenProps> = ({
   );
 };
 
-export default BettingScreen;
+export default Betting;

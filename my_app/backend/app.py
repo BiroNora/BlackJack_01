@@ -465,6 +465,7 @@ def create_deck(user, game):
             {
                 "status": "success",
                 "message": "Deck created.",
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "DECK_CREATED",
             }

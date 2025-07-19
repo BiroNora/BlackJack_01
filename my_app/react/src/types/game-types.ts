@@ -1,5 +1,6 @@
 export type GameState =
   | "LOADING"
+  | "SHUFFLING"
   | "BETTING"
   | "MAIN_TURN"
   | "MAIN_STAND"
