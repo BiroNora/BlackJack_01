@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { GameStateData } from "../types/game-types";
 import "../styles/betting.css";
 
@@ -27,7 +27,7 @@ const BettingScreen: React.FC<BettingScreenProps> = ({
         Cards: {deckLen}
       </div>
 
-      <button id="start-button">Start Game</button>
+      <button id="start-button" disabled={bet === 0}>Start Game</button>
 
       <div id="deal-bank" className="deal-bank">
         <button id="deal-button" disabled={bet === 0} onClick={() => retakeBet()}>
@@ -41,6 +41,7 @@ const BettingScreen: React.FC<BettingScreenProps> = ({
           id="all-in"
           type="button"
           onClick={handleAllIn}
+          disabled={tokens === 0}
         >
           All In
         </button>
@@ -52,6 +53,7 @@ const BettingScreen: React.FC<BettingScreenProps> = ({
             type="button"
             data-bet={amount}
             onClick={() => onPlaceBet(amount)}
+            disabled={tokens < amount}
           >
             {amount.toLocaleString("hu-HU")}
           </button>
