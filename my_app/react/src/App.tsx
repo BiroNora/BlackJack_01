@@ -3,11 +3,15 @@ import Betting from "./components/Betting";
 import Cards from "./components/Cards";
 import HeaderTitles from "./components/HeaderTitles";
 import { Loading } from "./components/Loading";
+import PlayButtons from "./components/PlayButtons";
+import PlayerDealer from "./components/PlayerDealer";
+import PlayerDealerMasked from "./components/PlayerDealerMasked";
 import { Shuffling } from "./components/Shuffling";
+import Winner from "./components/Winner";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 
 function App() {
-  const { gameState, handlePlaceBet, handleRetakeBet, handleStartGame } =
+  const { gameState, handlePlaceBet, handleRetakeBet, handleStartGame, handleHitRequest } =
     useGameStateMachine();
   console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
@@ -46,9 +50,19 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
+          <PlayerDealerMasked gameState={gameState} />
+          <PlayButtons gameState={gameState} onHit={handleHitRequest} />
         </div>
       );
     case "MAIN_STAND":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <PlayerDealer gameState={gameState} />
+          <Winner gameState={gameState} />
+        </div>
+      );
     case "MAIN_NAT21":
     case "MAIN_NAT21_DEALER":
     case "SPLIT_START":

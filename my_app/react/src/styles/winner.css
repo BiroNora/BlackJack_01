@@ -1,0 +1,6 @@
+.winners {
+  display: flex; /* Flexbox használata a belső elemek (pl. a nyertes üzenet) elrendezéséhez */
+  align-items: flex-start; /* Függőlegesen az elem tetejére igazítja a tartalmat */
+  text-align: left; /* A szöveget az elemen belül balra igazítja */
+  justify-content: flex-start;
+}

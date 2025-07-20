@@ -323,9 +323,7 @@ def bet(user, game):
     db.session.commit()
 
     session["game"] = game.serialize()
-    serialized_game_data = game.serialize()
-    print(serialized_game_data)              # Kiírjuk a konzolra
-    print(game)
+    
     return (
         jsonify(
             {
@@ -442,6 +440,7 @@ def start_game(user, game):
             {
                 "status": "success",
                 "message": "New round initialized.",
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "NEW_ROUND_INITIALIZED",
             }
@@ -505,24 +504,13 @@ def ins_request(user, game):
 
     session["game"] = game.serialize()
 
-    response_data_for_client = {
-        "bet": game.get_bet(),
-        "betList": game.bet_list,
-        "deckLen": game.get_deck_len(),
-        "tokens": user.tokens,
-        "player": game.player,
-        "dealer": game.dealer,
-    }
-
-    # Visszaadjuk a frissített adatokat
     return (
         jsonify(
             {
                 "status": "success",
                 "message": "Insurance placed successfully.",
                 "insurance_amount": insurance_amount,
-                "tokens": user.tokens,
-                "data": response_data_for_client,
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "INSURANCE_PROCESSED",
             }
@@ -547,21 +535,12 @@ def rewards(user, game):
 
     session["game"] = game.serialize()
 
-    response_data_for_client = {
-        "bet": game.bet,  # A tét, ami valószínűleg már 0 (nullázódott) a rewards() után
-        "betList": game.bet_list,
-        "deckLen": game.get_deck_len(),
-        "tokens": user.tokens,
-        "player": game.player,
-        "dealer": game.dealer,
-    }
-
     return (
         jsonify(
             {
                 "status": "success",
                 "message": "Rewards processed and tokens updated.",
-                "data": response_data_for_client,
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "REWARDS_PROCESSED",
             }
@@ -580,21 +559,12 @@ def hit(user, game):
 
     session["game"] = game.serialize()
 
-    response_data_for_client = {
-        "bet": game.get_bet(),
-        "betList": game.bet_list,
-        "deckLen": game.get_deck_len(),
-        "tokens": user.tokens,
-        "player": game.player,
-        "dealer": game.dealer,
-    }
-
     return (
         jsonify(
             {
                 "status": "success",
                 "tokens": user.tokens,
-                "data": response_data_for_client,
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "HIT_RECIEVED",
             }
@@ -613,22 +583,13 @@ def stand(user, game):
 
     session["game"] = game.serialize()
 
-    response_data_for_client = {
-        "bet": game.get_bet(),
-        "betList": game.bet_list,
-        "deckLen": game.get_deck_len(),
-        "tokens": user.tokens,
-        "player": game.player,
-        "dealer": game.dealer,
-    }
-
     return (
         jsonify(
             {
                 "status": "success",
                 "message": "STAND_RECIEVED",
                 "tokens": user.tokens,
-                "data": response_data_for_client,
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "PLAYER_STAND_ROUND_ENDED",
             }
@@ -655,7 +616,7 @@ def round_end(user, game):
             {
                 "status": "success",
                 "message": message_for_client,
-                "tokens": user.tokens,
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": status_hint_for_client,
             }
@@ -695,23 +656,13 @@ def double_request(user, game):
 
     session["game"] = game.serialize()
 
-    response_data_for_client = {
-        "bet": game.get_bet(),
-        "betList": game.bet_list,
-        "deckLen": game.get_deck_len(),
-        "tokens": user.tokens,
-        "player": game.player,
-        "dealer": game.dealer,
-    }
-
     return (
         jsonify(
             {
                 "status": "success",
                 "message": "Double placed successfully.",
                 "double_amount": amount_deducted,
-                "tokens": user.tokens,
-                "data": response_data_for_client,
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
             }
         ),
@@ -775,23 +726,13 @@ def split_request(user, game):
 
     session["game"] = game.serialize()
 
-    response_data_for_client = {
-        "bet": game.get_bet(),
-        "betList": game.bet_list,
-        "deckLen": game.get_deck_len(),
-        "tokens": user.tokens,
-        "player": game.player,
-        "dealer": game.dealer,
-    }
-
     return (
         jsonify(
             {
                 "status": "success",
                 "message": "Split hand placed successfully.",
                 "split_amount": bet_amount,
-                "tokens": user.tokens,
-                "data": response_data_for_client,
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "SPLIT_SUCCESS",
             }
@@ -812,22 +753,12 @@ def add_to_players_list_by_stand(user, game):
 
     session["game"] = game.serialize()
 
-    response_data_for_client = {
-        "bet": game.get_bet(),
-        "betList": game.bet_list,
-        "deckLen": game.get_deck_len(),
-        "tokens": user.tokens,
-        "player": game.player,
-        "dealer": game.dealer,
-    }
-
     return (
         jsonify(
             {
                 "status": "success",
                 "message": "Split hand placed successfully.",
-                "tokens": user.tokens,
-                "data": response_data_for_client,
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "NEXT_SPLIT_HAND_ACTIVATED",
             }
@@ -860,22 +791,12 @@ def add_split_player_to_game(user, game):
 
     session["game"] = game.serialize()
 
-    response_data_for_client = {
-        "bet": game.get_bet(),
-        "betList": game.bet_list,
-        "deckLen": game.get_deck_len(),
-        "tokens": user.tokens,
-        "player": game.player,
-        "dealer": game.dealer,
-    }
-
     return (
         jsonify(
             {
                 "status": "success",
                 "message": "Split hand placed successfully.",
-                "tokens": user.tokens,
-                "data": response_data_for_client,
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "NEXT_SPLIT_HAND_ACTIVATED",
             }
@@ -908,22 +829,12 @@ def add_player_from_players(user, game):
 
     session["game"] = game.serialize()
 
-    response_data_for_client = {
-        "bet": game.get_bet(),
-        "betList": game.bet_list,
-        "deckLen": game.get_deck_len(),
-        "tokens": user.tokens,
-        "player": game.player,
-        "dealer": game.dealer,
-    }
-
     return (
         jsonify(
             {
                 "status": "success",
                 "message": "Split hand placed successfully.",
-                "tokens": user.tokens,
-                "data": response_data_for_client,
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "NEXT_SPLIT_HAND_ACTIVATED",
             }
@@ -949,7 +860,7 @@ def set_restart(user, game):
         jsonify(
             {
                 "status": "success",
-                "tokens": user.tokens,
+                "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "HIT_RESTART",
             }

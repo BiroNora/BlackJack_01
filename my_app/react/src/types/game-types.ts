@@ -2,6 +2,7 @@ export type GameState =
   | "LOADING"
   | "SHUFFLING"
   | "BETTING"
+  | "INIT_GAME"
   | "MAIN_TURN"
   | "MAIN_STAND"
   | "MAIN_NAT21"
@@ -69,4 +70,20 @@ export type GameStateMachineHookResult = {
   //handleDeal: () => Promise<void>; // Hozzáadva a visszatérési típushoz
   handleRetakeBet: () => Promise<void>;
   handleStartGame: (shouldShuffle: boolean) => void;
+  handleHitRequest: (isDouble: boolean) => Promise<void>; 
 };
+
+export const states = [
+  "",
+  "BLACKJACK PLAYER WON!",
+  "BLACKJACK PUSH",
+  "BLACKJACK DEALER WON!",
+  "PUSH",
+  "PLAYER LOST",
+  "PLAYER WON",
+  "DEALER WON",
+  "twenty one",
+  "bust",
+  "under 21",
+  "BLACKJACK",
+];

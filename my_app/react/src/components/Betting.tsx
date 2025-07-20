@@ -1,5 +1,6 @@
 import type { GameStateData } from "../types/game-types";
 import "../styles/betting.css";
+import { formatNumber } from "../utilities/utils";
 
 interface BettingProps {
   gameState: GameStateData;
@@ -23,7 +24,7 @@ const Betting: React.FC<BettingProps> = ({
   };
 
   const handleStartGame = () => {
-    const shouldShuffle = (deckLen === 0 || deckLen < 60);
+    const shouldShuffle = deckLen === 0 || deckLen < 60;
     // Mindig meghívjuk az onStartGame-et, átadva neki, hogy kell-e keverni
     onStartGame(shouldShuffle);
   };
@@ -40,9 +41,12 @@ const Betting: React.FC<BettingProps> = ({
           onClick={() => retakeBet()}
           disabled={bet === 0}
         >
-          Bet: {bet}
+          Bet: {formatNumber(bet)}
         </button>
-        <div id="bank">Tokens: {tokens}</div>
+        <div id="bank">
+          Player's bank:{" "}
+          <span className="bank-amount">{formatNumber(tokens)}</span>
+        </div>
       </div>
 
       <div id="chips" className="chips">
@@ -64,7 +68,7 @@ const Betting: React.FC<BettingProps> = ({
             onClick={() => onPlaceBet(amount)}
             disabled={tokens < amount}
           >
-            {amount.toLocaleString("hu-HU")}
+            {formatNumber(amount)}
           </button>
         ))}
       </div>

@@ -1,0 +1,42 @@
+/* src/components/PlayerDealer.css */
+
+/* Alapvető stílusok a dealer és player dobozoknak */
+.dealer,
+.player {
+    display: flex; /* Flexbox használata az elemek elrendezéséhez */
+    align-items: center; /* Függőlegesen középre igazítja az elemeket */
+    margin-bottom: var(--extra-vertical-padding05, 0.5em); /* Kis alsó margó, ha van ilyen változó */
+    flex-wrap: wrap; /* Hosszú kártyasor esetén törje a sort */
+    gap: 0.2rem;
+}
+
+/* Stílus a "Dealer:" és "Player:" feliratoknak */
+.dealer .label-text,
+.player .label-text {
+    /* Alapértelmezés szerint ezek a feliratok már az első elemek a flex containerben,
+       így automatikusan a sor elején lesznek. Ha a szöveg rövid, nem kell további stílus.
+       Ha szeretnéd, hogy ne ugorjon be a második sorba, állíthatod a flex-shrink-et. */
+    flex-shrink: 0; /* Megakadályozza, hogy ez az elem zsugorodjon és a szöveg törjön. */
+    font-weight: bold; /* Vastagabb betűtípus a címkéknek */
+    white-space: nowrap; /* Megakadályozza a szövegtörést a címkénél */
+    color: #333; /* Sötétebb szín a jobb olvashatóságért */
+    margin-right: 0.5em;
+}
+
+/* Stílus a kártyák szív/káró piros színéhez */
+.red-suit {
+    color: #d41515; /* Piros szín */
+    font-weight: bold; /* Vastagabb betűtípus a jobb láthatóságért */
+}
+
+/* Stílus a kártyák pikk/treff fekete színéhez */
+.black-suit {
+    color: #000000; /* Fekete szín */
+    font-weight: bold; /* Vastagabb betűtípus a jobb láthatóságért */
+}
+
+/* Stílus az egyenlőségjelhez a játékos pontszámánál */
+.equal-text {
+    color: #555; /* Szürkésebb szín */
+    font-weight: bold;
+}

@@ -45,3 +45,43 @@ export function extractGameStateData(apiResponse: unknown): Partial<GameStateDat
     return undefined;
   }
 }
+
+export function formatNumber(number: number) {
+  return number.toLocaleString("en-US");
+}
+
+export function loop(data: any) {
+  let item = "";
+  for (let i = 0; i < data.length; i++) {
+    item += data[i] + "  + ";
+  }
+  item = item.slice(0, -2);
+  return item;
+}
+
+export function formatCard(card: any) {
+  if (card.trim() === "✪") {
+    return `<span class="red-suit">✪</span>`;
+  }
+
+  const suit = card[0];
+  const value = card.substring(1).trim();
+
+  let suitClass = "";
+  if (suit === "♥" || suit === "♦") {
+    suitClass = "red-suit";
+  } else if (suit === "♠" || suit === "♣") {
+    suitClass = "black-suit";
+  } else {
+    console.log("card: ",card)
+    return card;
+  }
+
+  return `<span class="${suitClass}">${suit}</span>${value}`;
+}
+
+export function formatHand(data: any) {
+  const card = data.split(/\s*\+\s*/);
+  const formattedCardsHTML = card.map((card: any) => formatCard(card.trim()));
+  return formattedCardsHTML.join(' <span class="equal-text">+</span> ');
+}

@@ -8,6 +8,10 @@ import {
   setBet,
   takeBackDeal,
   getShuffling,
+  startGame,
+  handleHit,
+  handleStand,
+  handleReward,
 } from '../api/api-calls';
 import type {
   DeckLenResponse,
@@ -90,14 +94,38 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     if (shouldShuffle) {
       console.log("Pakli hossza nem megfelelő, keverés szükséges.");
       transitionToState('SHUFFLING');
-
     } else {
       console.log("Pakli rendben, játék indítása.");
-      transitionToState('MAIN_TURN');
+      transitionToState('INIT_GAME');
     }
   }, [transitionToState]); // Függőség: transitionToState
 
+  const handleHitRequest = useCallback(async (isDouble: boolean) => {
+    try {
+      const data = await handleHit();
+      const response = extractGameStateData(data);
+
+      if (response && response.player) {
+        const playerHandValue = response.player[1];
+
+        if (playerHandValue >= 21 || isDouble) {
+          await handleStand();
+          const rewards = await handleReward(false);
+          const resp = extractGameStateData(rewards);
+          transitionToState('MAIN_STAND', resp);
+        } else {
+          transitionToState('MAIN_TURN', response);
+        }
+      }
+    } catch {
+      transitionToState('ERROR');
+    }
+  }, [transitionToState]);
+
   useEffect(() => {
+    let isMounted = true;
+    let timeoutId: number | null = null;
+
     // --- LOADING ÁLLAPOT KEZELÉSE ---
     if (gameState.currentGameState === 'LOADING') {
       const initializeApplicationOnLoad = async () => {
@@ -155,9 +183,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           const response = extractGameStateData(data);
 
           if (response) {
-            console.log("handleStartGame - SHUFFLING to MAIN_TURN:", response);
+            console.log("handleStartGame - SHUFFLING to INIT_GAME:", response);
             await new Promise(resolve => setTimeout(resolve, 4000));
-            transitionToState('MAIN_TURN', response);
+            transitionToState('INIT_GAME', response);
           }
         } catch {
           transitionToState('ERROR');
@@ -165,6 +193,46 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       };
       shufflingAct();
     }
+
+    else if (gameState.currentGameState === 'INIT_GAME') {
+      console.log("Játék a INIT_GAME állapotban.");
+      const InitGame = async () => {
+        try {
+          const data = await startGame();
+          const response = extractGameStateData(data);
+
+          if (response) {
+            console.log("handleStartGame - INIT_GAME to MAIN_TURN:", response);
+            transitionToState('MAIN_TURN', response);
+          }
+        } catch {
+          transitionToState('ERROR');
+        }
+      };
+      InitGame();
+    }
+
+    else if (gameState.currentGameState === 'MAIN_TURN') {
+      console.log("Játék a MAIN_TURN állapotban.");
+
+    }
+
+    else if (gameState.currentGameState === 'MAIN_STAND') {
+      console.log("Játék a MAIN_STAND állapotban.");
+      console.log("Játék a MAIN_STAND állapotban. Vár 2 másodpercet...");
+      timeoutId = setTimeout(() => {
+        if (isMounted) { // Ellenőrizzük, hogy a komponens még "él-e"
+          transitionToState('BETTING');
+        }
+      }, 3000);
+    }
+    return () => { // CLEANUP FÜGGVÉNY
+      isMounted = false; // Jelezzük, hogy a komponens lecsatolódik
+      if (timeoutId) {
+        clearTimeout(timeoutId); // Töröljük az időzítőt
+      }
+    };
+
   }, [gameState.currentGameState, transitionToState]);
 
   return {
@@ -173,5 +241,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     handlePlaceBet,
     handleRetakeBet,
     handleStartGame,
+    handleHitRequest,
   };
 }
