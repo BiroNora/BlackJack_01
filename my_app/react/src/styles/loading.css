@@ -20,7 +20,7 @@
 .loading-container-centered h1 {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif; /* A betűtípusod */
   font-size: 2.5em;
-  font-weight: 400;
+  font-weight: 100;
   color: #504343ff; /* A szöveg színe */
   display: inline-flex; /* <-- Módosítva: inline-flex, hogy jobban viselkedjen az alapvonallal */
   align-items: baseline; /* <-- Módosítva: A pontok a szöveg alapvonalához igazodnak */

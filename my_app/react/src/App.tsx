@@ -6,7 +6,7 @@ import { Shuffling } from "./components/Shuffling";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 
 function App() {
-  const { gameState, handlePlaceBet, handleRetakeBet } = useGameStateMachine();
+  const { gameState, handlePlaceBet, handleRetakeBet, handleStartGame } = useGameStateMachine();
   console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
   // A React itt dönti el, mit jelenítsen meg az aktuális állapot alapján
@@ -34,6 +34,7 @@ function App() {
             gameState={gameState}
             onPlaceBet={handlePlaceBet}
             retakeBet={handleRetakeBet}
+            onStartGame={handleStartGame}
           />
         </div>
       );

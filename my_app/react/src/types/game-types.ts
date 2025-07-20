@@ -47,13 +47,13 @@ export type SessionInitResponse = {
 }
 
 export type TokensResponse = {
-    user_tokens: number;
-    message: string;
+  user_tokens: number;
+  message: string;
 };
 
 export type DeckLenResponse = {
-    deckLen: number;
-    message: string;
+  deckLen: number;
+  message: string;
 };
 
 export type ErrorResponse = {
@@ -66,7 +66,7 @@ export type GameStateMachineHookResult = {
   gameState: GameStateData;
   transitionToState: (newState: GameState, newData?: Partial<GameStateData>) => void;
   handlePlaceBet: (amount: number) => Promise<void>;
-  handleDeal: () => Promise<void>; // Hozzáadva a visszatérési típushoz
-  handleStartGame: () => Promise<void>; // Hozzáadva a visszatérési típushoz
+  //handleDeal: () => Promise<void>; // Hozzáadva a visszatérési típushoz
   handleRetakeBet: () => Promise<void>;
+  handleStartGame: (shouldShuffle: boolean) => void;
 };

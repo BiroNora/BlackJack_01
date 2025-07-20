@@ -5,12 +5,14 @@ interface BettingProps {
   gameState: GameStateData;
   onPlaceBet: (amount: number) => void;
   retakeBet: () => void;
+  onStartGame: (shouldShuffle: boolean) => void;
 }
 
 const Betting: React.FC<BettingProps> = ({
   gameState,
   onPlaceBet,
   retakeBet,
+  onStartGame,
 }) => {
   const { tokens, bet, deckLen } = gameState;
 
@@ -20,21 +22,28 @@ const Betting: React.FC<BettingProps> = ({
     onPlaceBet(tokens);
   };
 
+  const handleStartGame = () => {
+    // Eldöntjük, hogy kell-e keverni a paklit a feltétel alapján
+    const shouldShuffle = (deckLen === 0 || deckLen < 60);
+    // Mindig meghívjuk az onStartGame-et, átadva neki, hogy kell-e keverni
+    onStartGame(shouldShuffle);
+  };
+
   return (
     <div className="betting-screen-container">
       <div className="cards" id="cards">
         Cards: {deckLen}
       </div>
 
-      <button id="start-button" disabled={bet === 0}>
+      <button id="start-button" onClick={handleStartGame} disabled={bet === 0}>
         Start Game
       </button>
 
       <div id="deal-bank" className="deal-bank">
         <button
           id="deal-button"
-          disabled={bet === 0}
           onClick={() => retakeBet()}
+          disabled={bet === 0}
         >
           Bet: {bet}
         </button>

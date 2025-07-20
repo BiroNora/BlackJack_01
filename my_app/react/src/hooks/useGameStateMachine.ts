@@ -7,6 +7,7 @@ import {
   getDeckLenAPI,
   setBet,
   takeBackDeal,
+  getShuffling,
 } from '../api/api-calls';
 import type {
   DeckLenResponse,
@@ -85,6 +86,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
   }, [gameState.bet_list, transitionToState]);
 
+  const handleStartGame = useCallback((shouldShuffle: boolean) => {
+    if (shouldShuffle) {
+      console.log("Pakli hossza nem megfelelő, keverés szükséges.");
+      transitionToState('SHUFFLING');
+
+    } else {
+      console.log("Pakli rendben, játék indítása.");
+      transitionToState('MAIN_TURN');
+    }
+  }, [transitionToState]); // Függőség: transitionToState
+
   useEffect(() => {
     // --- LOADING ÁLLAPOT KEZELÉSE ---
     if (gameState.currentGameState === 'LOADING') {
@@ -137,6 +149,21 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     // --- A SHUFFLING ÁLLAPOT KEZELÉSE ---
     else if (gameState.currentGameState === 'SHUFFLING') {
       console.log("Játék a SHUFFLING állapotban.");
+      const shufflingAct = async () => {
+        try {
+          const data = await getShuffling();
+          const response = extractGameStateData(data);
+
+          if (response) {
+            console.log("handleStartGame - SHUFFLING to MAIN_TURN:", response);
+            await new Promise(resolve => setTimeout(resolve, 4000));
+            transitionToState('MAIN_TURN', response);
+          }
+        } catch {
+          transitionToState('ERROR');
+        }
+      };
+      shufflingAct();
     }
   }, [gameState.currentGameState, transitionToState]);
 
@@ -145,5 +172,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     transitionToState,
     handlePlaceBet,
     handleRetakeBet,
+    handleStartGame,
   };
 }
