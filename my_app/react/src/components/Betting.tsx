@@ -23,7 +23,6 @@ const Betting: React.FC<BettingProps> = ({
   };
 
   const handleStartGame = () => {
-    // Eldöntjük, hogy kell-e keverni a paklit a feltétel alapján
     const shouldShuffle = (deckLen === 0 || deckLen < 60);
     // Mindig meghívjuk az onStartGame-et, átadva neki, hogy kell-e keverni
     onStartGame(shouldShuffle);
@@ -31,10 +30,6 @@ const Betting: React.FC<BettingProps> = ({
 
   return (
     <div className="betting-screen-container">
-      <div className="cards" id="cards">
-        Cards: {deckLen}
-      </div>
-
       <button id="start-button" onClick={handleStartGame} disabled={bet === 0}>
         Start Game
       </button>

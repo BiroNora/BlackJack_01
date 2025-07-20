@@ -1,12 +1,14 @@
 import "./App.css";
 import Betting from "./components/Betting";
+import Cards from "./components/Cards";
 import HeaderTitles from "./components/HeaderTitles";
 import { Loading } from "./components/Loading";
 import { Shuffling } from "./components/Shuffling";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 
 function App() {
-  const { gameState, handlePlaceBet, handleRetakeBet, handleStartGame } = useGameStateMachine();
+  const { gameState, handlePlaceBet, handleRetakeBet, handleStartGame } =
+    useGameStateMachine();
   console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
   // A React itt dönti el, mit jelenítsen meg az aktuális állapot alapján
@@ -30,6 +32,7 @@ function App() {
       return (
         <div>
           <HeaderTitles />
+          <Cards gameState={gameState} />
           <Betting
             gameState={gameState}
             onPlaceBet={handlePlaceBet}
@@ -39,6 +42,12 @@ function App() {
         </div>
       );
     case "MAIN_TURN":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+        </div>
+      );
     case "MAIN_STAND":
     case "MAIN_NAT21":
     case "MAIN_NAT21_DEALER":

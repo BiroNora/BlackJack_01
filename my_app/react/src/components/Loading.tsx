@@ -2,7 +2,7 @@ import "../styles/loading.css"; // Fontos, hogy importáld a stílusokat
 
 export function Loading() {
   return (
-    <div>
+    <div className="loading-container-centered">
       <h1>
         L O A D I N G<span className="dot dot-1">.</span>
         <span className="dot dot-2">.</span>

@@ -11,7 +11,7 @@
   min-height: 100vh; /* Teljes képernyő magasság */
   width: 100%; /* Teljes képernyő szélesség */
   position: fixed; /* Fixen a képernyőn, hogy ne befolyásolja más tartalom */
-  top: 12rem;
+  top: clamp(10rem, 1.375vw, 20rem);
   background-color: transparent; /* Teljesen átlátszó háttér */
   z-index: 9999; /* Legyen felül, ha van más tartalom */
 }
@@ -19,8 +19,8 @@
 /* A LOADING... felirat stílusa */
 .loading-container-centered h1 {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif; /* A betűtípusod */
-  font-size: 2.5em;
-  font-weight: 100;
+  font-size: clamp(1.5rem, 2.3vw, 3rem);
+  font-weight: 500;
   color: #504343ff; /* A szöveg színe */
   display: inline-flex; /* <-- Módosítva: inline-flex, hogy jobban viselkedjen az alapvonallal */
   align-items: baseline; /* <-- Módosítva: A pontok a szöveg alapvonalához igazodnak */
@@ -34,7 +34,7 @@
 .dot {
   opacity: 0; /* Kezdetben láthatatlanok */
   animation: dot-fade 1.4s infinite ease-in-out; /* Animáció */
-  font-size: 1.35em; /* Ugyanakkora méret, mint a "LOADING" szó */
+  font-size: clamp(1.8rem, 2.3vw, 3rem); /* Ugyanakkora méret, mint a "LOADING" szó */
   line-height: 1; /* Nincs extra sorköz */
   vertical-align: baseline; /* <-- Hozzáadva: biztosítja az alapvonalhoz igazítást */
   display: inline-block; /* <-- Hozzáadva: hogy a vertical-align működjön */
