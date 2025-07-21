@@ -1,4 +1,5 @@
 import "./App.css";
+import BetBank from "./components/BetBank";
 import Betting from "./components/Betting";
 import Cards from "./components/Cards";
 import HeaderTitles from "./components/HeaderTitles";
@@ -52,6 +53,7 @@ function App() {
           <Cards gameState={gameState} />
           <PlayerDealerMasked gameState={gameState} />
           <PlayButtons gameState={gameState} onHit={handleHitRequest} />
+          <BetBank gameState={gameState}/>
         </div>
       );
     case "MAIN_STAND":
@@ -61,6 +63,7 @@ function App() {
           <Cards gameState={gameState} />
           <PlayerDealer gameState={gameState} />
           <Winner gameState={gameState} />
+          <BetBank gameState={gameState}/>
         </div>
       );
     case "MAIN_NAT21":
