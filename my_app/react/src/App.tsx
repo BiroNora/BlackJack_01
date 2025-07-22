@@ -19,6 +19,7 @@ function App() {
     handleRetakeBet,
     handleStartGame,
     handleHitRequest,
+    handleStandRequest,
     preRewardBet,
     preRewardTokens,
   } = useGameStateMachine();
@@ -60,7 +61,7 @@ function App() {
           <HeaderTitles />
           <Cards gameState={gameState} />
           <PlayerDealerMasked gameState={gameState} />
-          <PlayButtons gameState={gameState} onHit={handleHitRequest} />
+          <PlayButtons gameState={gameState} onHit={handleHitRequest} onStand={handleStandRequest}/>
           <BetBank gameState={gameState} />
         </div>
       );

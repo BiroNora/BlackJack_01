@@ -134,6 +134,27 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
   }, [transitionToState, gameState, setPreRewardTokens, setPreRewardBet]);
 
+  const handleStandRequest = useCallback(async () => {
+    if (gameState) { // Ellenőrzés, hogy a gameState létezik
+      setPreRewardBet(gameState.bet);
+      setPreRewardTokens(gameState.tokens); // <<< ITT MENTSÜK EL A RÉGI ÉRTÉKET
+      console.log("!!!!!!Pre-reward bet elmentve:", gameState.bet);
+      console.log("!!!!!!Pre-reward tokens elmentve:", gameState.tokens);
+    } else {
+      setPreRewardBet(null);
+      setPreRewardTokens(null);
+    }
+
+    try {
+      await handleStand();
+      const rewards = await handleReward(false);
+      const resp = extractGameStateData(rewards);
+      transitionToState('MAIN_STAND', resp);
+    } catch {
+      transitionToState('ERROR');
+    }
+  }, [transitionToState, gameState, setPreRewardTokens, setPreRewardBet]);
+
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | undefined; // 'undefined' is important here
     let isMounted = true;
@@ -256,6 +277,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     handleRetakeBet,
     handleStartGame,
     handleHitRequest,
+    handleStandRequest,
     preRewardBet,
     preRewardTokens,
   };
