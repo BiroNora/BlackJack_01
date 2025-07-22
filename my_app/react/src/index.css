@@ -100,3 +100,43 @@
 .grey-suit {
   color: rgb(53, 154, 74);
 }
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  border-radius: 4px;
+  background-color: rgb(199, 239, 205);
+  color: black;
+  border: 0.2px solid rgb(166, 180, 199);
+  padding: 0.2em 1.1em;
+  cursor: pointer;
+  /* transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out; */
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out, opacity 0.4s ease-out,
+    visibility 0s linear 0.4s;
+}
+
+button:hover:not([disabled]) {
+  background-color: rgb(199, 239, 205);
+  border-color: rgb(156, 167, 182);
+}
+
+button:focus {
+  outline: none;
+}
+
+/* --- Styles for the DISABLED state --- */
+button:disabled {
+  border: 0.2px solid rgb(166, 180, 199);
+  color: #666666;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.button-container {
+  display: flex; /* Engedélyezi a Flexbox elrendezést */
+  flex-wrap: wrap; /* <<< EZ A KULCS! Lehetővé teszi, hogy az elemek új sorba törjenek */
+  gap: 2px; /* Opcionális: Szóköz a gombok között */
+}

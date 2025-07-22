@@ -49,7 +49,7 @@ const Betting: React.FC<BettingProps> = ({
         </div>
       </div>
 
-      <div id="chips" className="chips">
+      <div id="chips" className="button-container">
         <button
           id="all-in"
           type="button"

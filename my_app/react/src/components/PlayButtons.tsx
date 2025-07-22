@@ -12,7 +12,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({ gameState, onHit }) => {
   const { tokens, bet, deckLen } = gameState;
 
   return (
-    <div id="play-buttons">
+    <div id="play-buttons" className="button-container">
       <button id="hit-button" onClick={() => onHit(false)}>
         Hit
       </button>
