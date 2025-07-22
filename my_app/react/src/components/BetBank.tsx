@@ -11,7 +11,7 @@ const BetBank: React.FC<BetBankProps> = ({ gameState }) => {
 
   return (
     <div >
-      <div className="winners">Bet: {formatNumber(bet)}</div>
+      <div className="winners">Bet:{" "} {formatNumber(bet)}</div>
       <div className="winners">
         Player's bank:{" "}
         <span className="bank-amount">{formatNumber(tokens)}</span>

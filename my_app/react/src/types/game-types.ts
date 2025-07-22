@@ -1,19 +1,21 @@
 export type GameState =
-  | "LOADING"
-  | "SHUFFLING"
-  | "BETTING"
-  | "INIT_GAME"
-  | "MAIN_TURN"
-  | "MAIN_STAND"
-  | "MAIN_NAT21"
-  | "MAIN_NAT21_DEALER"
-  | "SPLIT_START"
-  | "SPLIT_TURN"
-  | "SPLIT_FINISH"
-  | "SPLIT_NAT21"
-  | "ROUND_END"
-  | "RESTART_GAME"
-  | "ERROR";
+  | 'LOADING'
+  | 'SHUFFLING'
+  | 'BETTING'
+  | 'INIT_GAME'
+  | 'MAIN_TURN'
+  | 'MAIN_STAND'
+  | 'SHOW_WINNER'
+  | 'SHOW_REWARDS'
+  | 'MAIN_NAT21'
+  | 'MAIN_NAT21_DEALER'
+  | 'SPLIT_START'
+  | 'SPLIT_TURN'
+  | 'SPLIT_FINISH'
+  | 'SPLIT_NAT21'
+  | 'ROUND_END'
+  | 'RESTART_GAME'
+  | 'ERROR';
 
 export interface GameStateData {
   currentGameState: GameState;
@@ -70,7 +72,9 @@ export type GameStateMachineHookResult = {
   //handleDeal: () => Promise<void>; // Hozzáadva a visszatérési típushoz
   handleRetakeBet: () => Promise<void>;
   handleStartGame: (shouldShuffle: boolean) => void;
-  handleHitRequest: (isDouble: boolean) => Promise<void>; 
+  handleHitRequest: (isDouble: boolean) => Promise<void>;
+  preRewardBet: number | null;
+  preRewardTokens: number | null;
 };
 
 export const states = [

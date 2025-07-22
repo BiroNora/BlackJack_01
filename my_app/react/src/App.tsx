@@ -1,5 +1,6 @@
 import "./App.css";
 import BetBank from "./components/BetBank";
+import BetBankDelayed from "./components/BetBankDelayed";
 import Betting from "./components/Betting";
 import Cards from "./components/Cards";
 import HeaderTitles from "./components/HeaderTitles";
@@ -12,8 +13,15 @@ import Winner from "./components/Winner";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 
 function App() {
-  const { gameState, handlePlaceBet, handleRetakeBet, handleStartGame, handleHitRequest } =
-    useGameStateMachine();
+  const {
+    gameState,
+    handlePlaceBet,
+    handleRetakeBet,
+    handleStartGame,
+    handleHitRequest,
+    preRewardBet,
+    preRewardTokens,
+  } = useGameStateMachine();
   console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
   // A React itt dönti el, mit jelenítsen meg az aktuális állapot alapján
@@ -53,7 +61,7 @@ function App() {
           <Cards gameState={gameState} />
           <PlayerDealerMasked gameState={gameState} />
           <PlayButtons gameState={gameState} onHit={handleHitRequest} />
-          <BetBank gameState={gameState}/>
+          <BetBank gameState={gameState} />
         </div>
       );
     case "MAIN_STAND":
@@ -63,7 +71,11 @@ function App() {
           <Cards gameState={gameState} />
           <PlayerDealer gameState={gameState} />
           <Winner gameState={gameState} />
-          <BetBank gameState={gameState}/>
+          <BetBankDelayed
+            finalGameState={gameState}    // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
+            initialBet={preRewardBet}
+            initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
+          />
         </div>
       );
     case "MAIN_NAT21":

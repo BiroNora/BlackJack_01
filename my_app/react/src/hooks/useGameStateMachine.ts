@@ -41,6 +41,8 @@ const initialGameState: GameStateData = {
 // A hook visszatérési típusa most inline van deklarálva, nincs külön 'type' definíció.
 export function useGameStateMachine(): GameStateMachineHookResult {
   const [gameState, setLocalGameState] = useState<GameStateData>(initialGameState);
+  const [preRewardBet, setPreRewardBet] = useState<number | null>(null);
+  const [preRewardTokens, setPreRewardTokens] = useState<number | null>(null);
 
   // Állapotváltó funkció
   const transitionToState = useCallback((
@@ -101,6 +103,16 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [transitionToState]); // Függőség: transitionToState
 
   const handleHitRequest = useCallback(async (isDouble: boolean) => {
+    if (gameState) { // Ellenőrzés, hogy a gameState létezik
+      setPreRewardBet(gameState.bet);
+      setPreRewardTokens(gameState.tokens); // <<< ITT MENTSÜK EL A RÉGI ÉRTÉKET
+      console.log("!!!!!!Pre-reward bet elmentve:", gameState.bet);
+      console.log("!!!!!!Pre-reward tokens elmentve:", gameState.tokens);
+    } else {
+      setPreRewardBet(null);
+      setPreRewardTokens(null);
+    }
+
     try {
       const data = await handleHit();
       const response = extractGameStateData(data);
@@ -120,11 +132,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     } catch {
       transitionToState('ERROR');
     }
-  }, [transitionToState]);
+  }, [transitionToState, gameState, setPreRewardTokens, setPreRewardBet]);
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout | undefined; // 'undefined' is important here
     let isMounted = true;
-    let timeoutId: number | null = null;
 
     // --- LOADING ÁLLAPOT KEZELÉSE ---
     if (gameState.currentGameState === 'LOADING') {
@@ -220,15 +232,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     else if (gameState.currentGameState === 'MAIN_STAND') {
       console.log("Játék a MAIN_STAND állapotban.");
       console.log("Játék a MAIN_STAND állapotban. Vár 2 másodpercet...");
+
       timeoutId = setTimeout(() => {
         if (isMounted) { // Ellenőrizzük, hogy a komponens még "él-e"
           transitionToState('BETTING');
         }
-      }, 3000);
+      }, 3000); // 3 másodperc késleltetés
     }
+
     return () => { // CLEANUP FÜGGVÉNY
       isMounted = false; // Jelezzük, hogy a komponens lecsatolódik
-      if (timeoutId) {
+      if (timeoutId) { // Fontos ellenőrizni, hogy timeoutId kapott-e értéket
         clearTimeout(timeoutId); // Töröljük az időzítőt
       }
     };
@@ -242,5 +256,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     handleRetakeBet,
     handleStartGame,
     handleHitRequest,
+    preRewardBet,
+    preRewardTokens,
   };
 }
