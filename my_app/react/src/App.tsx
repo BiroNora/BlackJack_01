@@ -10,6 +10,7 @@ import PlayButtons from "./components/PlayButtons";
 import PlayerDealer from "./components/PlayerDealer";
 import PlayerDealerMasked from "./components/PlayerDealerMasked";
 import { Shuffling } from "./components/Shuffling";
+import SplitPlayButtons from "./components/SplitPlayButtons";
 import Winner from "./components/Winner";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 
@@ -73,7 +74,7 @@ function App() {
             insPlaced={insPlaced}
           />
           <BetBank gameState={gameState} />
-          <InsMessage insMessage={showInsLost}/>
+          <InsMessage insMessage={showInsLost} />
         </div>
       );
     case "MAIN_STAND":
@@ -90,9 +91,22 @@ function App() {
           />
         </div>
       );
+    case "SPLIT_START":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <PlayerDealerMasked gameState={gameState} />
+          <SplitPlayButtons
+            gameState={gameState}
+            onHit={handleHitRequest}
+            onStand={handleStandRequest}
+          />
+          <BetBank gameState={gameState} />
+        </div>
+      );
     case "MAIN_NAT21":
     case "MAIN_NAT21_DEALER":
-    case "SPLIT_START":
     case "SPLIT_TURN":
     case "SPLIT_FINISH":
     case "SPLIT_NAT21":

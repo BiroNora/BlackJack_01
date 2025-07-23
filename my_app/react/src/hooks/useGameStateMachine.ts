@@ -63,6 +63,18 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     });
   }, []);
 
+  const savePreActionState = useCallback(() => {
+    if (gameState) {
+      setPreRewardBet(gameState.bet);
+      setPreRewardTokens(gameState.tokens);
+      console.log("!!!!!!Pre-reward bet elmentve:", gameState.bet);
+      console.log("!!!!!!Pre-reward tokens elmentve:", gameState.tokens);
+    } else {
+      setPreRewardBet(null);
+      setPreRewardTokens(null);
+    }
+  }, [gameState, setPreRewardBet, setPreRewardTokens]);
+
   const handlePlaceBet = useCallback(async (amount: number) => {
     if (gameState.tokens >= amount && amount > 0) {
       try {
@@ -107,15 +119,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
   const handleHitRequest = useCallback(async (isDouble: boolean) => {
     setShowInsLost(false);
-    if (gameState) { // Ellenőrzés, hogy a gameState létezik
-      setPreRewardBet(gameState.bet);
-      setPreRewardTokens(gameState.tokens); // <<< ITT MENTSÜK EL A RÉGI ÉRTÉKET
-      console.log("!!!!!!Pre-reward bet elmentve:", gameState.bet);
-      console.log("!!!!!!Pre-reward tokens elmentve:", gameState.tokens);
-    } else {
-      setPreRewardBet(null);
-      setPreRewardTokens(null);
-    }
+    savePreActionState();
 
     try {
       const data = await handleHit();
@@ -136,19 +140,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     } catch {
       transitionToState('ERROR');
     }
-  }, [transitionToState, gameState, setPreRewardTokens, setPreRewardBet]);
+  }, [transitionToState, savePreActionState]);
 
   const handleStandRequest = useCallback(async () => {
     setShowInsLost(false);
-    if (gameState) { // Ellenőrzés, hogy a gameState létezik
-      setPreRewardBet(gameState.bet);
-      setPreRewardTokens(gameState.tokens); // <<< ITT MENTSÜK EL A RÉGI ÉRTÉKET
-      console.log("!!!!!!Pre-reward bet elmentve:", gameState.bet);
-      console.log("!!!!!!Pre-reward tokens elmentve:", gameState.tokens);
-    } else {
-      setPreRewardBet(null);
-      setPreRewardTokens(null);
-    }
+    savePreActionState();
 
     try {
       await handleStand();
@@ -158,19 +154,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     } catch {
       transitionToState('ERROR');
     }
-  }, [transitionToState, gameState, setPreRewardTokens, setPreRewardBet]);
+  }, [transitionToState, savePreActionState]);
 
   const handleInsRequest = useCallback(async () => {
     setInsPlaced(true);
-    if (gameState) { // Ellenőrzés, hogy a gameState létezik
-      setPreRewardBet(gameState.bet);
-      setPreRewardTokens(gameState.tokens); // <<< ITT MENTSÜK EL A RÉGI ÉRTÉKET
-      console.log("!!!!!!Pre-reward bet elmentve:", gameState.bet);
-      console.log("!!!!!!Pre-reward tokens elmentve:", gameState.tokens);
-    } else {
-      setPreRewardBet(null);
-      setPreRewardTokens(null);
-    }
+    savePreActionState();
 
     const insWon = gameState.dealer[5] === 3 ? true : false;
 
@@ -178,7 +166,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const data = await handleInsurance();
       const resp = extractGameStateData(data);
       if (insWon) {
-        console.log("******INSURANSE: ",resp)
+        console.log("******INSURANSE: ", resp)
         transitionToState('MAIN_STAND', resp);
       } else {
         setShowInsLost(true);
@@ -187,7 +175,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     } catch {
       transitionToState('ERROR');
     }
-  }, [transitionToState, gameState, setPreRewardTokens, setPreRewardBet]);
+  }, [transitionToState, gameState, savePreActionState]);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | undefined; // 'undefined' is important here
@@ -266,13 +254,21 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const InitGame = async () => {
         setInsPlaced(false);
         setShowInsLost(false);
+
         try {
           const data = await startGame();
           const response = extractGameStateData(data);
 
-          if (response) {
-            console.log("handleStartGame - INIT_GAME to MAIN_TURN:", response);
-            transitionToState('MAIN_TURN', response);
+          if (response && response.dealer) {
+            if (response.dealer[5] === 1 || response.dealer[5] === 2) {
+              savePreActionState();
+              const rewards = await handleReward(false);
+              const resp = extractGameStateData(rewards);
+              transitionToState('MAIN_STAND', resp);
+            } else {
+              console.log("handleStartGame - INIT_GAME to MAIN_TURN:", response);
+              transitionToState('MAIN_TURN', response);
+            }
           }
         } catch {
           transitionToState('ERROR');
