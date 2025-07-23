@@ -77,6 +77,8 @@ export type GameStateMachineHookResult = {
   handleInsRequest: () => Promise<void>;
   preRewardBet: number | null;
   preRewardTokens: number | null;
+  insPlaced: boolean;
+  showInsLost: boolean;
 };
 
 export const states = [

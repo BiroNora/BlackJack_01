@@ -323,7 +323,7 @@ def bet(user, game):
     db.session.commit()
 
     session["game"] = game.serialize()
-    
+
     return (
         jsonify(
             {

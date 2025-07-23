@@ -44,6 +44,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const [gameState, setLocalGameState] = useState<GameStateData>(initialGameState);
   const [preRewardBet, setPreRewardBet] = useState<number | null>(null);
   const [preRewardTokens, setPreRewardTokens] = useState<number | null>(null);
+  const [insPlaced, setInsPlaced] = useState(false);
+  const [showInsLost, setShowInsLost] = useState(false);
 
   // Állapotváltó funkció
   const transitionToState = useCallback((
@@ -104,6 +106,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [transitionToState]); // Függőség: transitionToState
 
   const handleHitRequest = useCallback(async (isDouble: boolean) => {
+    setShowInsLost(false);
     if (gameState) { // Ellenőrzés, hogy a gameState létezik
       setPreRewardBet(gameState.bet);
       setPreRewardTokens(gameState.tokens); // <<< ITT MENTSÜK EL A RÉGI ÉRTÉKET
@@ -136,6 +139,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [transitionToState, gameState, setPreRewardTokens, setPreRewardBet]);
 
   const handleStandRequest = useCallback(async () => {
+    setShowInsLost(false);
     if (gameState) { // Ellenőrzés, hogy a gameState létezik
       setPreRewardBet(gameState.bet);
       setPreRewardTokens(gameState.tokens); // <<< ITT MENTSÜK EL A RÉGI ÉRTÉKET
@@ -157,6 +161,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [transitionToState, gameState, setPreRewardTokens, setPreRewardBet]);
 
   const handleInsRequest = useCallback(async () => {
+    setInsPlaced(true);
     if (gameState) { // Ellenőrzés, hogy a gameState létezik
       setPreRewardBet(gameState.bet);
       setPreRewardTokens(gameState.tokens); // <<< ITT MENTSÜK EL A RÉGI ÉRTÉKET
@@ -173,8 +178,10 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const data = await handleInsurance();
       const resp = extractGameStateData(data);
       if (insWon) {
+        console.log("******INSURANSE: ",resp)
         transitionToState('MAIN_STAND', resp);
       } else {
+        setShowInsLost(true);
         transitionToState('MAIN_TURN', resp);
       }
     } catch {
@@ -244,7 +251,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
           if (response) {
             console.log("handleStartGame - SHUFFLING to INIT_GAME:", response);
-            await new Promise(resolve => setTimeout(resolve, 4000));
+            await new Promise(resolve => setTimeout(resolve, 2000));
             transitionToState('INIT_GAME', response);
           }
         } catch {
@@ -257,6 +264,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     else if (gameState.currentGameState === 'INIT_GAME') {
       console.log("Játék a INIT_GAME állapotban.");
       const InitGame = async () => {
+        setInsPlaced(false);
+        setShowInsLost(false);
         try {
           const data = await startGame();
           const response = extractGameStateData(data);
@@ -281,20 +290,22 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       console.log("Játék a MAIN_STAND állapotban. Vár 2 másodpercet...");
 
       timeoutId = setTimeout(() => {
-        if (isMounted) { // Ellenőrizzük, hogy a komponens még "él-e"
+        if (isMounted) {
           const nextRoundGameState: Partial<GameStateData> = {
-            ...gameState, // Megtartjuk a meglévő adatokat (pl. tokens)
-            bet: 0,
-            bet_list: [],
+            currentGameState: 'BETTING',
             player: [[], 0, 0, false, false, 0, 0],
             dealer: [[], [], 0, 0, false, 0],
-            winner: 0,
-            is_round_active: false,
+            deckLen: gameState.deckLen, // A deckLen értéke is átkerül
+            tokens: gameState.tokens,
+            bet: 0,
+            bet_list: [],
             players: [],
+            winner: 0,
+            is_round_active: true,
           };
           transitionToState('BETTING', nextRoundGameState);
         }
-      }, 3000); // 3 másodperc késleltetés
+      }, 3000);
     }
 
     return () => { // CLEANUP FÜGGVÉNY
@@ -317,5 +328,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     handleInsRequest,
     preRewardBet,
     preRewardTokens,
+    insPlaced,
+    showInsLost,
   };
 }

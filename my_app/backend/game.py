@@ -61,7 +61,7 @@ class Game:
         # card3 = self.deck.pop(0)
         # card4 = self.deck.pop(0)
         player_hand = ["♥10", "♣K"]
-        dealer_hand = ["♥5", "♥A"]
+        dealer_hand = ["♥2", "♥A"]
         # PLAYER
         # [[], 0, NONE, False, False, 0, 0]
         # 0 player, 1 sum, 2 state, 3 can_split, 4 checked, 5 bet, 6 tokens
@@ -307,8 +307,10 @@ class Game:
     def insurance_request(self):
         bet = self.bet
         ins_cost = math.ceil(self.bet / 2)
+        if self.dealer[5] == 3:
+            self.bet = 0
 
-        return bet if self.player[6] == 3 else -ins_cost
+        return bet if self.dealer[5] == 3 else -ins_cost
 
     def double_request(self):
         self.player[5] += self.bet

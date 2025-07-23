@@ -4,6 +4,7 @@ import BetBankDelayed from "./components/BetBankDelayed";
 import Betting from "./components/Betting";
 import Cards from "./components/Cards";
 import HeaderTitles from "./components/HeaderTitles";
+import InsMessage from "./components/InsMessage";
 import { Loading } from "./components/Loading";
 import PlayButtons from "./components/PlayButtons";
 import PlayerDealer from "./components/PlayerDealer";
@@ -23,6 +24,8 @@ function App() {
     handleInsRequest,
     preRewardBet,
     preRewardTokens,
+    insPlaced,
+    showInsLost,
   } = useGameStateMachine();
   console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
@@ -67,8 +70,10 @@ function App() {
             onHit={handleHitRequest}
             onStand={handleStandRequest}
             onInsurance={handleInsRequest}
+            insPlaced={insPlaced}
           />
           <BetBank gameState={gameState} />
+          <InsMessage insMessage={showInsLost}/>
         </div>
       );
     case "MAIN_STAND":
