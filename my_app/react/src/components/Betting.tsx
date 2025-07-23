@@ -41,12 +41,12 @@ const Betting: React.FC<BettingProps> = ({
           onClick={() => retakeBet()}
           disabled={bet === 0}
         >
-          Bet: {formatNumber(bet)}
+          Bet: {"  " + formatNumber(bet)}
         </button>
-        <div id="bank">
-          Player's bank:{" "}
-          <span className="bank-amount">{formatNumber(tokens)}</span>
-        </div>
+      </div>
+      <div id="bank" className="bank">
+        Player's bank: {" "}
+        <span className="bank-amount">{formatNumber(tokens)}</span>
       </div>
 
       <div id="chips" className="button-container">

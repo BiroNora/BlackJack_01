@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import type { GameStateData } from "../types/game-types";
-import { formatNumber } from "../utilities/utils"; // Ellenőrizd az elérési utat!
+import { formatNumber } from "../utilities/utils";
+import "../styles/betting.css";
 
 interface BetBankDelayedProps {
   finalGameState: GameStateData; // Ez a prop most már helyesen van definiálva
@@ -61,9 +62,9 @@ const BetBankDelayed: React.FC<BetBankDelayedProps> = ({
   console.log("betToDisplay: ", betToDisplay)
 
   return (
-    <div className="betting-screen-container">
-      <div className="winners">Bet: {betToDisplay}</div>
-      <div className="winners">
+    <div >
+      <div className="bank">Bet: {betToDisplay}</div>
+      <div className="bank">
         Player's bank: <span className="bank-amount">{tokensToDisplay}</span>
       </div>
     </div>
