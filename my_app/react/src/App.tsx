@@ -22,6 +22,7 @@ function App() {
     handleStartGame,
     handleHitRequest,
     handleStandRequest,
+    handleDoubleRequest,
     handleInsRequest,
     preRewardBet,
     preRewardTokens,
@@ -70,6 +71,7 @@ function App() {
             gameState={gameState}
             onHit={handleHitRequest}
             onStand={handleStandRequest}
+            onDouble={handleDoubleRequest}
             onInsurance={handleInsRequest}
             insPlaced={insPlaced}
           />

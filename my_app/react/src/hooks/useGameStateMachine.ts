@@ -1,5 +1,3 @@
-// frontend/src/hooks/useGameStateMachine.ts
-
 import { useState, useEffect, useCallback } from 'react';
 import {
   initializeSessionAPI,
@@ -13,6 +11,7 @@ import {
   handleStand,
   handleReward,
   handleInsurance,
+  handleDouble,
 } from '../api/api-calls';
 import type {
   DeckLenResponse,
@@ -65,9 +64,10 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
   const savePreActionState = useCallback(() => {
     if (gameState) {
-      setPreRewardBet(gameState.bet);
+      setPreRewardBet(gameState.player[5]);
       setPreRewardTokens(gameState.tokens);
-      console.log("!!!!!!Pre-reward bet elmentve:", gameState.bet);
+      console.log("!!!!!!Pre-reward bet elmentve:", gameState.player[5]);
+      console.log("!!!!!: ", gameState.player)
       console.log("!!!!!!Pre-reward tokens elmentve:", gameState.tokens);
     } else {
       setPreRewardBet(null);
@@ -117,7 +117,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
   }, [transitionToState]); // Függőség: transitionToState
 
-  const handleHitRequest = useCallback(async (isDouble: boolean) => {
+  const handleHitRequest = useCallback(async () => {
     setShowInsLost(false);
     savePreActionState();
 
@@ -128,7 +128,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       if (response && response.player) {
         const playerHandValue = response.player[1];
 
-        if (playerHandValue >= 21 || isDouble) {
+        if (playerHandValue >= 21) {
           await handleStand();
           const rewards = await handleReward(false);
           const resp = extractGameStateData(rewards);
@@ -155,6 +155,34 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       transitionToState('ERROR');
     }
   }, [transitionToState, savePreActionState]);
+
+  const handleDoubleRequest = useCallback(async () => {
+    setShowInsLost(false);
+
+    try {
+      const doubleResponse = await handleDouble();
+      const doubledState = extractGameStateData(doubleResponse);
+
+      if (doubledState && doubledState.player && doubledState.tokens) {
+        setPreRewardBet(doubledState.player[5]);
+        setPreRewardTokens(doubledState.tokens);
+
+        const hitResponse = await handleHit();
+        const hitState = extractGameStateData(hitResponse);
+
+        if (hitState) {
+          const rewardsResponse = await handleReward(false);
+          const finalState = extractGameStateData(rewardsResponse);
+
+          if (finalState) {
+            transitionToState('MAIN_STAND', finalState);
+          }
+        }
+      }
+    } catch {
+      transitionToState('ERROR');
+    }
+  }, [transitionToState, setPreRewardBet, setPreRewardTokens]);
 
   const handleInsRequest = useCallback(async () => {
     setInsPlaced(true);
@@ -311,7 +339,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
     };
 
-  }, [gameState, transitionToState]);
+  }, [gameState, savePreActionState, transitionToState]);
 
   return {
     gameState,
@@ -321,6 +349,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     handleStartGame,
     handleHitRequest,
     handleStandRequest,
+    handleDoubleRequest,
     handleInsRequest,
     preRewardBet,
     preRewardTokens,

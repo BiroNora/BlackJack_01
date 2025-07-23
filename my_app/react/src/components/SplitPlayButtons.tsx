@@ -2,7 +2,7 @@ import type { GameStateData } from "../types/game-types";
 
 interface SplitPlayButtonsProps {
   gameState: GameStateData;
-  onHit: (isDouble: boolean) => void;
+  onHit: () => void;
   onStand: () => void;
   // onSplit: () => void;
 }
@@ -12,7 +12,7 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
   onHit,
   onStand,
 }) => {
-  const { tokens, bet, player, dealer } = gameState;
+  const { tokens, bet, player } = gameState;
   const canDouble = tokens >= bet;
   const canSplit = player[0].length == 2 && player[3] && tokens >= bet;
 
@@ -24,7 +24,7 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
     <div id="play-buttons" className="button-container">
       <button
         id="hit-button"
-        onClick={() => handleAnyButtonClick(() => onHit(false))}
+        onClick={() => handleAnyButtonClick(() => onHit())}
       >
         Hit
       </button>
@@ -35,7 +35,7 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
       {canDouble && (
         <button
           id="double-button"
-          onClick={() => handleAnyButtonClick(() => onHit(true))}
+          onClick={() => handleAnyButtonClick(() => onHit())}
         >
           Double
         </button>

@@ -72,8 +72,9 @@ export type GameStateMachineHookResult = {
   //handleDeal: () => Promise<void>; // Hozzáadva a visszatérési típushoz
   handleRetakeBet: () => Promise<void>;
   handleStartGame: (shouldShuffle: boolean) => void;
-  handleHitRequest: (isDouble: boolean) => Promise<void>;
+  handleHitRequest: () => Promise<void>;
   handleStandRequest: () => Promise<void>;
+  handleDoubleRequest: () => Promise<void>;
   handleInsRequest: () => Promise<void>;
   preRewardBet: number | null;
   preRewardTokens: number | null;

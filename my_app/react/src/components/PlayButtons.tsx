@@ -2,8 +2,9 @@ import type { GameStateData } from "../types/game-types";
 
 interface PlayButtonsProps {
   gameState: GameStateData;
-  onHit: (isDouble: boolean) => void;
+  onHit: () => void;
   onStand: () => void;
+  onDouble: () => void;
   // onSplit: () => void;
   onInsurance: () => void;
   insPlaced: boolean | null;
@@ -13,6 +14,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
   gameState,
   onHit,
   onStand,
+  onDouble,
   onInsurance,
   insPlaced,
 }) => {
@@ -29,7 +31,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
     <div id="play-buttons" className="button-container">
       <button
         id="hit-button"
-        onClick={() => handleAnyButtonClick(() => onHit(false))}
+        onClick={() => handleAnyButtonClick(() => onHit())}
       >
         Hit
       </button>
@@ -40,7 +42,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
       {canDouble && (
         <button
           id="double-button"
-          onClick={() => handleAnyButtonClick(() => onHit(true))}
+          onClick={() => handleAnyButtonClick(onDouble)}
         >
           Double
         </button>
