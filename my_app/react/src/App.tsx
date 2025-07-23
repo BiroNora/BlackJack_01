@@ -20,6 +20,7 @@ function App() {
     handleStartGame,
     handleHitRequest,
     handleStandRequest,
+    handleInsRequest,
     preRewardBet,
     preRewardTokens,
   } = useGameStateMachine();
@@ -61,7 +62,12 @@ function App() {
           <HeaderTitles />
           <Cards gameState={gameState} />
           <PlayerDealerMasked gameState={gameState} />
-          <PlayButtons gameState={gameState} onHit={handleHitRequest} onStand={handleStandRequest}/>
+          <PlayButtons
+            gameState={gameState}
+            onHit={handleHitRequest}
+            onStand={handleStandRequest}
+            onInsurance={handleInsRequest}
+          />
           <BetBank gameState={gameState} />
         </div>
       );
@@ -73,7 +79,7 @@ function App() {
           <PlayerDealer gameState={gameState} />
           <Winner gameState={gameState} />
           <BetBankDelayed
-            finalGameState={gameState}    // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
+            finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
             initialBet={preRewardBet}
             initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
           />

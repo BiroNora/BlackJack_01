@@ -74,6 +74,7 @@ export type GameStateMachineHookResult = {
   handleStartGame: (shouldShuffle: boolean) => void;
   handleHitRequest: (isDouble: boolean) => Promise<void>;
   handleStandRequest: () => Promise<void>;
+  handleInsRequest: () => Promise<void>;
   preRewardBet: number | null;
   preRewardTokens: number | null;
 };

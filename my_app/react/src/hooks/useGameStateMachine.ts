@@ -12,6 +12,7 @@ import {
   handleHit,
   handleStand,
   handleReward,
+  handleInsurance,
 } from '../api/api-calls';
 import type {
   DeckLenResponse,
@@ -155,6 +156,32 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
   }, [transitionToState, gameState, setPreRewardTokens, setPreRewardBet]);
 
+  const handleInsRequest = useCallback(async () => {
+    if (gameState) { // Ellenőrzés, hogy a gameState létezik
+      setPreRewardBet(gameState.bet);
+      setPreRewardTokens(gameState.tokens); // <<< ITT MENTSÜK EL A RÉGI ÉRTÉKET
+      console.log("!!!!!!Pre-reward bet elmentve:", gameState.bet);
+      console.log("!!!!!!Pre-reward tokens elmentve:", gameState.tokens);
+    } else {
+      setPreRewardBet(null);
+      setPreRewardTokens(null);
+    }
+
+    const insWon = gameState.dealer[5] === 3 ? true : false;
+
+    try {
+      const data = await handleInsurance();
+      const resp = extractGameStateData(data);
+      if (insWon) {
+        transitionToState('MAIN_STAND', resp);
+      } else {
+        transitionToState('MAIN_TURN', resp);
+      }
+    } catch {
+      transitionToState('ERROR');
+    }
+  }, [transitionToState, gameState, setPreRewardTokens, setPreRewardBet]);
+
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | undefined; // 'undefined' is important here
     let isMounted = true;
@@ -247,7 +274,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     else if (gameState.currentGameState === 'MAIN_TURN') {
       console.log("Játék a MAIN_TURN állapotban.");
-
     }
 
     else if (gameState.currentGameState === 'MAIN_STAND') {
@@ -288,6 +314,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     handleStartGame,
     handleHitRequest,
     handleStandRequest,
+    handleInsRequest,
     preRewardBet,
     preRewardTokens,
   };
