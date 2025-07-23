@@ -256,7 +256,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
       timeoutId = setTimeout(() => {
         if (isMounted) { // Ellenőrizzük, hogy a komponens még "él-e"
-          transitionToState('BETTING');
+          const nextRoundGameState: Partial<GameStateData> = {
+            ...gameState, // Megtartjuk a meglévő adatokat (pl. tokens)
+            bet: 0,
+            bet_list: [],
+            player: [[], 0, 0, false, false, 0, 0],
+            dealer: [[], [], 0, 0, false, 0],
+            winner: 0,
+            is_round_active: false,
+            players: [],
+          };
+          transitionToState('BETTING', nextRoundGameState);
         }
       }, 3000); // 3 másodperc késleltetés
     }
@@ -268,7 +278,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
     };
 
-  }, [gameState.currentGameState, transitionToState]);
+  }, [gameState, transitionToState]);
 
   return {
     gameState,
