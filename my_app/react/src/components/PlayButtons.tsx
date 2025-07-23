@@ -8,18 +8,36 @@ interface PlayButtonsProps {
   // onInsurance: () => void;
 }
 
-const PlayButtons: React.FC<PlayButtonsProps> = ({ gameState, onHit, onStand }) => {
-  const { tokens, bet, deckLen } = gameState;
+const PlayButtons: React.FC<PlayButtonsProps> = ({
+  gameState,
+  onHit,
+  onStand,
+}) => {
+  const { tokens, bet, player, dealer } = gameState;
+  const canDouble = tokens >= bet;
+  const canSplit = player[0].length == 2 && player[3] && tokens >= bet
+  const canInsure = tokens >= bet / 2 && dealer[4];
 
   return (
     <div id="play-buttons" className="button-container">
       <button id="hit-button" onClick={() => onHit(false)}>
         Hit
       </button>
-      <button id="stand-button" onClick={() => onStand()}>Stand</button>
-      <button id="double-button" onClick={() => onHit(true)} >Double</button>
-      <button id="split-button">Split</button>
-      <button id="insurance-button">Insurance</button>
+      <button id="stand-button" onClick={() => onStand()}>
+        Stand
+      </button>
+
+      {canDouble && (
+        <button id="double-button" onClick={() => onHit(true)}>
+          Double
+        </button>
+      )}
+
+      {canSplit && (
+        <button id="split-button">Split</button>
+      )}
+
+      {canInsure && <button id="insurance-button">Insurance</button>}
     </div>
   );
 };
