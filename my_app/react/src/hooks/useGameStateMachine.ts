@@ -12,6 +12,7 @@ import {
   handleReward,
   handleInsurance,
   handleDouble,
+  splitHand,
 } from '../api/api-calls';
 import type {
   DeckLenResponse,
@@ -45,6 +46,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const [preRewardTokens, setPreRewardTokens] = useState<number | null>(null);
   const [insPlaced, setInsPlaced] = useState(false);
   const [showInsLost, setShowInsLost] = useState(false);
+  const [hasHitTurn, setHasHitTurn] = useState(false);
 
   // Állapotváltó funkció
   const transitionToState = useCallback((
@@ -134,6 +136,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           const resp = extractGameStateData(rewards);
           transitionToState('MAIN_STAND', resp);
         } else {
+          setHasHitTurn(true);
           transitionToState('MAIN_TURN', response);
         }
       }
@@ -184,6 +187,40 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
   }, [transitionToState, setPreRewardBet, setPreRewardTokens]);
 
+  const handleSplitRequest = useCallback(async () => {
+    setShowInsLost(false);
+    savePreActionState();
+
+    try {
+      const response = await splitHand()
+      const resp = extractGameStateData(response);
+      transitionToState('SPLIT_START', resp);
+    } catch {
+      transitionToState('ERROR');
+    }
+  }, [transitionToState, savePreActionState]);
+
+  const handleSplitHitRequest = useCallback(async () => {
+    savePreActionState();
+
+    try {
+      const data = await handleHit();
+      const response = extractGameStateData(data);
+
+      if (response && response.player) {
+        const playerHandValue = response.player[1];
+
+        if (playerHandValue >= 21) {
+          transitionToState('SPLIT_TURN', response);
+        } else {
+          transitionToState('SPLIT_START', response);
+        }
+      }
+    } catch {
+      transitionToState('ERROR');
+    }
+  }, [transitionToState, savePreActionState]);
+
   const handleInsRequest = useCallback(async () => {
     setInsPlaced(true);
     savePreActionState();
@@ -194,7 +231,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const data = await handleInsurance();
       const resp = extractGameStateData(data);
       if (insWon) {
-        console.log("******INSURANSE: ", resp)
         transitionToState('MAIN_STAND', resp);
       } else {
         setShowInsLost(true);
@@ -282,6 +318,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const InitGame = async () => {
         setInsPlaced(false);
         setShowInsLost(false);
+        setHasHitTurn(false);
 
         try {
           const data = await startGame();
@@ -350,10 +387,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     handleHitRequest,
     handleStandRequest,
     handleDoubleRequest,
+    handleSplitRequest,
+    handleSplitHitRequest,
     handleInsRequest,
     preRewardBet,
     preRewardTokens,
     insPlaced,
+    hasHitTurn,
     showInsLost,
   };
 }

@@ -75,10 +75,13 @@ export type GameStateMachineHookResult = {
   handleHitRequest: () => Promise<void>;
   handleStandRequest: () => Promise<void>;
   handleDoubleRequest: () => Promise<void>;
+  handleSplitRequest: () => Promise<void>;
+  handleSplitHitRequest: () => Promise<void>;
   handleInsRequest: () => Promise<void>;
   preRewardBet: number | null;
   preRewardTokens: number | null;
   insPlaced: boolean;
+  hasHitTurn: boolean;
   showInsLost: boolean;
 };
 

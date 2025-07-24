@@ -5,9 +5,10 @@ interface PlayButtonsProps {
   onHit: () => void;
   onStand: () => void;
   onDouble: () => void;
-  // onSplit: () => void;
+  onSplit: () => void;
   onInsurance: () => void;
-  insPlaced: boolean | null;
+  insPlaced: boolean;
+  hasHitTurn: boolean;
 }
 
 const PlayButtons: React.FC<PlayButtonsProps> = ({
@@ -15,14 +16,17 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
   onHit,
   onStand,
   onDouble,
+  onSplit,
   onInsurance,
   insPlaced,
+  hasHitTurn,
 }) => {
   const { tokens, bet, player, dealer } = gameState;
-  const canDouble = tokens >= bet;
-  const canSplit = player[0].length == 2 && player[3] && tokens >= bet;
-  const canInsure = tokens >= bet / 2 && dealer[4];
-
+  const canDouble = tokens >= bet && !hasHitTurn;
+  const canSplit = player[0].length == 2 && player[3] && tokens >= bet && !hasHitTurn;
+  const canInsure = tokens >= bet / 2 && dealer[4] && !hasHitTurn;
+  console.log("hasHitTurn: ", hasHitTurn)
+  console.log("insPlaced: ", insPlaced)
   const handleAnyButtonClick = (actionHandler: () => void) => {
     actionHandler();
   };
@@ -48,10 +52,20 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
         </button>
       )}
 
-      {canSplit && (<button id="split-button">Split</button>)}
+      {canSplit && (
+        <button
+          id="split-button"
+          onClick={() => handleAnyButtonClick(onSplit)}
+        >
+          Split
+        </button>
+      )}
 
       {canInsure && !insPlaced && (
-        <button id="insurance-button" onClick={() => handleAnyButtonClick(onInsurance)}>
+        <button
+          id="insurance-button"
+          onClick={() => handleAnyButtonClick(onInsurance)}
+        >
           Insurance
         </button>
       )}

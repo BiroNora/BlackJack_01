@@ -23,10 +23,12 @@ function App() {
     handleHitRequest,
     handleStandRequest,
     handleDoubleRequest,
+    handleSplitRequest,
     handleInsRequest,
     preRewardBet,
     preRewardTokens,
     insPlaced,
+    hasHitTurn,
     showInsLost,
   } = useGameStateMachine();
   console.log("App.tsx render - currentGameState:", gameState.currentGameState);
@@ -72,9 +74,10 @@ function App() {
             onHit={handleHitRequest}
             onStand={handleStandRequest}
             onDouble={handleDoubleRequest}
+            onSplit={handleSplitRequest}
             onInsurance={handleInsRequest}
             insPlaced={insPlaced}
-          />
+            hasHitTurn={hasHitTurn}          />
           <BetBank gameState={gameState} />
           <InsMessage insMessage={showInsLost} />
         </div>
@@ -103,6 +106,8 @@ function App() {
             gameState={gameState}
             onHit={handleHitRequest}
             onStand={handleStandRequest}
+            onSplit={handleSplitRequest}
+            onDouble={handleDoubleRequest}
           />
           <BetBank gameState={gameState} />
         </div>
