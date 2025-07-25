@@ -11,6 +11,7 @@ import PlayerDealer from "./components/PlayerDealer";
 import PlayerDealerMasked from "./components/PlayerDealerMasked";
 import { Shuffling } from "./components/Shuffling";
 import SplitPlayButtons from "./components/SplitPlayButtons";
+import SplitPlayers from "./components/SplitPlayers";
 import Winner from "./components/Winner";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 
@@ -110,6 +111,7 @@ function App() {
             onDouble={handleDoubleRequest}
           />
           <BetBank gameState={gameState} />
+          <SplitPlayers gameState={gameState} />
         </div>
       );
     case "MAIN_NAT21":

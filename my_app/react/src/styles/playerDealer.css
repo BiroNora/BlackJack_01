@@ -13,30 +13,41 @@
 /* Stílus a "Dealer:" és "Player:" feliratoknak */
 .dealer .label-text,
 .player .label-text {
-    /* Alapértelmezés szerint ezek a feliratok már az első elemek a flex containerben,
+  /* Alapértelmezés szerint ezek a feliratok már az első elemek a flex containerben,
        így automatikusan a sor elején lesznek. Ha a szöveg rövid, nem kell további stílus.
        Ha szeretnéd, hogy ne ugorjon be a második sorba, állíthatod a flex-shrink-et. */
-    flex-shrink: 0; /* Megakadályozza, hogy ez az elem zsugorodjon és a szöveg törjön. */
-    font-weight: bold; /* Vastagabb betűtípus a címkéknek */
-    white-space: nowrap; /* Megakadályozza a szövegtörést a címkénél */
-    color: #333; /* Sötétebb szín a jobb olvashatóságért */
-    margin-right: 0.5em;
+  flex-shrink: 0; /* Megakadályozza, hogy ez az elem zsugorodjon és a szöveg törjön. */
+  font-weight: bold; /* Vastagabb betűtípus a címkéknek */
+  white-space: nowrap; /* Megakadályozza a szövegtörést a címkénél */
+  color: #333; /* Sötétebb szín a jobb olvashatóságért */
+  margin-right: 0.5em;
 }
 
 /* Stílus a kártyák szív/káró piros színéhez */
 .red-suit {
-    color: #d41515; /* Piros szín */
-    font-weight: bold; /* Vastagabb betűtípus a jobb láthatóságért */
+  color: #d41515; /* Piros szín */
+  font-weight: bold; /* Vastagabb betűtípus a jobb láthatóságért */
 }
 
 /* Stílus a kártyák pikk/treff fekete színéhez */
 .black-suit {
-    color: #000000; /* Fekete szín */
-    font-weight: bold; /* Vastagabb betűtípus a jobb láthatóságért */
+  color: #000000; /* Fekete szín */
+  font-weight: bold; /* Vastagabb betűtípus a jobb láthatóságért */
 }
 
 /* Stílus az egyenlőségjelhez a játékos pontszámánál */
 .equal-text {
-    color: #555; /* Szürkésebb szín */
-    font-weight: bold;
+  color: #555; /* Szürkésebb szín */
+  font-weight: bold;
+}
+
+#players-list {
+  list-style-type: none; /* Ez távolítja el a pontokat */
+  padding: 0; /* Eltávolítja az alapértelmezett bal oldali behúzást */
+  margin: 0; /* Eltávolítja az alapértelmezett külső margót */
+  display: flex;             /* Engedélyezi a flexbox elrendezést */
+  flex-direction: column;    /* A listaelemek egymás alatt legyenek (alapértelmezett: row) */
+  align-items: flex-start;   /* A tartalom a sor elejére igazítása vízszintesen */
+  /* Ha a listaelemek szélességét szeretnéd befolyásolni, érdemes lehet hozzáadni: */
+  width: 100%;
 }
