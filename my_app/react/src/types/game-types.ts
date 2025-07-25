@@ -5,12 +5,8 @@ export type GameState =
   | 'INIT_GAME'
   | 'MAIN_TURN'
   | 'MAIN_STAND'
-  | 'SHOW_WINNER'
-  | 'SHOW_REWARDS'
-  | 'MAIN_NAT21'
-  | 'MAIN_NAT21_DEALER'
-  | 'SPLIT_START'
   | 'SPLIT_TURN'
+  | 'SPLIT_STAND'
   | 'SPLIT_FINISH'
   | 'SPLIT_NAT21'
   | 'ROUND_END'
@@ -77,6 +73,7 @@ export type GameStateMachineHookResult = {
   handleDoubleRequest: () => Promise<void>;
   handleSplitRequest: () => Promise<void>;
   handleSplitHitRequest: () => Promise<void>;
+  handleSplitStandRequest: () => Promise<void>;
   handleInsRequest: () => Promise<void>;
   preRewardBet: number | null;
   preRewardTokens: number | null;

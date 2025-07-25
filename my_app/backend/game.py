@@ -352,9 +352,6 @@ class Game:
         if self.players[0][4] == False:
             self.player[4] = not self.stated
             self.players.append(self.player)
-        else:
-            self.player[4] = not self.stated
-            self.players.insert(0, self.player)
         print("game 354 players: ", self.players)
 
         return self.players

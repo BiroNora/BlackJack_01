@@ -15,36 +15,47 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
   onDouble,
   onSplit,
 }) => {
-  const { tokens, bet, player } = gameState;
+  const { tokens, bet, player, players } = gameState;
   const canDouble = tokens >= bet;
   const canSplit = player[0].length == 2 && player[3] && tokens >= bet;
+  const playersLength = players.length < 3 ? true : false;
+  console.log("PLAYERS LENGTH: ", playersLength, players.length);
 
   const handleAnyButtonClick = (actionHandler: () => void) => {
     actionHandler();
   };
 
   return (
-    <div id="play-buttons" className="button-container">
-      <button
-        id="hit-button"
-        onClick={() => handleAnyButtonClick(() => onHit())}
-      >
-        Hit
-      </button>
-      <button id="stand-button" onClick={() => handleAnyButtonClick(onStand)}>
-        Stand
-      </button>
-
-      {canDouble && (
+    <div>
+      <div id="play-buttons" className="button-container">
         <button
-          id="double-button"
-          onClick={() => handleAnyButtonClick(onDouble)}
+          id="hit-button"
+          onClick={() => handleAnyButtonClick(() => onHit())}
         >
-          Double
+          Hit
         </button>
-      )}
+        <button id="stand-button" onClick={() => handleAnyButtonClick(onStand)}>
+          Stand
+        </button>
 
-      {canSplit && (<button id="split-button" onClick={() => handleAnyButtonClick(onSplit)}>Split</button>)}
+        {canDouble && (
+          <button
+            id="double-button"
+            onClick={() => handleAnyButtonClick(onDouble)}
+          >
+            Double
+          </button>
+        )}
+
+        {canSplit && playersLength && (
+          <button
+            id="split-button"
+            onClick={() => handleAnyButtonClick(onSplit)}
+          >
+            Split
+          </button>
+        )}
+      </div>
     </div>
   );
 };

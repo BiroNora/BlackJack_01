@@ -25,12 +25,15 @@ function App() {
     handleStandRequest,
     handleDoubleRequest,
     handleSplitRequest,
+    handleSplitHitRequest,
+    handleSplitStandRequest,
     handleInsRequest,
     preRewardBet,
     preRewardTokens,
     insPlaced,
     hasHitTurn,
     showInsLost,
+    hasSplitNat21,
   } = useGameStateMachine();
   console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
@@ -97,7 +100,7 @@ function App() {
           />
         </div>
       );
-    case "SPLIT_START":
+    case "SPLIT_TURN":
       return (
         <div>
           <HeaderTitles />
@@ -105,8 +108,8 @@ function App() {
           <PlayerDealerMasked gameState={gameState} />
           <SplitPlayButtons
             gameState={gameState}
-            onHit={handleHitRequest}
-            onStand={handleStandRequest}
+            onHit={handleSplitHitRequest}
+            onStand={handleSplitStandRequest}
             onSplit={handleSplitRequest}
             onDouble={handleDoubleRequest}
           />
@@ -114,11 +117,43 @@ function App() {
           <SplitPlayers gameState={gameState} />
         </div>
       );
-    case "MAIN_NAT21":
-    case "MAIN_NAT21_DEALER":
-    case "SPLIT_TURN":
+    case "SPLIT_STAND":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <PlayerDealerMasked gameState={gameState} />
+          <SplitPlayButtons
+            gameState={gameState}
+            onHit={handleSplitHitRequest}
+            onStand={handleSplitStandRequest}
+            onSplit={handleSplitRequest}
+            onDouble={handleDoubleRequest}
+          />
+          <BetBank gameState={gameState} />
+          <SplitPlayers gameState={gameState} />
+        </div>
+      );
     case "SPLIT_FINISH":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <PlayerDealerMasked gameState={gameState} />
+          <BetBank gameState={gameState} />
+          <SplitPlayers gameState={gameState} />
+        </div>
+      );
     case "SPLIT_NAT21":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <PlayerDealerMasked gameState={gameState} />
+          <BetBank gameState={gameState} />
+          <SplitPlayers gameState={gameState} />
+        </div>
+      );
     case "ROUND_END":
     case "RESTART_GAME":
     case "ERROR":
