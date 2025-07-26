@@ -24,7 +24,6 @@
   flex-direction: column; /* Egymás alá rendeződnek a gyermekek */
   align-items: flex-start;
 
-
   --extra-vertical-padding02: 0.2em;
   --extra-vertical-padding05: 0.5em;
   --extra-vertical-padding1: 1em;
@@ -139,4 +138,35 @@ button:disabled {
   display: flex; /* Engedélyezi a Flexbox elrendezést */
   flex-wrap: wrap; /* <<< EZ A KULCS! Lehetővé teszi, hogy az elemek új sorba törjenek */
   gap: 2px; /* Opcionális: Szóköz a gombok között */
+}
+
+.game-action-area-wrapper {
+  display: flex;
+  justify-content: flex-start; /* <<< EZ A KULCS: A tartalmat balra igazítja */
+  align-items: flex-start; /* <<< Ezt is állítsd be: A tartalom a konténer tetejéhez igazodik (ha több soros) */
+  width: 100%;
+}
+
+.winners {
+  display: flex; /* Flexbox használata a belső elemek (pl. a nyertes üzenet) elrendezéséhez */
+  align-items: flex-start; /* Függőlegesen az elem tetejére igazítja a tartalmat */
+  text-align: left; /* A szöveget az elemen belül balra igazítja */
+  justify-content: flex-start;
+  font-size: var(--root-font-size); /* Ha definiáltad a rootban */
+  line-height: var(--root-line-height); /* Ha definiáltad a rootban */
+  font-weight: 700;
+  padding-top: 0.2em; /* Megfelel a gombok vertikális paddingjének */
+  padding-bottom: 0.2em;
+}
+
+.ins {
+  display: flex; /* Flexbox használata a belső elemek (pl. a nyertes üzenet) elrendezéséhez */
+  align-items: flex-start; /* Függőlegesen az elem tetejére igazítja a tartalmat */
+  text-align: left; /* A szöveget az elemen belül balra igazítja */
+  justify-content: flex-start;
+  font-size: var(--root-font-size); /* Ha definiáltad a rootban */
+  line-height: var(--root-line-height); /* Ha definiáltad a rootban */
+  font-weight: 400;
+  padding-top: 0.2em; /* Megfelel a gombok vertikális paddingjének */
+  padding-bottom: 0.2em;
 }

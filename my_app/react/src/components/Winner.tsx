@@ -1,5 +1,4 @@
 import { states, type GameStateData } from "../types/game-types";
-import "../styles/winner.css";
 
 interface TableProps {
   gameState: GameStateData;

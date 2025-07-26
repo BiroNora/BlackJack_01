@@ -73,16 +73,19 @@ function App() {
           <HeaderTitles />
           <Cards gameState={gameState} />
           <PlayerDealerMasked gameState={gameState} />
-          <PlayButtons
-            gameState={gameState}
-            onHit={handleHitRequest}
-            onStand={handleStandRequest}
-            onDouble={handleDoubleRequest}
-            onSplit={handleSplitRequest}
-            onInsurance={handleInsRequest}
-            insPlaced={insPlaced}
-            hasHitTurn={hasHitTurn}
-            hasOver21={hasOver21} />
+          <div className="game-action-area-wrapper">
+            <PlayButtons
+              gameState={gameState}
+              onHit={handleHitRequest}
+              onStand={handleStandRequest}
+              onDouble={handleDoubleRequest}
+              onSplit={handleSplitRequest}
+              onInsurance={handleInsRequest}
+              insPlaced={insPlaced}
+              hasHitTurn={hasHitTurn}
+              hasOver21={hasOver21}
+            />
+          </div>
           <BetBank gameState={gameState} />
           <InsMessage insMessage={showInsLost} />
         </div>
@@ -93,7 +96,9 @@ function App() {
           <HeaderTitles />
           <Cards gameState={gameState} />
           <PlayerDealer gameState={gameState} />
-          <Winner gameState={gameState} />
+          <div className="game-action-area-wrapper">
+            <Winner gameState={gameState} />
+          </div>
           <BetBankDelayed
             finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
             initialBet={preRewardBet}
@@ -107,7 +112,8 @@ function App() {
           <HeaderTitles />
           <Cards gameState={gameState} />
           <PlayerDealerMasked gameState={gameState} />
-          <SplitPlayButtons
+          <div className="game-action-area-wrapper">
+            <SplitPlayButtons
             gameState={gameState}
             onHit={handleSplitHitRequest}
             onStand={handleSplitStandRequest}
@@ -116,6 +122,7 @@ function App() {
             hasHitTurn={hasHitTurn}
             hasOver21={hasOver21}
           />
+          </div>
           <BetBank gameState={gameState} />
           <SplitPlayers gameState={gameState} />
         </div>
@@ -126,7 +133,8 @@ function App() {
           <HeaderTitles />
           <Cards gameState={gameState} />
           <PlayerDealerMasked gameState={gameState} />
-          <SplitPlayButtons
+          <div className="game-action-area-wrapper">
+            <SplitPlayButtons
             gameState={gameState}
             onHit={handleSplitHitRequest}
             onStand={handleSplitStandRequest}
@@ -135,6 +143,7 @@ function App() {
             hasHitTurn={hasHitTurn}
             hasOver21={hasOver21}
           />
+          </div>
           <BetBank gameState={gameState} />
           <SplitPlayers gameState={gameState} />
         </div>
@@ -145,6 +154,9 @@ function App() {
           <HeaderTitles />
           <Cards gameState={gameState} />
           <PlayerDealerMasked gameState={gameState} />
+          <div className="game-action-area-wrapper">
+            <Winner gameState={gameState} />
+          </div>
           <BetBank gameState={gameState} />
           <SplitPlayers gameState={gameState} />
         </div>
@@ -155,6 +167,9 @@ function App() {
           <HeaderTitles />
           <Cards gameState={gameState} />
           <PlayerDealerMasked gameState={gameState} />
+          <div className="game-action-area-wrapper">
+            
+          </div>
           <BetBank gameState={gameState} />
           <SplitPlayers gameState={gameState} />
         </div>
