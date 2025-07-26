@@ -9,6 +9,7 @@ interface PlayButtonsProps {
   onInsurance: () => void;
   insPlaced: boolean;
   hasHitTurn: boolean;
+  hasOver21: boolean;
 }
 
 const PlayButtons: React.FC<PlayButtonsProps> = ({
@@ -20,6 +21,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
   onInsurance,
   insPlaced,
   hasHitTurn,
+  hasOver21,
 }) => {
   const { tokens, bet, player, dealer } = gameState;
   const canDouble = tokens >= bet && !hasHitTurn;
@@ -27,8 +29,11 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
   const canInsure = tokens >= bet / 2 && dealer[4] && !hasHitTurn;
   console.log("hasHitTurn: ", hasHitTurn)
   console.log("insPlaced: ", insPlaced)
+  console.log("hasOver21: ", hasOver21)
   const handleAnyButtonClick = (actionHandler: () => void) => {
-    actionHandler();
+    if (!hasOver21) {
+      actionHandler();
+    }
   };
 
   return (
@@ -36,10 +41,11 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
       <button
         id="hit-button"
         onClick={() => handleAnyButtonClick(() => onHit())}
+        disabled={hasOver21}
       >
         Hit
       </button>
-      <button id="stand-button" onClick={() => handleAnyButtonClick(onStand)}>
+      <button id="stand-button" onClick={() => handleAnyButtonClick(onStand)} disabled={hasOver21}>
         Stand
       </button>
 
@@ -47,6 +53,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
         <button
           id="double-button"
           onClick={() => handleAnyButtonClick(onDouble)}
+          disabled={hasOver21}
         >
           Double
         </button>
@@ -56,6 +63,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
         <button
           id="split-button"
           onClick={() => handleAnyButtonClick(onSplit)}
+          disabled={hasOver21}
         >
           Split
         </button>
@@ -65,6 +73,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
         <button
           id="insurance-button"
           onClick={() => handleAnyButtonClick(onInsurance)}
+          disabled={hasOver21}
         >
           Insurance
         </button>

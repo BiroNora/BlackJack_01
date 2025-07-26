@@ -33,7 +33,7 @@ function App() {
     insPlaced,
     hasHitTurn,
     showInsLost,
-    hasSplitNat21,
+    hasOver21,
   } = useGameStateMachine();
   console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
@@ -81,7 +81,8 @@ function App() {
             onSplit={handleSplitRequest}
             onInsurance={handleInsRequest}
             insPlaced={insPlaced}
-            hasHitTurn={hasHitTurn}          />
+            hasHitTurn={hasHitTurn}
+            hasOver21={hasOver21} />
           <BetBank gameState={gameState} />
           <InsMessage insMessage={showInsLost} />
         </div>
@@ -112,6 +113,8 @@ function App() {
             onStand={handleSplitStandRequest}
             onSplit={handleSplitRequest}
             onDouble={handleDoubleRequest}
+            hasHitTurn={hasHitTurn}
+            hasOver21={hasOver21}
           />
           <BetBank gameState={gameState} />
           <SplitPlayers gameState={gameState} />
@@ -129,6 +132,8 @@ function App() {
             onStand={handleSplitStandRequest}
             onSplit={handleSplitRequest}
             onDouble={handleDoubleRequest}
+            hasHitTurn={hasHitTurn}
+            hasOver21={hasOver21}
           />
           <BetBank gameState={gameState} />
           <SplitPlayers gameState={gameState} />

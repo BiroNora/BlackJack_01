@@ -49,6 +49,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const [insPlaced, setInsPlaced] = useState(false);
   const [showInsLost, setShowInsLost] = useState(false);
   const [hasHitTurn, setHasHitTurn] = useState(false);
+  const [hasOver21, setHasOver21] = useState(false);
 
   // Állapotváltó funkció
   const transitionToState = useCallback((
@@ -133,6 +134,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const playerHandValue = response.player[1];
 
         if (playerHandValue >= 21) {
+          setHasOver21(true);
           await handleStand();
           const rewards = await handleReward(false);
           const resp = extractGameStateData(rewards);
@@ -221,6 +223,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const playerHandValue = response.player[1];
 
         if (playerHandValue >= 21) {
+          setHasOver21(true);
           transitionToState('SPLIT_TURN', response);
           await delay(2000);
           transitionToState('SPLIT_STAND', response);
@@ -336,6 +339,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         setInsPlaced(false);
         setShowInsLost(false);
         setHasHitTurn(false);
+        setHasOver21(false);
 
         try {
           const data = await startGame();
@@ -388,16 +392,19 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     else if (gameState.currentGameState === 'SPLIT_STAND') {
       console.log("Játék a SPLIT_STAND állapotban.");
+      const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
       const SplitStand = async () => {
         try {
           const data = await updateSplitPlayersByStand();
           const response = extractGameStateData(data);
-          console.log("SPLITREQ 1: ", response?.splitReq);
+
           if (response && response.splitReq && response.splitReq > 0) {
             const splitResponse = await splittedToHand();
             const resp = extractGameStateData(splitResponse);
-            console.log("SPLITREQ 2: ", response?.splitReq);
+            await delay(1000);
+            setHasHitTurn(false);
+            setHasOver21(false);
             transitionToState('SPLIT_TURN', resp);
           } else {
             transitionToState('SPLIT_FINISH', response);
@@ -415,6 +422,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
       timeoutId = setTimeout(() => {
         if (isMounted) {
+          setHasHitTurn(false);
+          setHasOver21(false);
           transitionToState('SPLIT_STAND');
         }
       }, 3000);
@@ -446,6 +455,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     preRewardTokens,
     insPlaced,
     hasHitTurn,
+    hasOver21,
     showInsLost,
   };
 }

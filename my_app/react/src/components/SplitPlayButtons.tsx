@@ -6,6 +6,8 @@ interface SplitPlayButtonsProps {
   onStand: () => void;
   onDouble: () => void;
   onSplit: () => void;
+  hasHitTurn: boolean;
+  hasOver21: boolean;
 }
 
 const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
@@ -14,15 +16,21 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
   onStand,
   onDouble,
   onSplit,
+  hasHitTurn,
+  hasOver21,
 }) => {
   const { tokens, bet, player, players } = gameState;
-  const canDouble = tokens >= bet;
-  const canSplit = player[0].length == 2 && player[3] && tokens >= bet;
+  const canDouble = tokens >= bet && !hasHitTurn;
+  const canSplit = player[0].length == 2 && player[3] && tokens >= bet && !hasHitTurn;
   const playersLength = players.length < 3 ? true : false;
   console.log("PLAYERS LENGTH: ", playersLength, players.length);
+  console.log("hasHitTurn: ", hasHitTurn)
+  console.log("hasOver21: ", hasOver21)
 
   const handleAnyButtonClick = (actionHandler: () => void) => {
-    actionHandler();
+    if (!hasOver21) {
+      actionHandler();
+    }
   };
 
   return (
@@ -31,10 +39,11 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
         <button
           id="hit-button"
           onClick={() => handleAnyButtonClick(() => onHit())}
+          disabled={hasOver21}
         >
           Hit
         </button>
-        <button id="stand-button" onClick={() => handleAnyButtonClick(onStand)}>
+        <button id="stand-button" onClick={() => handleAnyButtonClick(onStand)} disabled={hasOver21}>
           Stand
         </button>
 
@@ -42,6 +51,7 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
           <button
             id="double-button"
             onClick={() => handleAnyButtonClick(onDouble)}
+            disabled={hasOver21}
           >
             Double
           </button>
@@ -51,6 +61,7 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
           <button
             id="split-button"
             onClick={() => handleAnyButtonClick(onSplit)}
+            disabled={hasOver21}
           >
             Split
           </button>
