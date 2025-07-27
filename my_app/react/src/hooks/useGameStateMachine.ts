@@ -393,6 +393,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     else if (gameState.currentGameState === 'SPLIT_STAND') {
       console.log("Játék a SPLIT_STAND állapotban.");
       const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+      setHasHitTurn(false);
+      setHasOver21(false);
 
       const SplitStand = async () => {
         try {
@@ -403,8 +405,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             const splitResponse = await splittedToHand();
             const resp = extractGameStateData(splitResponse);
             await delay(1000);
-            setHasHitTurn(false);
-            setHasOver21(false);
             transitionToState('SPLIT_TURN', resp);
           } else {
             transitionToState('SPLIT_FINISH', response);

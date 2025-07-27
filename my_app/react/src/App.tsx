@@ -11,6 +11,7 @@ import PlayerDealer from "./components/PlayerDealer";
 import PlayerDealerMasked from "./components/PlayerDealerMasked";
 import { Shuffling } from "./components/Shuffling";
 import SplitPlayButtons from "./components/SplitPlayButtons";
+import SplitPlayDisabledButtons from "./components/SplitPlayDisabledButtons";
 import SplitPlayers from "./components/SplitPlayers";
 import Winner from "./components/Winner";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
@@ -114,14 +115,14 @@ function App() {
           <PlayerDealerMasked gameState={gameState} />
           <div className="game-action-area-wrapper">
             <SplitPlayButtons
-            gameState={gameState}
-            onHit={handleSplitHitRequest}
-            onStand={handleSplitStandRequest}
-            onSplit={handleSplitRequest}
-            onDouble={handleDoubleRequest}
-            hasHitTurn={hasHitTurn}
-            hasOver21={hasOver21}
-          />
+              gameState={gameState}
+              onHit={handleSplitHitRequest}
+              onStand={handleSplitStandRequest}
+              onSplit={handleSplitRequest}
+              onDouble={handleDoubleRequest}
+              hasHitTurn={hasHitTurn}
+              hasOver21={hasOver21}
+            />
           </div>
           <BetBank gameState={gameState} />
           <SplitPlayers gameState={gameState} />
@@ -134,15 +135,7 @@ function App() {
           <Cards gameState={gameState} />
           <PlayerDealerMasked gameState={gameState} />
           <div className="game-action-area-wrapper">
-            <SplitPlayButtons
-            gameState={gameState}
-            onHit={handleSplitHitRequest}
-            onStand={handleSplitStandRequest}
-            onSplit={handleSplitRequest}
-            onDouble={handleDoubleRequest}
-            hasHitTurn={hasHitTurn}
-            hasOver21={hasOver21}
-          />
+            <SplitPlayDisabledButtons />
           </div>
           <BetBank gameState={gameState} />
           <SplitPlayers gameState={gameState} />
@@ -167,9 +160,7 @@ function App() {
           <HeaderTitles />
           <Cards gameState={gameState} />
           <PlayerDealerMasked gameState={gameState} />
-          <div className="game-action-area-wrapper">
-            
-          </div>
+          <div className="game-action-area-wrapper"></div>
           <BetBank gameState={gameState} />
           <SplitPlayers gameState={gameState} />
         </div>
