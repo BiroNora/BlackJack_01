@@ -13,6 +13,7 @@ import { Shuffling } from "./components/Shuffling";
 import SplitPlayButtons from "./components/SplitPlayButtons";
 import SplitPlayDisabledButtons from "./components/SplitPlayDisabledButtons";
 import SplitPlayers from "./components/SplitPlayers";
+import SplitWinner from "./components/SplitWinner";
 import Winner from "./components/Winner";
 import { useGameStateMachine } from "./hooks/useGameStateMachine";
 
@@ -28,6 +29,7 @@ function App() {
     handleSplitRequest,
     handleSplitHitRequest,
     handleSplitStandRequest,
+    handleSplitDoubleRequest,
     handleInsRequest,
     preRewardBet,
     preRewardTokens,
@@ -119,7 +121,7 @@ function App() {
               onHit={handleSplitHitRequest}
               onStand={handleSplitStandRequest}
               onSplit={handleSplitRequest}
-              onDouble={handleDoubleRequest}
+              onDouble={handleSplitDoubleRequest}
               hasHitTurn={hasHitTurn}
               hasOver21={hasOver21}
             />
@@ -146,11 +148,15 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealerMasked gameState={gameState} />
+          <PlayerDealer gameState={gameState} />
           <div className="game-action-area-wrapper">
-            <Winner gameState={gameState} />
+            <SplitWinner gameState={gameState} />
           </div>
-          <BetBank gameState={gameState} />
+          <BetBankDelayed
+            finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
+            initialBet={preRewardBet}
+            initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
+          />
           <SplitPlayers gameState={gameState} />
         </div>
       );
@@ -160,7 +166,9 @@ function App() {
           <HeaderTitles />
           <Cards gameState={gameState} />
           <PlayerDealerMasked gameState={gameState} />
-          <div className="game-action-area-wrapper"></div>
+          <div className="game-action-area-wrapper">
+            <SplitPlayDisabledButtons />
+          </div>
           <BetBank gameState={gameState} />
           <SplitPlayers gameState={gameState} />
         </div>

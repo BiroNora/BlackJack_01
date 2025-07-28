@@ -27,9 +27,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
   const canDouble = tokens >= bet && !hasHitTurn;
   const canSplit = player[0].length == 2 && player[3] && tokens >= bet && !hasHitTurn;
   const canInsure = tokens >= bet / 2 && dealer[4] && !hasHitTurn;
-  console.log("hasHitTurn: ", hasHitTurn)
-  console.log("insPlaced: ", insPlaced)
-  console.log("hasOver21: ", hasOver21)
+  
   const handleAnyButtonClick = (actionHandler: () => void) => {
     if (!hasOver21) {
       actionHandler();

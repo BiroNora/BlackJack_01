@@ -15,6 +15,7 @@ import {
   splitHand,
   updateSplitPlayersByStand,
   splittedToHand,
+  updatePlayerFromPlayers,
 } from '../api/api-calls';
 import type {
   DeckLenResponse,
@@ -200,6 +201,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const resp = extractGameStateData(response);
       if (resp && resp.player) {
         if (resp.player[6] === 1 || resp.player[6] === 2) {
+          console.log("SPLIT NAT21 player[6]: ", resp.player[6], resp.player[6] === 1 || resp.player[6] === 2)
           transitionToState('SPLIT_NAT21', resp);
         } else {
           transitionToState('SPLIT_TURN', resp);
@@ -208,7 +210,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     } catch {
       transitionToState('ERROR');
     }
-  }, [transitionToState, savePreActionState]);
+  }, [savePreActionState, transitionToState]);
 
   const handleSplitHitRequest = useCallback(async () => {
     const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -237,8 +239,30 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [savePreActionState, transitionToState]);
 
   const handleSplitStandRequest = useCallback(async () => {
+    savePreActionState();
     transitionToState('SPLIT_STAND');
-  }, [transitionToState]);
+  }, [savePreActionState, transitionToState]);
+
+  const handleSplitDoubleRequest = useCallback(async () => {
+    savePreActionState();
+
+    try {
+      const doubleResponse = await handleDouble();
+      const doubledState = extractGameStateData(doubleResponse);
+
+      if (doubledState && doubledState.player && doubledState.tokens) {
+        setPreRewardBet(doubledState.player[5]);
+        setPreRewardTokens(doubledState.tokens);
+        const data = await handleHit();
+        const response = extractGameStateData(data);
+        if (response) {
+          transitionToState('SPLIT_STAND', response);
+        }
+      }
+    } catch {
+      transitionToState('ERROR');
+    }
+  }, [savePreActionState, transitionToState]);
 
 
   const handleInsRequest = useCallback(async () => {
@@ -401,19 +425,86 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           const data = await updateSplitPlayersByStand();
           const response = extractGameStateData(data);
 
+
+
           if (response && response.splitReq && response.splitReq > 0) {
             const splitResponse = await splittedToHand();
             const resp = extractGameStateData(splitResponse);
             await delay(1000);
             transitionToState('SPLIT_TURN', resp);
           } else {
-            transitionToState('SPLIT_FINISH', response);
+            await delay(2000);
+            await handleStand();
+            const rewardData = await handleReward(true);
+            const reward = extractGameStateData(rewardData);
+            console.log('SPLIT_FINISH', reward)
+            transitionToState('SPLIT_FINISH', reward);
           }
         } catch {
           transitionToState('ERROR');
         }
       };
       SplitStand();
+    }
+
+    else if (gameState.currentGameState === 'SPLIT_FINISH') {
+      console.log("Játék a SPLIT_FINISH állapotban.");
+      const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+      setHasHitTurn(false);
+      setHasOver21(false);
+
+      console.log("PLAYERS.length: ", gameState.players.length)
+      let i = gameState.players.length
+      const SplitFinish = async () => {
+        try {
+          while (i > 0) {
+            await delay(2000);
+            console.log(">>>>>>>>>>>>>>>>>>>>>> PLAYERS.length: ", gameState.players.length, gameState.players)
+            try {
+              if (gameState.players) {
+                const r = await updatePlayerFromPlayers();
+                const res = extractGameStateData(r);
+                console.log("YYYY UPDATE SPLIT FINISH updatePlayerFromPlayers: ", res)
+              }
+              const g = await handleStand();
+              const resy = extractGameStateData(g);
+              console.log("YYYY 1 SPLIT FINISH handleStand: ", resy)
+              const rewardData = await handleReward(true);
+              const response = extractGameStateData(rewardData);
+              console.log("YYYY 2 SPLIT_FINISH RESPONSE: ", response)
+              console.log("PLAYERS: ", gameState.players)
+              transitionToState('SPLIT_FINISH', response);
+            } catch {
+              transitionToState('BETTING', { /* ... reset game state ... */ });
+              break;
+            }
+            i -= 1;
+
+          }
+
+          timeoutId = setTimeout(() => {
+            if (isMounted) {
+              const nextRoundGameState: Partial<GameStateData> = {
+                currentGameState: 'BETTING',
+                player: [[], 0, 0, false, false, 0, 0],
+                dealer: [[], [], 0, 0, false, 0],
+                deckLen: gameState.deckLen, // A deckLen értéke is átkerül
+                tokens: gameState.tokens,
+                bet: 0,
+                bet_list: [],
+                players: [],
+                winner: 0,
+                is_round_active: true,
+              };
+              transitionToState('BETTING', nextRoundGameState);
+            }
+          }, 3000);
+
+        } catch {
+          transitionToState('ERROR');
+        }
+      };
+      SplitFinish();
     }
 
     else if (gameState.currentGameState === 'SPLIT_NAT21') {
@@ -426,7 +517,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           setHasOver21(false);
           transitionToState('SPLIT_STAND');
         }
-      }, 3000);
+      }, 1000);
     }
 
     return () => { // CLEANUP FÜGGVÉNY
@@ -450,6 +541,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     handleSplitRequest,
     handleSplitHitRequest,
     handleSplitStandRequest,
+    handleSplitDoubleRequest,
     handleInsRequest,
     preRewardBet,
     preRewardTokens,

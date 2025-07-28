@@ -74,6 +74,7 @@ export type GameStateMachineHookResult = {
   handleSplitRequest: () => Promise<void>;
   handleSplitHitRequest: () => Promise<void>;
   handleSplitStandRequest: () => Promise<void>;
+  handleSplitDoubleRequest: () => Promise<void>;
   handleInsRequest: () => Promise<void>;
   preRewardBet: number | null;
   preRewardTokens: number | null;

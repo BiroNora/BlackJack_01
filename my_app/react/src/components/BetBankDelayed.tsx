@@ -30,7 +30,7 @@ const BetBankDelayed: React.FC<BetBankDelayedProps> = ({
       console.log("--- DEBUG --- BetBankDelayed: Késleltetés utáni frissítés.");
       setDisplayedTokens(finalGameState.tokens);
       setDisplayedBet(finalGameState.player[5]);
-    }, 1500);
+    }, 2000);
 
 
     return () => {

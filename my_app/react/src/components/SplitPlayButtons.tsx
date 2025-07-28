@@ -23,9 +23,6 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
   const canDouble = tokens >= bet && !hasHitTurn;
   const canSplit = player[0].length == 2 && player[3] && tokens >= bet && !hasHitTurn;
   const playersLength = players.length < 3 ? true : false;
-  console.log("PLAYERS LENGTH: ", playersLength, players.length);
-  console.log("hasHitTurn: ", hasHitTurn)
-  console.log("hasOver21: ", hasOver21)
 
   const handleAnyButtonClick = (actionHandler: () => void) => {
     if (!hasOver21) {
