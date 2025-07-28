@@ -96,7 +96,7 @@ export async function startGame() {
 export async function getGameData() {
   const data = await callApiEndpoint("/api/get_game_data", "GET");
 
-  //console.log("getGameData API response:", data);
+  console.log("getGameData API response:", data);
   return data;
 }
 
@@ -124,28 +124,28 @@ export async function handleReward(is_splitted: boolean) {
 export async function handleInsurance() {
   const data = await callApiEndpoint("/api/ins_request", "POST");
 
-  console.log("handleInsurance API response:", data);
+  //console.log("handleInsurance API response:", data);
   return data;
 }
 
 export async function handleDouble() {
   const data = await callApiEndpoint("/api/double_request", "POST");
 
-  console.log("handleDouble API response:", data);
+  //console.log("handleDouble API response:", data);
   return data;
 }
 
 export async function splitHand() {
   const data = await callApiEndpoint("/api/split_request", "POST");
 
-  console.log("splitHand API response:", data);
+  //console.log("splitHand API response:", data);
   return data;
 }
 
 export async function splittedToHand() {
   const data = await callApiEndpoint("/api/add_split_player_to_game", "POST");
 
-  console.log("splittedToHand API response:", data);
+  //console.log("splittedToHand API response:", data);
   return data;
 }
 
@@ -175,6 +175,15 @@ export async function roundToEnd() {
 
   //console.log("roundToEnd API response:", data);
   return data;
+}
+
+export interface HttpError extends Error {
+  response?: { // A response property most opcionális
+    status: number;
+    statusText: string;
+    error?: string;
+    data?: ErrorResponse; // A szerver válasza (pl. { error: 'No more split hands.' })
+  };
 }
 
 export async function callApiEndpoint<T>(
@@ -207,26 +216,45 @@ export async function callApiEndpoint<T>(
       const statusText = response.statusText || 'Ismeretlen hiba';
       const errorMessage = errorData.message || `HTTP hiba! Státusz: ${status} ${statusText}.`;
 
-      console.error(
-        `API hiba a(z) '${endpoint}' végponton (státusz: ${status}):`,
-        errorData
-      );
+      if (!(status === 400 && errorData.error === 'No more split hands.')) {
+        // Logolunk piros hibát, ha NEM a "No more split hands." hiba
+        console.error(
+          `API hiba a(z) '${endpoint}' végponton (státusz: ${status}):`,
+          errorData
+        );
+      }
+      // Ha a "No more split hands." hiba, akkor itt nem logolunk SEMMIT a konzolra.
+      // Ezt a hibát majd a useGameStateMachine fogja diszkréten kezelni.
 
-      // Dobunk egy hibát, amit a hívó fél el tud kapni
-      throw new Error(errorMessage);
+      // Mindenesetre dobjuk a hibát, hogy a hívó fél elkapja és kezelje.
+      const errorToThrow: HttpError = new Error(errorMessage);
+      errorToThrow.response = {
+        status: status,
+        statusText: statusText,
+        data: errorData
+      };
+      throw errorToThrow;
     }
 
-    // Ha a válasz sikeres, de nincs tartalom (pl. 204 No Content), akkor üres objektumot adjunk vissza
-    // Különben próbáljuk meg JSON-ként feldolgozni
     if (response.status === 204) {
-      return {} as T; // Sikeres, de üres válasz esetén üres objektumot adunk vissza, típuskényszerítve T-re
+      return {} as T;
     }
 
     const data = await response.json();
-    return data as T; // Típuskényszerítés a generikus T típusra
+    return data as T;
   } catch (error: unknown) {
-    // Ez a blokk hálózati hibákat (pl. nincs internet) vagy az előző throw-ált hibákat kapja el
-    console.error(`Hálózati vagy feldolgozási hiba a(z) '${endpoint}' végponton:`, error);
-    throw error; // Fontos: továbbdobja a hibát, hogy a hívó fél kezelhesse!
+    // *** FONTOS VÁLTOZTATÁS ITT: Kondicionális logolás a külső catch-ben is. ***
+    // Csak akkor logolunk pirosat, ha valamilyen ismeretlen hiba történik.
+    // Ha a `HttpError` a "No more split hands." esete, akkor itt sem logolunk.
+
+    const isSpecificSplitHandError = error instanceof Error && 'response' in error &&
+      (error as HttpError).response?.status === 400 &&
+      (error as HttpError).response?.data?.error === 'No more split hands.';
+
+    if (!isSpecificSplitHandError) {
+      console.error(`Hálózati vagy feldolgozási hiba a(z) '${endpoint}' végponton:`, error);
+    }
+    // Mindig továbbdobja a hibát a hívó félnek!
+    throw error;
   }
 }

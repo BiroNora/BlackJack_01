@@ -27,7 +27,7 @@ const BetBankDelayed: React.FC<BetBankDelayedProps> = ({
 
 
     const timeoutId: NodeJS.Timeout = setTimeout(() => {
-      console.log("--- DEBUG --- BetBankDelayed: Késleltetés utáni frissítés.");
+      //console.log("--- DEBUG --- BetBankDelayed: Késleltetés utáni frissítés.");
       setDisplayedTokens(finalGameState.tokens);
       setDisplayedBet(finalGameState.player[5]);
     }, 2000);
@@ -37,13 +37,13 @@ const BetBankDelayed: React.FC<BetBankDelayedProps> = ({
       clearTimeout(timeoutId);
     };
   }, [finalGameState, initialBet, initialTokens]); // Az initial érték is függőség
-  console.log("displayedBet: ", displayedBet);
+  //console.log("displayedBet: ", displayedBet);
 
   const tokensToDisplay =
     displayedTokens !== null ? formatNumber(displayedTokens) : "---";
   const betToDisplay =
     displayedBet !== null ? formatNumber(displayedBet) : "---";
-  console.log("betToDisplay: ", betToDisplay);
+  //console.log("betToDisplay: ", betToDisplay);
 
   return (
     <div>

@@ -8,6 +8,7 @@ export type GameState =
   | 'SPLIT_TURN'
   | 'SPLIT_STAND'
   | 'SPLIT_FINISH'
+  | 'SPLIT_FINISH_TRANSIT'
   | 'SPLIT_NAT21'
   | 'ROUND_END'
   | 'RESTART_GAME'
@@ -57,7 +58,8 @@ export type DeckLenResponse = {
 
 export type ErrorResponse = {
   message?: string; // Az üzenet opcionális, ha a backend nem mindig küld ilyet
-  code?: string | number; // Lehet, hogy a backend küld hibakódot is
+  code?: string | number;
+  error?: string; // Lehet, hogy a backend küld hibakódot is
   details?: string | object; // További részletek
 };
 

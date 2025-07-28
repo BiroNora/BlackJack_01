@@ -38,7 +38,7 @@ function App() {
     showInsLost,
     hasOver21,
   } = useGameStateMachine();
-  console.log("App.tsx render - currentGameState:", gameState.currentGameState);
+  //console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
   // A React itt dönti el, mit jelenítsen meg az aktuális állapot alapján
   // A `gameState.currentGameState` fogja vezérelni a megjelenítést
@@ -144,6 +144,23 @@ function App() {
         </div>
       );
     case "SPLIT_FINISH":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <PlayerDealer gameState={gameState} />
+          <div className="game-action-area-wrapper">
+            <SplitWinner gameState={gameState} />
+          </div>
+          <BetBankDelayed
+            finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
+            initialBet={preRewardBet}
+            initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
+          />
+          <SplitPlayers gameState={gameState} />
+        </div>
+      );
+    case "SPLIT_FINISH_TRANSIT":
       return (
         <div>
           <HeaderTitles />
