@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   initializeSessionAPI,
   getTokensAPI,
@@ -52,6 +52,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const [showInsLost, setShowInsLost] = useState(false);
   const [hasHitTurn, setHasHitTurn] = useState(false);
   const [hasOver21, setHasOver21] = useState(false);
+
+  const timeoutIdRef = useRef<number | null>(null);
+
+  // Az isMounted ref-et is használjuk a komponens mountolt állapotának követésére
+  // Ennek típusa boolean, a useRef pedig automatikusan kikövetkezteti.
+  const isMountedRef = useRef(true);
 
   // Állapotváltó funkció
   const transitionToState = useCallback((
@@ -193,79 +199,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
   }, [transitionToState, setPreRewardBet, setPreRewardTokens]);
 
-  const handleSplitRequest = useCallback(async () => {
-    setShowInsLost(false);
-    savePreActionState();
-
-    try {
-      const response = await splitHand()
-      const resp = extractGameStateData(response);
-      if (resp && resp.player) {
-        if (resp.player[6] === 1 || resp.player[6] === 2) {
-          //console.log("SPLIT NAT21 player[6]: ", resp.player[6], resp.player[6] === 1 || resp.player[6] === 2)
-          transitionToState('SPLIT_NAT21', resp);
-        } else {
-          transitionToState('SPLIT_TURN', resp);
-        }
-      }
-    } catch {
-      transitionToState('ERROR');
-    }
-  }, [savePreActionState, transitionToState]);
-
-  const handleSplitHitRequest = useCallback(async () => {
-    const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
-    savePreActionState();
-    setHasHitTurn(true);
-
-    try {
-      const data = await handleHit();
-      const response = extractGameStateData(data);
-
-      if (response && response.player) {
-        const playerHandValue = response.player[1];
-
-        if (playerHandValue >= 21) {
-          setHasOver21(true);
-          transitionToState('SPLIT_TURN', response);
-          await delay(2000);
-          transitionToState('SPLIT_STAND', response);
-        } else {
-          transitionToState('SPLIT_TURN', response);
-        }
-      }
-    } catch {
-      transitionToState('ERROR');
-    }
-  }, [savePreActionState, transitionToState]);
-
-  const handleSplitStandRequest = useCallback(async () => {
-    savePreActionState();
-    transitionToState('SPLIT_STAND');
-  }, [savePreActionState, transitionToState]);
-
-  const handleSplitDoubleRequest = useCallback(async () => {
-    savePreActionState();
-
-    try {
-      const doubleResponse = await handleDouble();
-      const doubledState = extractGameStateData(doubleResponse);
-
-      if (doubledState && doubledState.player && doubledState.tokens) {
-        setPreRewardBet(doubledState.player[5]);
-        setPreRewardTokens(doubledState.tokens);
-        const data = await handleHit();
-        const response = extractGameStateData(data);
-        if (response) {
-          transitionToState('SPLIT_STAND', response);
-        }
-      }
-    } catch {
-      transitionToState('ERROR');
-    }
-  }, [savePreActionState, transitionToState]);
-
-
   const handleInsRequest = useCallback(async () => {
     setInsPlaced(true);
     savePreActionState();
@@ -286,9 +219,97 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
   }, [transitionToState, gameState, savePreActionState]);
 
+
+  // SPLIT part
+  const handleSplitRequest = useCallback(async () => {
+    setShowInsLost(false);
+    savePreActionState();
+
+    try {
+      const response = await splitHand()
+      const resp = extractGameStateData(response);
+      if (resp && resp.player) {
+        if (resp.player[6] === 1 || resp.player[6] === 2) {
+          transitionToState('SPLIT_STAND_STILL', resp);
+        } else {
+          transitionToState('SPLIT_TURN', resp);
+        }
+      }
+    } catch {
+      transitionToState('ERROR');
+    }
+  }, [savePreActionState, transitionToState]);
+
+  const handleSplitHitRequest = useCallback(async () => {
+    savePreActionState();
+    setHasHitTurn(true);
+
+    try {
+      const data = await handleHit();
+      const response = extractGameStateData(data);
+
+      if (response && response.player) {
+        const playerHandValue = response.player[1];
+
+        if (playerHandValue >= 21) {
+          setHasOver21(true);
+          transitionToState('SPLIT_STAND_STILL', response);
+        } else {
+          transitionToState('SPLIT_TURN', response);
+        }
+      }
+    } catch {
+      transitionToState('ERROR');
+    }
+  }, [savePreActionState, transitionToState]);
+
+  const handleSplitStandRequest = useCallback(async () => {
+    savePreActionState();
+    transitionToState('SPLIT_STAND_STILL');
+  }, [savePreActionState, transitionToState]);
+
+  const handleSplitDoubleRequest = useCallback(async () => {
+    savePreActionState();
+
+    try {
+      const doubleResponse = await handleDouble();
+      const doubledState = extractGameStateData(doubleResponse);
+
+      if (doubledState && doubledState.player && doubledState.tokens) {
+        setPreRewardBet(doubledState.player[5]);
+        setPreRewardTokens(doubledState.tokens);
+        const data = await handleHit();
+        const response = extractGameStateData(data);
+        if (response) {
+          transitionToState('SPLIT_STAND_STILL', response);
+        }
+      }
+    } catch {
+      transitionToState('ERROR');
+    }
+  }, [savePreActionState, transitionToState]);
+
+  // --- useEffect blokkok ---
+
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout | undefined; // 'undefined' is important here
-    let isMounted = true;
+    isMountedRef.current = true; // Mountoláskor igazra állítjuk
+    console.log("isMountedRef: Komponens mountolva, isMountedRef.current = true");
+
+    return () => {
+      isMountedRef.current = false; // Unmountoláskor hamisra állítjuk
+      console.log("isMountedRef: Komponens unmountolva, isMountedRef.current = false");
+    };
+  }, []);
+
+  // MÁSODIK (FŐ) useEffect: Játékállapot változások kezelése
+  useEffect(() => {
+    console.log("Fő useEffect futott. Jelenlegi állapot:", gameState.currentGameState);
+    // Minden újrafutáskor töröljük az előzőleg beállított időzítőt, ha van.
+    // Ez megakadályozza, hogy több időzítő fusson egyszerre, vagy "szellem" időzítők maradjanak.
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null; // Fontos, hogy nullázzuk is
+    }
 
     // --- LOADING ÁLLAPOT KEZELÉSE ---
     if (gameState.currentGameState === 'LOADING') {
@@ -340,24 +361,42 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     // --- A SHUFFLING ÁLLAPOT KEZELÉSE ---
     else if (gameState.currentGameState === 'SHUFFLING') {
-      //console.log("Játék a SHUFFLING állapotban.");
+      console.log("Játék a SHUFFLING állapotban."); // Ezt már látod
       const shufflingAct = async () => {
+        // Early exit if component unmounted while awaiting (optional but good practice)
+        if (!isMountedRef.current) {
+          return;
+        }
+
         try {
           const data = await getShuffling();
           const response = extractGameStateData(data);
 
-          if (response) {
-            //console.log("handleStartGame - SHUFFLING to INIT_GAME:", response);
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            transitionToState('INIT_GAME', response);
+          if (!isMountedRef.current) {
+            return;
           }
-        } catch {
-          transitionToState('ERROR');
+
+          if (response) {
+            timeoutIdRef.current = window.setTimeout(() => {
+              // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+              if (isMountedRef.current) {
+                transitionToState('INIT_GAME', response);
+              }
+            }, 2000);
+          } else {
+            // EZ A BLOKK FUT LE, HA A RESPONSE ÉRVÉNYTELEN!
+            console.warn("SHUFFLING: AZ 'extractGameStateData' ÉRVÉNYTELEN VÁLASZT ADOTT VISSZA!");
+          }
+        } catch (e) {
+          // EZ A BLOKK FUT LE, HA A GETSHUFFLING() VAGY AZ EXTRACTGAMESTATEDATA() HIBÁVAL VÉGZŐDIK!
+          console.error("SHUFFLING: Hiba a SHUFFLING fázisban:", e);
+          if (isMountedRef.current) {
+            transitionToState('ERROR');
+          }
         }
       };
       shufflingAct();
     }
-
     else if (gameState.currentGameState === 'INIT_GAME') {
       //console.log("Játék a INIT_GAME állapotban.");
       const InitGame = async () => {
@@ -395,9 +434,10 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     else if (gameState.currentGameState === 'MAIN_STAND') {
       //console.log("Játék a MAIN_STAND állapotban.");
       //console.log("Játék a MAIN_STAND állapotban. Vár 2 másodpercet...");
+      if (!isMountedRef.current) return;
 
-      timeoutId = setTimeout(() => {
-        if (isMounted) {
+      timeoutIdRef.current = window.setTimeout(() => {
+        if (isMountedRef.current) {
           const nextRoundGameState: Partial<GameStateData> = {
             currentGameState: 'BETTING',
             player: [[], 0, 0, false, false, 0, 0],
@@ -415,29 +455,62 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }, 3000);
     }
 
+    else if (gameState.currentGameState === 'SPLIT_STAND_STILL') {
+      const StandStill = async () => {
+        if (!isMountedRef.current) return;
+
+        try {
+          if (!isMountedRef.current) return;
+          timeoutIdRef.current = window.setTimeout(() => {
+            // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+            if (isMountedRef.current) {
+              //console.log("handleStartGame - SHUFFLING to INIT_GAME:", response);
+              transitionToState('SPLIT_STAND');
+            }
+          }, 2000);
+        } catch {
+          transitionToState('ERROR');
+        }
+      };
+      StandStill();
+    }
+
     else if (gameState.currentGameState === 'SPLIT_STAND') {
       //console.log("Játék a SPLIT_STAND állapotban.");
-      const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
       setHasHitTurn(false);
       setHasOver21(false);
 
       const SplitStand = async () => {
+        if (!isMountedRef.current) return;
+
         try {
+          if (!isMountedRef.current) return;
           const data = await updateSplitPlayersByStand();
           const response = extractGameStateData(data);
 
           if (response && response.splitReq && response.splitReq > 0) {
             const splitResponse = await splittedToHand();
-            const resp = extractGameStateData(splitResponse);
-            await delay(1000);
-            transitionToState('SPLIT_TURN', resp);
+            const ans = extractGameStateData(splitResponse);
+
+            timeoutIdRef.current = window.setTimeout(() => {
+              // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+              if (isMountedRef.current) {
+                //console.log("handleStartGame - SHUFFLING to INIT_GAME:", response);
+                transitionToState('SPLIT_TURN', ans);
+              }
+            }, 2000);
           } else {
-            await delay(2000);
+            timeoutIdRef.current = window.setTimeout(() => {
+              // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+              if (isMountedRef.current) {
+                //console.log("handleStartGame - SHUFFLING to INIT_GAME:", response);
+                transitionToState('SPLIT_FINISH', response);
+              }
+            }, 2000);
             /* await handleStand();
             const rewardData = await handleReward(true);
             const reward = extractGameStateData(rewardData);
             console.log('SPLIT_FINISH', reward) */
-            transitionToState('SPLIT_FINISH', response);
           }
         } catch {
           transitionToState('ERROR');
@@ -446,7 +519,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       SplitStand();
     }
 
-    if (gameState.currentGameState === 'SPLIT_FINISH') {
+    else if (gameState.currentGameState === 'SPLIT_FINISH') {
       console.log("Játék a SPLIT_FINISH állapotban. Elindítjuk a feldolgozást.");
       //const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
       setHasHitTurn(false);
@@ -454,7 +527,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
       const SplitFinish = async () => {
         try {
-          console.log("SPLIT FINISH BEÁRKEZÁS: ", gameState)
+          console.log("SPLIT FINISH BEÁRKEZÉS: ", gameState)
           const r = await handleStand();
           console.log("RRR: ", r)
           const rewardData = await handleReward(true);
@@ -483,7 +556,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       SplitFinish();
     }
 
-    if (gameState.currentGameState === 'SPLIT_FINISH_TRANSIT') {
+    else if (gameState.currentGameState === 'SPLIT_FINISH_TRANSIT') {
       console.log("Játék a SPLIT_FINISH_TRANSIT állapotban. Elindítjuk a feldolgozást.");
       const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
       setHasHitTurn(false);
@@ -495,7 +568,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           const data = extractGameStateData(gameData);
           if (data && data.players) {
             if (data.players.length === 0) {
-              await delay(5000);
+              await delay(8000);
               transitionToState('BETTING', {
                 currentGameState: 'BETTING',
                 player: [[], 0, 0, false, false, 0, 0],
@@ -509,9 +582,10 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                 is_round_active: true,
               });
             } else {
-              await delay(5000);
+              await delay(8000);
               const resp = await updatePlayerFromPlayers();
               const res = extractGameStateData(resp);
+              console.log("SPLIT FINISH ÁTADÁS: ", res)
               transitionToState('SPLIT_FINISH', res);
             }
           }
@@ -521,32 +595,16 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       };
       SplitFinishTransit();
     }
-
-
-    else if (gameState.currentGameState === 'SPLIT_NAT21') {
-      //console.log("Játék a SPLIT_NAT21 állapotban.");
-      //console.log("Játék a SPLIT_NAT21 állapotban. Vár 2 másodpercet...");
-
-      timeoutId = setTimeout(() => {
-        if (isMounted) {
-          setHasHitTurn(false);
-          setHasOver21(false);
-          transitionToState('SPLIT_STAND');
-        }
-      }, 1000);
-    }
-
-    return () => { // CLEANUP FÜGGVÉNY
-      isMounted = false; // Jelezzük, hogy a komponens lecsatolódik
-      if (timeoutId) { // Fontos ellenőrizni, hogy timeoutId kapott-e értéket
-        clearTimeout(timeoutId); // Töröljük az időzítőt
-      }
-    };
-
-  }, [gameState, savePreActionState, transitionToState]);
+  }, [gameState,
+    transitionToState,
+    savePreActionState,
+    isMountedRef,
+    timeoutIdRef,
+  ]);
 
   return {
     gameState,
+    currentGameState: gameState.currentGameState,
     transitionToState,
     handlePlaceBet,
     handleRetakeBet,

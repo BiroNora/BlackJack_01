@@ -130,7 +130,7 @@ function App() {
           <SplitPlayers gameState={gameState} />
         </div>
       );
-    case "SPLIT_STAND":
+    case "SPLIT_STAND_STILL":
       return (
         <div>
           <HeaderTitles />
@@ -174,19 +174,6 @@ function App() {
             initialBet={preRewardBet}
             initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
           />
-          <SplitPlayers gameState={gameState} />
-        </div>
-      );
-    case "SPLIT_NAT21":
-      return (
-        <div>
-          <HeaderTitles />
-          <Cards gameState={gameState} />
-          <PlayerDealerMasked gameState={gameState} />
-          <div className="game-action-area-wrapper">
-            <SplitPlayDisabledButtons />
-          </div>
-          <BetBank gameState={gameState} />
           <SplitPlayers gameState={gameState} />
         </div>
       );

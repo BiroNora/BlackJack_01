@@ -41,7 +41,7 @@ export function extractGameStateData(apiResponse: unknown): Partial<GameStateDat
     };
     return processedData;
   } catch (e) {
-    //console.error("extractGameStateData Hiba: Hiba történt a game_state mezőinek kinyerésekor.", e);
+    console.error("extractGameStateData Hiba: Hiba történt a game_state mezőinek kinyerésekor.", e);
     return undefined;
   }
 }
@@ -49,6 +49,15 @@ export function extractGameStateData(apiResponse: unknown): Partial<GameStateDat
 export function formatNumber(number: number) {
   return number.toLocaleString("en-US");
 }
+
+/* export function loop(data: (string | number)[]): string {
+  // Convert all elements to strings and join them with "  + "
+  const item = data.map(value => String(value)).join("  + ");
+
+  // If the array is empty, join() returns an empty string, so no need for slice.
+  // If the array is not empty, join() does not add trailing separator, so no need for slice.
+  return item;
+} */
 
 export function loop(data: any) {
   let item = "";

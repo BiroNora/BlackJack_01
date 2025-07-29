@@ -7,9 +7,9 @@ export type GameState =
   | 'MAIN_STAND'
   | 'SPLIT_TURN'
   | 'SPLIT_STAND'
+  | 'SPLIT_STAND_STILL'
   | 'SPLIT_FINISH'
   | 'SPLIT_FINISH_TRANSIT'
-  | 'SPLIT_NAT21'
   | 'ROUND_END'
   | 'RESTART_GAME'
   | 'ERROR';
@@ -65,6 +65,7 @@ export type ErrorResponse = {
 
 export type GameStateMachineHookResult = {
   gameState: GameStateData;
+  currentGameState: GameState;
   transitionToState: (newState: GameState, newData?: Partial<GameStateData>) => void;
   handlePlaceBet: (amount: number) => Promise<void>;
   //handleDeal: () => Promise<void>; // Hozzáadva a visszatérési típushoz
