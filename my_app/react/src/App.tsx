@@ -57,6 +57,12 @@ function App() {
           <Shuffling />
         </div>
       );
+    case "INIT_GAME":
+      return (
+        <div>
+          <HeaderTitles />
+        </div>
+      );
     case "BETTING":
       return (
         <div>
@@ -130,7 +136,7 @@ function App() {
           <SplitPlayers gameState={gameState} />
         </div>
       );
-    case "SPLIT_STAND_STILL":
+    case "SPLIT_STAND":
       return (
         <div>
           <HeaderTitles />

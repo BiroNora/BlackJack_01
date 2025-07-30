@@ -80,7 +80,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       setPreRewardBet(gameState.player[5]);
       setPreRewardTokens(gameState.tokens);
       //console.log("!!!!!!Pre-reward bet elmentve:", gameState.player[5]);
-      //console.log("!!!!!: ", gameState.player)
       //console.log("!!!!!!Pre-reward tokens elmentve:", gameState.tokens);
     } else {
       setPreRewardBet(null);
@@ -230,7 +229,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const resp = extractGameStateData(response);
       if (resp && resp.player) {
         if (resp.player[6] === 1 || resp.player[6] === 2) {
-          transitionToState('SPLIT_STAND_STILL', resp);
+          transitionToState('SPLIT_STAND', resp);
         } else {
           transitionToState('SPLIT_TURN', resp);
         }
@@ -241,7 +240,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [savePreActionState, transitionToState]);
 
   const handleSplitHitRequest = useCallback(async () => {
-    savePreActionState();
     setHasHitTurn(true);
 
     try {
@@ -253,7 +251,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         if (playerHandValue >= 21) {
           setHasOver21(true);
-          transitionToState('SPLIT_STAND_STILL', response);
+          transitionToState('SPLIT_STAND', response);
         } else {
           transitionToState('SPLIT_TURN', response);
         }
@@ -261,33 +259,32 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     } catch {
       transitionToState('ERROR');
     }
-  }, [savePreActionState, transitionToState]);
+  }, [transitionToState]);
 
   const handleSplitStandRequest = useCallback(async () => {
-    savePreActionState();
-    transitionToState('SPLIT_STAND_STILL');
-  }, [savePreActionState, transitionToState]);
+    transitionToState('SPLIT_STAND');
+  }, [transitionToState]);
 
   const handleSplitDoubleRequest = useCallback(async () => {
-    savePreActionState();
+    setHasHitTurn(true);
 
     try {
       const doubleResponse = await handleDouble();
       const doubledState = extractGameStateData(doubleResponse);
 
       if (doubledState && doubledState.player && doubledState.tokens) {
-        setPreRewardBet(doubledState.player[5]);
-        setPreRewardTokens(doubledState.tokens);
         const data = await handleHit();
         const response = extractGameStateData(data);
         if (response) {
-          transitionToState('SPLIT_STAND_STILL', response);
+          transitionToState('SPLIT_STAND', response);
         }
+      } else {
+        transitionToState('SPLIT_TURN');
       }
     } catch {
       transitionToState('ERROR');
     }
-  }, [savePreActionState, transitionToState]);
+  }, [transitionToState]);
 
   // --- useEffect blokkok ---
 
@@ -397,6 +394,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       };
       shufflingAct();
     }
+
     else if (gameState.currentGameState === 'INIT_GAME') {
       //console.log("Játék a INIT_GAME állapotban.");
       const InitGame = async () => {
@@ -455,26 +453,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }, 3000);
     }
 
-    else if (gameState.currentGameState === 'SPLIT_STAND_STILL') {
-      const StandStill = async () => {
-        if (!isMountedRef.current) return;
-
-        try {
-          if (!isMountedRef.current) return;
-          timeoutIdRef.current = window.setTimeout(() => {
-            // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-            if (isMountedRef.current) {
-              //console.log("handleStartGame - SHUFFLING to INIT_GAME:", response);
-              transitionToState('SPLIT_STAND');
-            }
-          }, 2000);
-        } catch {
-          transitionToState('ERROR');
-        }
-      };
-      StandStill();
-    }
-
     else if (gameState.currentGameState === 'SPLIT_STAND') {
       //console.log("Játék a SPLIT_STAND állapotban.");
       setHasHitTurn(false);
@@ -495,7 +473,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             timeoutIdRef.current = window.setTimeout(() => {
               // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
               if (isMountedRef.current) {
-                //console.log("handleStartGame - SHUFFLING to INIT_GAME:", response);
                 transitionToState('SPLIT_TURN', ans);
               }
             }, 2000);
@@ -503,14 +480,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             timeoutIdRef.current = window.setTimeout(() => {
               // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
               if (isMountedRef.current) {
-                //console.log("handleStartGame - SHUFFLING to INIT_GAME:", response);
                 transitionToState('SPLIT_FINISH', response);
               }
             }, 2000);
-            /* await handleStand();
-            const rewardData = await handleReward(true);
-            const reward = extractGameStateData(rewardData);
-            console.log('SPLIT_FINISH', reward) */
           }
         } catch {
           transitionToState('ERROR');
@@ -521,36 +493,25 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     else if (gameState.currentGameState === 'SPLIT_FINISH') {
       console.log("Játék a SPLIT_FINISH állapotban. Elindítjuk a feldolgozást.");
-      //const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
-      setHasHitTurn(false);
-      setHasOver21(false);
 
       const SplitFinish = async () => {
         try {
-          console.log("SPLIT FINISH BEÁRKEZÉS: ", gameState)
-          const r = await handleStand();
-          console.log("RRR: ", r)
+          savePreActionState();
+          console.log("SPLIT FINISH BEÉRKEZÉS: ", gameState)
+          const standData = await handleStand();
+          const stand = extractGameStateData(standData);
+          console.log("SPLIT FINISH STAND: ", stand)
           const rewardData = await handleReward(true);
           const reward = extractGameStateData(rewardData);
           console.log("SPLIT FINISH REWARD: ", reward)
           if (reward && reward?.players) {
             transitionToState('SPLIT_FINISH_TRANSIT', reward);
           } else {
-            transitionToState('BETTING', {
-              currentGameState: 'BETTING',
-              player: [[], 0, 0, false, false, 0, 0],
-              dealer: [[], [], 0, 0, false, 0],
-              deckLen: gameState.deckLen,
-              tokens: gameState.tokens,
-              bet: 0,
-              bet_list: [],
-              players: [],
-              winner: 0,
-              is_round_active: true,
-            });
+            transitionToState('ERROR')
           }
-        } catch {
-          transitionToState('ERROR')
+        } catch (e) {
+          console.error("Hiba a SPLIT_FINISH fázisban:", e);
+          transitionToState('ERROR');
         }
       };
       SplitFinish();
@@ -558,38 +519,48 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     else if (gameState.currentGameState === 'SPLIT_FINISH_TRANSIT') {
       console.log("Játék a SPLIT_FINISH_TRANSIT állapotban. Elindítjuk a feldolgozást.");
-      const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
-      setHasHitTurn(false);
-      setHasOver21(false);
 
       const SplitFinishTransit = async () => {
+        if (!isMountedRef.current) return;
+
         try {
+          if (!isMountedRef.current) return;
           const gameData = await getGameData();
           const data = extractGameStateData(gameData);
           if (data && data.players) {
             if (data.players.length === 0) {
-              await delay(8000);
-              transitionToState('BETTING', {
-                currentGameState: 'BETTING',
-                player: [[], 0, 0, false, false, 0, 0],
-                dealer: [[], [], 0, 0, false, 0],
-                deckLen: gameState.deckLen,
-                tokens: gameState.tokens,
-                bet: 0,
-                bet_list: [],
-                players: [],
-                winner: 0,
-                is_round_active: true,
-              });
+              setHasHitTurn(false);
+              setHasOver21(false);
+              timeoutIdRef.current = window.setTimeout(() => {
+                // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+                if (isMountedRef.current) {
+                  transitionToState('BETTING', {
+                    currentGameState: 'BETTING',
+                    player: [[], 0, 0, false, false, 0, 0],
+                    dealer: [[], [], 0, 0, false, 0],
+                    deckLen: gameState.deckLen,
+                    tokens: gameState.tokens,
+                    bet: 0,
+                    bet_list: [],
+                    players: [],
+                    winner: 0,
+                    is_round_active: true,
+                  });
+                }
+              }, 3000);
             } else {
-              await delay(8000);
-              const resp = await updatePlayerFromPlayers();
-              const res = extractGameStateData(resp);
-              console.log("SPLIT FINISH ÁTADÁS: ", res)
-              transitionToState('SPLIT_FINISH', res);
+              const updateData = await updatePlayerFromPlayers();
+              const response = extractGameStateData(updateData);
+              timeoutIdRef.current = window.setTimeout(() => {
+                // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+                if (isMountedRef.current) {
+                  transitionToState('SPLIT_FINISH', response);
+                }
+              }, 3000);
             }
           }
-        } catch {
+        } catch (e) {
+          console.error("Hiba a SPLIT_FINISH_TRANSIT fázisban:", e);
           transitionToState('ERROR')
         }
       };
