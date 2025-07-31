@@ -68,7 +68,7 @@ const PlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
         <span className="label-text">Dealer:</span> {formattedDealerHand}
       </div>
       <div id="player-hand" className="player">
-        <span className="label-text">Player:</span> {formattedPlayerHand} <span className="equal-text">=</span> {player[1]}
+        <span className="label-text">Player:</span> {formattedPlayerHand} <span className="equal-text">=</span> <span className="label-text">{player[1]}</span>
       </div>
     </div>
   );

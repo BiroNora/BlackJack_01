@@ -155,8 +155,11 @@ button:disabled {
   font-size: var(--root-font-size); /* Ha definiáltad a rootban */
   line-height: var(--root-line-height); /* Ha definiáltad a rootban */
   font-weight: 700;
+  font-size: clamp(1.2rem, 1.2vw, 1.8rem);
   padding-top: 0.2em; /* Megfelel a gombok vertikális paddingjének */
   padding-bottom: 0.2em;
+  position: relative; /* <-- Add hozzá */
+  top: -0.15rem;
 }
 
 .ins {
@@ -169,4 +172,11 @@ button:disabled {
   font-weight: 400;
   padding-top: 0.2em; /* Megfelel a gombok vertikális paddingjének */
   padding-bottom: 0.2em;
+}
+
+.merriweather {
+  font-family: "Merriweather", serif;
+  font-weight: 600;
+  font-style: italic;
+  font-variation-settings: "wdth" 100;
 }

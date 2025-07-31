@@ -12,7 +12,7 @@ const SplitWinner: React.FC<TableProps> = ({ gameState }) => {
   const winners = nat21 !== 0 ? states[nat21] : state;
 
   return (
-    <div className="winners">
+    <div className="winners merriweather">
       {winners}
     </div>
   );
