@@ -44,7 +44,7 @@ const Betting: React.FC<BettingProps> = ({
           Bet: {"  " + formatNumber(bet)}
         </button>
       </div>
-      <div id="bank" className="bank">
+      <div id="bank" className="bank merriweather">
         Player's bank: {" "}
         <span className="bank-amount">{formatNumber(tokens)}</span>
       </div>

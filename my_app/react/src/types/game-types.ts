@@ -88,8 +88,8 @@ export type GameStateMachineHookResult = {
 
 export const states = [
   "",
-  "BlackJack Player won!",
-  "BLACKJACK PUSH",
+  "BLACKJACK Player won!",
+  "BlackJack push",
   "BlackJack Dealer won!",
   "Push",
   "Player lost",
@@ -98,5 +98,5 @@ export const states = [
   "twenty one",
   "bust",
   "under 21",
-  "BLACKJACK",
+  "BlackJack",
 ];

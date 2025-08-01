@@ -5,10 +5,7 @@
 .player {
   display: flex; /* Flexbox használata az elemek elrendezéséhez */
   align-items: center; /* Függőlegesen középre igazítja az elemeket */
-  margin-bottom: var(
-    --extra-vertical-padding05,
-    0.5em
-  ); /* Kis alsó margó, ha van ilyen változó */
+  padding-top: var(--extra-vertical-padding05);
   flex-wrap: wrap; /* Hosszú kártyasor esetén törje a sort */
   font-size: clamp(1.2rem, 1.2vw, 1.8rem);
   font-weight: 500;

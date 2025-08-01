@@ -29,7 +29,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
     return (
       <React.Fragment>
         <span className={suitClass}>{suit}</span>
-        {value}
+        <span className="merriweatherblack">{value}</span>
       </React.Fragment>
     );
   };
@@ -79,13 +79,13 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
         <span className="label-text">Dealer:</span> {formattedDealerHand}{" "}
         <span className="equal-text">=</span>{" "}
         <span className="label-text">{dealer[2]},</span>
-        <span className="score-mood merriweather">{d_mood}</span>
+        <span className="score-mood">{d_mood}</span>
       </div>
       <div id="player-hand" className="player">
         <span className="label-text">Player:</span> {formattedPlayerHand}{" "}
         <span className="equal-text">=</span>{" "}
         <span className="label-text">{player[1]},</span>
-        <span className="score-mood merriweather">{p_mood}</span>
+        <span className="score-mood">{p_mood}</span>
       </div>
     </div>
   );

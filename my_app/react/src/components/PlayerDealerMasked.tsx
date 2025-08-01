@@ -28,7 +28,8 @@ const PlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
 
     return (
       <React.Fragment>
-        <span className={suitClass}>{suit}</span>{value}
+        <span className={suitClass}>{suit}</span>
+        <span className="merriweatherblack">{value}</span>
       </React.Fragment>
     );
   };
@@ -36,15 +37,19 @@ const PlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
   const formatHand = (cardStrings: string[]): JSX.Element[] => {
     const formattedElements = cardStrings.map((cardString, index) => {
       // Elválasztó elem, ha nem az első lap (fontos a 'key' prop!)
-      const separator = index > 0
-        ? <span key={`hand-sep-${index}`} className="equal-text"> + </span>
-        : null;
+      const separator =
+        index > 0 ? (
+          <span key={`hand-sep-${index}`} className="equal-text">
+            {" "}
+            +{" "}
+          </span>
+        ) : null;
 
       // React.Fragment használata a szeparátor és a kártya csoportosítására (fontos a 'key' prop!)
       return (
         <React.Fragment key={cardString + index}>
-          {separator}{" "}
-          {formatCard(cardString)} {/* formatCard már JSX elemet ad vissza */}
+          {separator} {formatCard(cardString)}{" "}
+          {/* formatCard már JSX elemet ad vissza */}
         </React.Fragment>
       );
     });
@@ -53,7 +58,7 @@ const PlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
   };
 
   const loop = (data: string[]): string[] => {
-    return data.map(card => String(card).trim());
+    return data.map((card) => String(card).trim());
   };
 
   const playerHand = loop(player[0]);
@@ -68,7 +73,9 @@ const PlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
         <span className="label-text">Dealer:</span> {formattedDealerHand}
       </div>
       <div id="player-hand" className="player">
-        <span className="label-text">Player:</span> {formattedPlayerHand} <span className="equal-text">=</span> <span className="label-text">{player[1]}</span>
+        <span className="label-text">Player:</span> {formattedPlayerHand}{" "}
+        <span className="equal-text">=</span>{" "}
+        <span className="label-text">{player[1]}</span>
       </div>
     </div>
   );

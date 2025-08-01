@@ -12,7 +12,7 @@ const Winner: React.FC<TableProps> = ({ gameState }) => {
   const winners = nat21 !== 0 ? states[nat21] : state;
 
   return (
-    <div className="winners merriweather">
+    <div className="winners merriweather9black">
       {winners}
     </div>
   );

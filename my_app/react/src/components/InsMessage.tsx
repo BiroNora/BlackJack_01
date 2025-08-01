@@ -4,7 +4,7 @@ interface InsProps {
 
 const InsMessage: React.FC<InsProps> = ({ insMessage }) => {
   return (
-    <div>{insMessage && <div className="ins">Insurance lost</div>}</div>
+    <div>{insMessage && <div className="ins merriweather9">Insurance lost</div>}</div>
   );
 };
 

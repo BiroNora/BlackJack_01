@@ -11,9 +11,9 @@ const BetBank: React.FC<BetBankProps> = ({ gameState }) => {
   const currentBet = player[5];
 
   return (
-    <div >
-      <div className="bank">Bet:{" "} {formatNumber(currentBet)}</div>
-      <div className="bank">
+    <div>
+      <div className="bank1 merriweather">Bet:{" "} {formatNumber(currentBet)}</div>
+      <div className="bet-bank merriweather">
         Player's bank: {" "}
         <span className="bank-amount">{formatNumber(tokens)}</span>
       </div>

@@ -81,6 +81,7 @@
   padding-top: 1em;
   margin: 0;
   text-align: left;
+  color: #ba1616ff;
 }
 .title2 {
   font-size: clamp(2.4rem, 8vw, 3.45rem);
@@ -145,6 +146,9 @@ button:disabled {
   justify-content: flex-start; /* <<< EZ A KULCS: A tartalmat balra igazítja */
   align-items: flex-start; /* <<< Ezt is állítsd be: A tartalom a konténer tetejéhez igazodik (ha több soros) */
   width: 100%;
+  padding-top: var(--extra-vertical-padding1);
+  padding-bottom: var(--extra-vertical-padding05);
+  min-height: 3.0rem;
 }
 
 .winners {
@@ -153,13 +157,10 @@ button:disabled {
   text-align: left; /* A szöveget az elemen belül balra igazítja */
   justify-content: flex-start;
   font-size: var(--root-font-size); /* Ha definiáltad a rootban */
-  line-height: var(--root-line-height); /* Ha definiáltad a rootban */
   font-weight: 700;
-  font-size: clamp(1.2rem, 1.2vw, 1.8rem);
-  padding-top: 0.2em; /* Megfelel a gombok vertikális paddingjének */
-  padding-bottom: 0.2em;
+  font-size: clamp(1.3rem, 1.2vw, 1.9rem);
   position: relative; /* <-- Add hozzá */
-  top: -0.15rem;
+  padding-top: var(--extra-vertical-padding05);
 }
 
 .ins {
@@ -169,7 +170,7 @@ button:disabled {
   justify-content: flex-start;
   font-size: var(--root-font-size); /* Ha definiáltad a rootban */
   line-height: var(--root-line-height); /* Ha definiáltad a rootban */
-  font-weight: 400;
+  font-weight: 700;
   padding-top: 0.2em; /* Megfelel a gombok vertikális paddingjének */
   padding-bottom: 0.2em;
 }
@@ -177,6 +178,28 @@ button:disabled {
 .merriweather {
   font-family: "Merriweather", serif;
   font-weight: 600;
+  font-style: italic;
+  font-variation-settings: "wdth" 100;
+}
+
+.merriweatherblack {
+  font-family: "Merriweather", serif;
+  font-weight: 600;
+  font-style: italic;
+  font-variation-settings: "wdth" 100;
+}
+
+.merriweather9 {
+  font-family: "Merriweather", serif;
+  font-weight: 900;
+  font-style: italic;
+  font-variation-settings: "wdth" 100;
+  color: #ba1616ff;
+}
+
+.merriweather9black {
+  font-family: "Merriweather", serif;
+  font-weight: 900;
   font-style: italic;
   font-variation-settings: "wdth" 100;
 }

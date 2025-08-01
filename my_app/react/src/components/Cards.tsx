@@ -10,7 +10,7 @@ const Cards: React.FC<CardsProps> = ({
   const { deckLen } = gameState;
 
   return (
-    <div className="cards" id="cards">
+    <div className="cards merriweather" id="cards">
       Cards: {deckLen}
     </div>
   );

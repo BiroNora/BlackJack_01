@@ -47,8 +47,8 @@ const BetBankDelayed: React.FC<BetBankDelayedProps> = ({
 
   return (
     <div>
-      <div className="bank">Bet: {betToDisplay}</div>
-      <div className="bank">
+      <div className="bank1 merriweather">Bet: {betToDisplay}</div>
+      <div className="bet-bank merriweather">
         Player's bank: <span className="bank-amount">{tokensToDisplay}</span>
       </div>
     </div>
