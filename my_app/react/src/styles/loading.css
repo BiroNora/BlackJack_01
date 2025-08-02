@@ -68,3 +68,23 @@
     opacity: 0;
   }
 }
+
+.gap-right {
+  margin-right: 0.5rem;
+}
+
+.gap-left {
+  margin-left: 0.5rem;
+}
+
+.star-right {
+  margin-right: 0.1rem;
+}
+
+.star-left {
+  margin-left: 0.1rem;
+}
+
+.enjoy {
+  font-size: clamp(1.4rem, 1.2vw, 2.2rem);
+}

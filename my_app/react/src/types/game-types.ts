@@ -7,9 +7,10 @@ export type GameState =
   | 'MAIN_STAND'
   | 'SPLIT_TURN'
   | 'SPLIT_STAND'
+  | 'SPLIT_NAT21_STAND'
   | 'SPLIT_FINISH'
   | 'SPLIT_FINISH_TRANSIT'
-  | 'ROUND_END'
+  | 'OUT_OF_TOKENS'
   | 'RESTART_GAME'
   | 'ERROR';
 

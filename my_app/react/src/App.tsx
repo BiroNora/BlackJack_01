@@ -6,9 +6,11 @@ import Cards from "./components/Cards";
 import HeaderTitles from "./components/HeaderTitles";
 import InsMessage from "./components/InsMessage";
 import { Loading } from "./components/Loading";
+import { OutOfTokens } from "./components/OutOfTokens";
 import PlayButtons from "./components/PlayButtons";
 import PlayerDealer from "./components/PlayerDealer";
 import PlayerDealerMasked from "./components/PlayerDealerMasked";
+import { Restart } from "./components/RestartGame";
 import { Shuffling } from "./components/Shuffling";
 import SplitPlayButtons from "./components/SplitPlayButtons";
 import SplitPlayDisabledButtons from "./components/SplitPlayDisabledButtons";
@@ -149,6 +151,19 @@ function App() {
           <SplitPlayers gameState={gameState} />
         </div>
       );
+    case "SPLIT_NAT21_STAND":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <PlayerDealerMasked gameState={gameState} />
+          <div className="game-action-area-wrapper">
+            <SplitPlayDisabledButtons />
+          </div>
+          <BetBank gameState={gameState} />
+          <SplitPlayers gameState={gameState} />
+        </div>
+      );
     case "SPLIT_FINISH":
       return (
         <div>
@@ -183,8 +198,20 @@ function App() {
           <SplitPlayers gameState={gameState} />
         </div>
       );
-    case "ROUND_END":
+    case "OUT_OF_TOKENS":
+      return (
+        <div>
+          <HeaderTitles />
+          <OutOfTokens />
+        </div>
+      );
     case "RESTART_GAME":
+      return (
+        <div>
+          <HeaderTitles />
+          <Restart />
+        </div>
+      );
     case "ERROR":
     default:
       return <div>Ismeretlen állapot: {gameState.currentGameState}</div>;
