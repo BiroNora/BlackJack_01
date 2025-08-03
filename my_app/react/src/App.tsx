@@ -3,6 +3,7 @@ import BetBank from "./components/BetBank";
 import BetBankDelayed from "./components/BetBankDelayed";
 import Betting from "./components/Betting";
 import Cards from "./components/Cards";
+import { ErrorPage } from "./components/ErrorPage";
 import HeaderTitles from "./components/HeaderTitles";
 import InsMessage from "./components/InsMessage";
 import { Loading } from "./components/Loading";
@@ -213,8 +214,19 @@ function App() {
         </div>
       );
     case "ERROR":
+      return (
+        <div>
+          <HeaderTitles />
+          <ErrorPage />
+        </div>
+      );
     default:
-      return <div>Ismeretlen állapot: {gameState.currentGameState}</div>;
+      return (
+        <div>
+          <HeaderTitles />
+          <ErrorPage />
+        </div>
+      );
   }
 }
 
