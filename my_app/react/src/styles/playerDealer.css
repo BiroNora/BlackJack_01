@@ -21,7 +21,7 @@
   flex-shrink: 0; /* Megakadályozza, hogy ez az elem zsugorodjon és a szöveg törjön. */
   font-weight: bold; /* Vastagabb betűtípus a címkéknek */
   white-space: nowrap; /* Megakadályozza a szövegtörést a címkénél */
-  color: #333; /* Sötétebb szín a jobb olvashatóságért */
+  color: #403d3d; /* Sötétebb szín a jobb olvashatóságért */
   margin-right: 0.33rem;
 }
 
@@ -39,7 +39,7 @@
 
 /* Stílus az egyenlőségjelhez a játékos pontszámánál */
 .equal-text {
-  color: #555; /* Szürkésebb szín */
+  color: #615a5aff; /* Szürkésebb szín */
   font-weight: bold;
 }
 
@@ -48,6 +48,7 @@
   font-weight: 400;
   position: relative; /* <-- Add hozzá */
   top: 0.17rem;
+  color: #403d3d;
   //margin-left: 0.2rem;
 }
 

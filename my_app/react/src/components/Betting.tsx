@@ -1,6 +1,7 @@
 import type { GameStateData } from "../types/game-types";
 import "../styles/betting.css";
 import { formatNumber } from "../utilities/utils";
+import { useEffect, useRef, useState } from "react";
 
 interface BettingProps {
   gameState: GameStateData;
@@ -16,6 +17,21 @@ const Betting: React.FC<BettingProps> = ({
   onStartGame,
 }) => {
   const { tokens, bet, deckLen } = gameState;
+
+  const [showButtons, setShowButtons] = useState(false);
+  const timeoutIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    timeoutIdRef.current = window.setTimeout(() => {
+      setShowButtons(true);
+    }, 1000); // 1000 ms = 1 másodperc késleltetés
+
+    return () => {
+      if (timeoutIdRef.current !== null) {
+        window.clearTimeout(timeoutIdRef.current);
+      }
+    };
+  }, []);
 
   const betAmounts = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000];
 
@@ -45,11 +61,14 @@ const Betting: React.FC<BettingProps> = ({
         </button>
       </div>
       <div id="bank" className="bank merriweather">
-        Player's bank: {" "}
+        Player's bank:{" "}
         <span className="bank-amount">{formatNumber(tokens)}</span>
       </div>
 
-      <div id="chips" className="button-container">
+      <div
+        id="chips"
+        className={`button-container ${showButtons ? "show-buttons" : ""}`}
+      >
         <button
           id="all-in"
           type="button"

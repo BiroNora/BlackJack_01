@@ -1,6 +1,10 @@
 function SplitPlayDisabledButtons() {
+
   return (
-    <div id="play-buttons" className="button-container">
+    <div
+      id="play-buttons"
+      className="button-container1"
+    >
       <button id="hit-button" disabled={true}>
         Hit
       </button>
