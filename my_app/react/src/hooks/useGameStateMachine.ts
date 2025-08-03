@@ -438,8 +438,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       timeoutIdRef.current = window.setTimeout(() => {
         if (isMountedRef.current) {
           if (gameState.tokens === 0) {
-            // If tokens are zero, transition to the game over state
-            // We don't need a new state object here, as OUT_OF_TOKENS handles this
             transitionToState('OUT_OF_TOKENS');
           } else {
             const nextRoundGameState: Partial<GameStateData> = {
@@ -479,7 +477,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
             if (ans && ans.player) {
               if (ans.player[6] === 1 || ans.player[6] === 2) {
-                transitionToState('SPLIT_NAT21_STAND', ans);
+                timeoutIdRef.current = window.setTimeout(() => {
+                  // Csak akkor váltsunk állapotot, ha a komponens még mountolva van!
+                  if (isMountedRef.current) {
+                    transitionToState('SPLIT_NAT21_STAND', ans);
+                  }
+                }, 2000);
               } else {
                 timeoutIdRef.current = window.setTimeout(() => {
                   // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
@@ -514,13 +517,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         if (!isMountedRef.current) return;
 
         try {
-          if (!isMountedRef.current) return;
-          timeoutIdRef.current = window.setTimeout(() => {
-            // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-            if (isMountedRef.current) {
-              transitionToState('SPLIT_STAND');
-            }
-          }, 2000);
+          transitionToState('SPLIT_STAND');
         } catch {
           transitionToState('ERROR');
         }
