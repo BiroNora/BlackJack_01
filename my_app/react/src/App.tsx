@@ -40,6 +40,7 @@ function App() {
     hasHitTurn,
     showInsLost,
     hasOver21,
+    isSplitted,
   } = useGameStateMachine();
   //console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
@@ -107,7 +108,7 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealer gameState={gameState} />
+          <PlayerDealer gameState={gameState} isSplitted={isSplitted}/>
           <div className="game-action-area-wrapper">
             <Winner gameState={gameState} />
           </div>
@@ -170,7 +171,7 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealer gameState={gameState} />
+          <PlayerDealer gameState={gameState} isSplitted={isSplitted}/>
           <div className="game-action-area-wrapper">
             <SplitWinner gameState={gameState} />
           </div>
@@ -187,7 +188,7 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealer gameState={gameState} />
+          <PlayerDealer gameState={gameState} isSplitted={isSplitted} />
           <div className="game-action-area-wrapper">
             <SplitWinner gameState={gameState} />
           </div>

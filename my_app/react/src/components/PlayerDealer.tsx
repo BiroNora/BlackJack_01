@@ -4,10 +4,11 @@ import "../styles/playerDealer.css";
 
 interface TableProps {
   gameState: GameStateData;
+  isSplitted: boolean;
 }
 
-const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
-  const { player, dealer, players } = gameState;
+const PlayerDealer: React.FC<TableProps> = ({ gameState, isSplitted }) => {
+  const { player, dealer } = gameState;
 
   const formatCard = (card: string): JSX.Element | string => {
     if (card.trim() === "✪") {
@@ -60,8 +61,8 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
   const loop = (data: string[]): string[] => {
     return data.map((card) => String(card).trim());
   };
-  const is_splitted = players.length === 0 ? false : true;
-  const nat21 = is_splitted ? player[6] : dealer[5];
+  
+  const nat21 = isSplitted ? player[6] : dealer[5];
   const p_state = states[player[2]];
   const d_state = states[dealer[3]];
   const p_mood = nat21 === 1 || nat21 === 2 ? states[11] : p_state;

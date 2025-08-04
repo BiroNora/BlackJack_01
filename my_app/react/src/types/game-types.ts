@@ -85,6 +85,7 @@ export type GameStateMachineHookResult = {
   hasHitTurn: boolean;
   hasOver21: boolean;
   showInsLost: boolean;
+  isSplitted: boolean;
 };
 
 export const states = [

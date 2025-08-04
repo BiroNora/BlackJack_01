@@ -53,6 +53,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const [showInsLost, setShowInsLost] = useState(false);
   const [hasHitTurn, setHasHitTurn] = useState(false);
   const [hasOver21, setHasOver21] = useState(false);
+  const [isSplitted, setIsSplitted] = useState(false);
 
   const timeoutIdRef = useRef<number | null>(null);
 
@@ -223,6 +224,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   // SPLIT part
   const handleSplitRequest = useCallback(async () => {
     setShowInsLost(false);
+    setIsSplitted(true);
     savePreActionState();
 
     try {
@@ -403,6 +405,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         setShowInsLost(false);
         setHasHitTurn(false);
         setHasOver21(false);
+        setIsSplitted(false);
 
         try {
           const data = await startGame();
@@ -682,6 +685,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     insPlaced,
     hasHitTurn,
     hasOver21,
+    isSplitted,
     showInsLost,
   };
 }
