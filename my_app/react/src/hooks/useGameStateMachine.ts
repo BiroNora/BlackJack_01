@@ -541,8 +541,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           const rewardData = await handleReward(true);
           const reward = extractGameStateData(rewardData);
           console.log("SPLIT FINISH REWARD: ", reward)
-          if (reward && reward?.players) {
-            transitionToState('SPLIT_FINISH_TRANSIT', reward);
+          if (reward && reward?.players && stand) {
+            const combinedState = { ...stand, ...reward };
+            transitionToState('SPLIT_FINISH_TRANSIT', combinedState);
           } else {
             transitionToState('ERROR')
           }
