@@ -46,10 +46,6 @@
   font-weight: 500;
 }
 
-.button-container {
-  padding-top: var(--extra-vertical-padding05);
-}
-
 /* Példa: Ha láthatóvá akarod tenni a Deal Bank szekciót egy bizonyos állapotban */
 /* Ezt egy React komponenssel vagy JavaScripttel adnád hozzá az elemhez */
 /* .deal-bank.active {

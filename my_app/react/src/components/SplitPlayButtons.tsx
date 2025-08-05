@@ -50,7 +50,7 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
     <div>
       <div
         id="play-buttons"
-        className={`button-container ${showButtons ? "show-buttons" : ""}`}
+        className={`button-container1 ${showButtons ? "show-buttons" : ""}`}
       >
         <button
           id="hit-button"

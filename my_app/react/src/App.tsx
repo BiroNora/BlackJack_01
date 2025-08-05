@@ -10,7 +10,9 @@ import { Loading } from "./components/Loading";
 import { OutOfTokens } from "./components/OutOfTokens";
 import PlayButtons from "./components/PlayButtons";
 import PlayerDealer from "./components/PlayerDealer";
+import PlayerDealer2 from "./components/PlayerDealer2";
 import PlayerDealerMasked from "./components/PlayerDealerMasked";
+import PlayerDealerMasked2 from "./components/PlayerDealerMasked2";
 import { Restart } from "./components/RestartGame";
 import { Shuffling } from "./components/Shuffling";
 import SplitPlayButtons from "./components/SplitPlayButtons";
@@ -85,7 +87,7 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealerMasked gameState={gameState} />
+          <PlayerDealerMasked2 gameState={gameState} />
           <div className="game-action-area-wrapper">
             <PlayButtons
               gameState={gameState}
@@ -108,7 +110,7 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealer gameState={gameState} isSplitted={isSplitted}/>
+          <PlayerDealer2 gameState={gameState} isSplitted={isSplitted}/>
           <div className="game-action-area-wrapper">
             <Winner gameState={gameState} />
           </div>

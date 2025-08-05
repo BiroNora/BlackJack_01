@@ -430,7 +430,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
 
     else if (gameState.currentGameState === 'MAIN_TURN') {
-      //console.log("Játék a MAIN_TURN állapotban.");
+      console.log("Játék a MAIN_TURN állapotban gameState.", gameState);
     }
 
     else if (gameState.currentGameState === 'MAIN_STAND') {
