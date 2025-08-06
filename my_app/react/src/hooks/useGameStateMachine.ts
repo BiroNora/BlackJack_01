@@ -434,7 +434,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
 
     else if (gameState.currentGameState === 'MAIN_STAND') {
-      //console.log("Játék a MAIN_STAND állapotban.");
+      console.log("Játék a MAIN_STAND állapotban.", gameState);
       //console.log("Játék a MAIN_STAND állapotban. Vár 2 másodpercet...");
       if (!isMountedRef.current) return;
 

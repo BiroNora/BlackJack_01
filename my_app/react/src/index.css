@@ -167,7 +167,7 @@ button:disabled {
   align-items: center; /* Függőlegesen középre igazítja az elemeket */
   justify-content: center;
   width: 100%;
-  padding-top: var(--extra-vertical-padding02);
+  padding-top: var(--extra-vertical-padding1);
   padding-bottom: var(--extra-vertical-padding05);
   min-height: 3.0rem;
 }
@@ -224,6 +224,22 @@ button:disabled {
   font-weight: 900;
   font-style: italic;
   font-variation-settings: "wdth" 100;
+}
+
+.merriweather5grey {
+  font-family: "Merriweather", serif;
+  font-weight: 400;
+  font-style: italic;
+  font-variation-settings: "wdth" 100;
+  color: #403d3d;
+}
+
+.merriweather5grey2 {
+  font-family: "Merriweather", serif;
+  font-weight: 200;
+  font-style: italic;
+  font-variation-settings: "wdth" 100;
+  color: #403d3d;
 }
 
 .error-container-centered h1 {
