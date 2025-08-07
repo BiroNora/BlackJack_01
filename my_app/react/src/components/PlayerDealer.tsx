@@ -7,7 +7,7 @@ interface TableProps {
   isSplitted: boolean;
 }
 
-const PlayerDealer: React.FC<TableProps> = ({ gameState, isSplitted }) => {
+const PlayerDealer2: React.FC<TableProps> = ({ gameState, isSplitted }) => {
   const { player, dealer } = gameState;
 
   const formatCard = (card: string): JSX.Element | string => {
@@ -40,9 +40,8 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState, isSplitted }) => {
       // Elválasztó elem, ha nem az első lap (fontos a 'key' prop!)
       const separator =
         index > 0 ? (
-          <span key={`hand-sep-${index}`} className="equal-text">
-            {" "}
-            +{" "}
+          <span key={`hand-sep-${index}`} className="equal-text merriweather5grey">
+            +
           </span>
         ) : null;
 
@@ -61,7 +60,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState, isSplitted }) => {
   const loop = (data: string[]): string[] => {
     return data.map((card) => String(card).trim());
   };
-  
+
   const nat21 = isSplitted ? player[6] : dealer[5];
   const p_state = states[player[2]];
   const d_state = states[dealer[3]];
@@ -76,20 +75,30 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState, isSplitted }) => {
 
   return (
     <div>
-      <div id="dealer-hand" className="dealer">
-        <span className="label-text">Dealer:</span> {formattedDealerHand}{" "}
-        <span className="equal-text">=</span>{" "}
-        <span className="label-text">{dealer[2]},</span>
-        <span className="score-mood">{d_mood}</span>
+      <div id="dealer-hand" className="play">
+        <div className="hand">
+          {formattedDealerHand}
+        </div>
+        <div>
+          <span className="score-mood merriweather5grey2">{d_mood}</span>
+        </div>
+        <div>
+          <span className="label-text">Dealer:{" "}</span><span className="label-text1">{dealer[2]}</span>
+        </div>
       </div>
-      <div id="player-hand" className="player">
-        <span className="label-text">Player:</span> {formattedPlayerHand}{" "}
-        <span className="equal-text">=</span>{" "}
-        <span className="label-text">{player[1]},</span>
-        <span className="score-mood">{p_mood}</span>
+      <div id="player-hand" className="play">
+        <div>
+          <span className="label-text">Player:{" "}</span><span className="label-text1">{player[1]}</span>
+        </div>
+        <div>
+          <span className="score-mood merriweather5grey">{p_mood}</span>
+        </div>
+        <div className="hand">
+          {formattedPlayerHand}
+        </div>
       </div>
     </div>
   );
 };
 
-export default PlayerDealer;
+export default PlayerDealer2;

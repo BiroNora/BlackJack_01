@@ -35,7 +35,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
   useEffect(() => {
     timeoutIdRef.current = window.setTimeout(() => {
       setShowButtons(true);
-    }, 400);
+    }, 1000);
 
     return () => {
       if (timeoutIdRef.current !== null) {
@@ -43,6 +43,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
       }
     };
   }, []);
+
   const handleAnyButtonClick = (actionHandler: () => void) => {
     if (!hasOver21) {
       actionHandler();
@@ -52,7 +53,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
   return (
     <div
       id="play-buttons"
-      className={`button-container1 ${showButtons ? "show-buttons" : ""}`}
+      className={`button-container ${showButtons ? "show-buttons" : ""}`}
     >
       <button
         id="hit-button"

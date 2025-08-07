@@ -1,13 +1,17 @@
 import React, { type JSX } from "react";
 import type { GameStateData } from "../types/game-types";
 import "../styles/playerDealer.css";
+import { maskedScore } from "../utilities/utils";
 
 interface TableProps {
   gameState: GameStateData;
 }
 
-const PlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
+const PlayerDealerMasked2: React.FC<TableProps> = ({ gameState }) => {
   const { player, dealer } = gameState;
+
+  const dealerMasked = dealer[0][1][1];
+  const dealerMaskedScore = maskedScore(dealerMasked);
 
   const formatCard = (card: string): JSX.Element | string => {
     if (card.trim() === "✪") {
@@ -39,7 +43,7 @@ const PlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
       // Elválasztó elem, ha nem az első lap (fontos a 'key' prop!)
       const separator =
         index > 0 ? (
-          <span key={`hand-sep-${index}`} className="equal-text">
+          <span key={`hand-sep-${index}`} className="equal-text merriweather5grey">
             {" "}
             +{" "}
           </span>
@@ -69,16 +73,20 @@ const PlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
 
   return (
     <div>
-      <div id="dealer-hand" className="dealer">
-        <span className="label-text">Dealer:</span> {formattedDealerHand}
+      <div id="dealer-hand" className="play">
+        <div className="hand">{formattedDealerHand}</div>
+        <div>
+          <span className="label-text">Dealer:</span><span className="label-text1">{" "}{dealerMaskedScore}</span>
+        </div>
       </div>
-      <div id="player-hand" className="player">
-        <span className="label-text">Player:</span> {formattedPlayerHand}{" "}
-        <span className="equal-text">=</span>{" "}
-        <span className="label-text">{player[1]}</span>
+      <div id="player-hand" className="play">
+        <div>
+          <span className="label-text">Player:</span><span className="label-text1">{" "}{player[1]}</span>
+        </div>
+        <div className="hand">{formattedPlayerHand}</div>
       </div>
     </div>
   );
 };
 
-export default PlayerDealerMasked;
+export default PlayerDealerMasked2;
