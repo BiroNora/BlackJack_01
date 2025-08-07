@@ -87,7 +87,10 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealerMasked2 gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealerMasked gameState={gameState} />
+          </div>
+
           <div className="game-action-area-wrapper">
             <PlayButtons
               gameState={gameState}
@@ -110,7 +113,10 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealer2 gameState={gameState} isSplitted={isSplitted}/>
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealer gameState={gameState} isSplitted={isSplitted}/>
+          </div>
+
           <div className="game-action-area-wrapper">
             <Winner gameState={gameState} />
           </div>
@@ -126,7 +132,10 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealerMasked gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealerMasked gameState={gameState} />
+          </div>
+
           <div className="game-action-area-wrapper">
             <SplitPlayButtons
               gameState={gameState}
@@ -147,7 +156,10 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealerMasked gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealerMasked gameState={gameState} />
+          </div>
+
           <div className="game-action-area-wrapper">
             <SplitPlayDisabledButtons />
           </div>
@@ -160,7 +172,10 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealerMasked gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealerMasked gameState={gameState} />
+          </div>
+
           <div className="game-action-area-wrapper">
             <SplitPlayDisabledButtons />
           </div>
@@ -173,7 +188,10 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealer gameState={gameState} isSplitted={isSplitted}/>
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealer gameState={gameState} isSplitted={isSplitted}/>
+          </div>
+
           <div className="game-action-area-wrapper">
             <SplitWinner gameState={gameState} />
           </div>
@@ -190,7 +208,10 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <PlayerDealer gameState={gameState} isSplitted={isSplitted} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealer gameState={gameState} isSplitted={isSplitted} />
+          </div>
+
           <div className="game-action-area-wrapper">
             <SplitWinner gameState={gameState} />
           </div>

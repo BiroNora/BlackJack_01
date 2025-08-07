@@ -3,11 +3,13 @@
   flex-direction: column;
   align-items: center; /* Függőlegesen középre igazítja az elemeket */
   justify-content: center;
-  padding-top: var(--extra-vertical-padding05);
+  padding-top: var(--extra-vertical-padding02);
+  padding-bottom: var(--extra-vertical-padding02);
   flex-wrap: wrap; /* Hosszú kártyasor esetén törje a sort */
   font-size: clamp(1.2rem, 1.2vw, 1.8rem);
   font-weight: 500;
   gap: 0.2rem;
+  box-sizing: border-box;
 }
 
 /* Stílus a "Dealer:" és "Player:" feliratoknak */
@@ -37,9 +39,17 @@
   padding-top: var(--extra-vertical-padding05);
   padding-bottom: var(--extra-vertical-padding05);
   flex-wrap: wrap; /* Hosszú kártyasor esetén törje a sort */
-  font-size: clamp(1.2rem, 1.2vw, 1.8rem);
+  font-size: clamp(1.4rem, 1.2vw, 2.0rem);
   font-weight: 500;
-  gap: 0.2rem;
+  gap: 0.1rem;
+}
+
+.playdeal-up {
+  padding-top: var(--extra-vertical-padding05);
+}
+
+.playdeal-down {
+  padding-bottom: var(--extra-vertical-padding05);
 }
 
 /* Stílus a kártyák szív/káró piros színéhez */
@@ -61,6 +71,12 @@
   font-style: italic;
 }
 
+.equal-text1 {
+  color: #615a5aff; /* Szürkésebb szín */
+  font-weight: 300;
+  font-style: italic;
+}
+
 .score-mood {
   font-size: clamp(0.9rem, 1.3vw, 1.375rem);
 }
@@ -74,4 +90,5 @@
   align-items: flex-start; /* A tartalom a sor elejére igazítása vízszintesen */
   /* Ha a listaelemek szélességét szeretnéd befolyásolni, érdemes lehet hozzáadni: */
   width: 100%;
+  box-sizing: border-box;
 }

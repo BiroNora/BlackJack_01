@@ -40,7 +40,7 @@ const PlayerDealer2: React.FC<TableProps> = ({ gameState, isSplitted }) => {
       // Elválasztó elem, ha nem az első lap (fontos a 'key' prop!)
       const separator =
         index > 0 ? (
-          <span key={`hand-sep-${index}`} className="equal-text merriweather5grey">
+          <span key={`hand-sep-${index}`} className="equal-text1 merriweather5grey">
             +
           </span>
         ) : null;
@@ -74,7 +74,7 @@ const PlayerDealer2: React.FC<TableProps> = ({ gameState, isSplitted }) => {
   const formattedDealerHand = formatHand(dealerHand);
 
   return (
-    <div>
+    <div className="player-dealer-area">
       <div id="dealer-hand" className="play">
         <div className="hand">
           {formattedDealerHand}

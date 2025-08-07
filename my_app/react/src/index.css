@@ -68,6 +68,11 @@
   }
 }
 
+body {
+  margin: 0;
+  padding: 0;
+}
+
 /* Esetlegesen fix szélességű tartalom mobilra igazítása, ha van */
 .content-wrapper {
   width: 100%;
@@ -162,14 +167,27 @@ button:disabled {
   justify-content: center;
 }
 
-.game-action-area-wrapper {
+.player-dealer-area-wrapper {
   display: flex;
   align-items: center; /* Függőlegesen középre igazítja az elemeket */
   justify-content: center;
   width: 100%;
-  padding-top: var(--extra-vertical-padding1);
+  padding-top: var(--extra-vertical-padding02);
   padding-bottom: var(--extra-vertical-padding05);
-  min-height: 3.0rem;
+  min-height: 15rem;
+  box-sizing: border-box;
+}
+
+.game-action-area-wrapper {
+  display: flex;
+  align-items: flex-start;
+  //align-items: center; /* Függőlegesen középre igazítja az elemeket */
+  justify-content: center;
+  width: 100%;
+  padding-top: var(--extra-vertical-padding02);
+  padding-bottom: var(--extra-vertical-padding05);
+  min-height: 4.0rem;
+  box-sizing: border-box;
 }
 
 .winners {
@@ -179,7 +197,7 @@ button:disabled {
   justify-content: flex-start;
   font-size: var(--root-font-size); /* Ha definiáltad a rootban */
   font-weight: 700;
-  font-size: clamp(1.3rem, 1.2vw, 1.9rem);
+  font-size: clamp(1.4rem, 1.2vw, 2.0rem);
   position: relative; /* <-- Add hozzá */
   padding-top: var(--extra-vertical-padding05);
 }

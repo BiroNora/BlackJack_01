@@ -47,46 +47,44 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
   };
 
   return (
-    <div>
-      <div
-        id="play-buttons"
-        className={`button-container1 ${showButtons ? "show-buttons" : ""}`}
+    <div
+      id="play-buttons"
+      className={`button-container1 ${showButtons ? "show-buttons" : ""}`}
+    >
+      <button
+        id="hit-button"
+        onClick={() => handleAnyButtonClick(() => onHit())}
+        disabled={hasOver21}
       >
+        Hit
+      </button>
+      <button
+        id="stand-button"
+        onClick={() => handleAnyButtonClick(onStand)}
+        disabled={hasOver21}
+      >
+        Stand
+      </button>
+
+      {canDouble && (
         <button
-          id="hit-button"
-          onClick={() => handleAnyButtonClick(() => onHit())}
+          id="double-button"
+          onClick={() => handleAnyButtonClick(onDouble)}
           disabled={hasOver21}
         >
-          Hit
+          Double
         </button>
+      )}
+
+      {canSplit && playersLength && (
         <button
-          id="stand-button"
-          onClick={() => handleAnyButtonClick(onStand)}
+          id="split-button"
+          onClick={() => handleAnyButtonClick(onSplit)}
           disabled={hasOver21}
         >
-          Stand
+          Split
         </button>
-
-        {canDouble && (
-          <button
-            id="double-button"
-            onClick={() => handleAnyButtonClick(onDouble)}
-            disabled={hasOver21}
-          >
-            Double
-          </button>
-        )}
-
-        {canSplit && playersLength && (
-          <button
-            id="split-button"
-            onClick={() => handleAnyButtonClick(onSplit)}
-            disabled={hasOver21}
-          >
-            Split
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 };

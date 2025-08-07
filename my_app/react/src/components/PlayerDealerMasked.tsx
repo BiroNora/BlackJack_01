@@ -72,15 +72,15 @@ const PlayerDealerMasked2: React.FC<TableProps> = ({ gameState }) => {
   const formattedDealerHand = formatHand(dealerHand);
 
   return (
-    <div>
+    <div className="player-dealer-area">
       <div id="dealer-hand" className="play">
         <div className="hand">{formattedDealerHand}</div>
-        <div>
+        <div className="playdeal-up">
           <span className="label-text">Dealer:</span><span className="label-text1">{" "}{dealerMaskedScore}</span>
         </div>
       </div>
       <div id="player-hand" className="play">
-        <div>
+        <div className="playdeal-down">
           <span className="label-text">Player:</span><span className="label-text1">{" "}{player[1]}</span>
         </div>
         <div className="hand">{formattedPlayerHand}</div>

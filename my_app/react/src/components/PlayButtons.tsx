@@ -53,7 +53,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
   return (
     <div
       id="play-buttons"
-      className={`button-container ${showButtons ? "show-buttons" : ""}`}
+      className={`button-container1 ${showButtons ? "show-buttons" : ""}`}
     >
       <button
         id="hit-button"

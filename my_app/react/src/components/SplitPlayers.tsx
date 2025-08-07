@@ -39,9 +39,8 @@ const SplitPlayers: React.FC<TableProps> = ({ gameState }) => {
       // Elválasztó elem, ha nem az első lap (fontos a 'key' prop!)
       const separator =
         index > 0 ? (
-          <span key={`hand-sep-${index}`} className="equal-text">
-            {" "}
-            +{" "}
+          <span key={`hand-sep-${index}`} className="equal-text1 merriweather5grey">
+            +
           </span>
         ) : null;
 
@@ -66,8 +65,8 @@ const SplitPlayers: React.FC<TableProps> = ({ gameState }) => {
           const bet = player[5]; // Kivesszük a tétet
 
           return (
-            <li key={index} className="player">
-              Hand: {formattedHand} &nbsp; Bet: {bet}
+            <li key={index} >
+              Hand: <span className="merriweather5grey">{" "}{formattedHand}</span> &nbsp; Bet: <span className="merriweather5grey">{" "}{bet}</span>
             </li>
           );
         })}
