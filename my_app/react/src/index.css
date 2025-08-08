@@ -15,7 +15,7 @@
   -moz-osx-font-smoothing: grayscale;
 
   min-height: 100vh; /* Legalább a teljes viewport magasságát foglalja el */
-  width: 100vw; /* Mindig a teljes szélességet foglalja el */
+  width: 100%; /* Mindig a teljes szélességet foglalja el */
   box-sizing: border-box; /* Fontos: padding és border is beleszámít a szélességbe */
   padding: 1rem; /* Kisebb padding mobilra */
   margin: 0 auto; /* Középre igazítás és nincs felesleges margó */
@@ -26,6 +26,7 @@
   --extra-vertical-padding02: 0.2em;
   --extra-vertical-padding05: 0.5em;
   --extra-vertical-padding1: 1em;
+  box-sizing: border-box;
 }
 
 /* --- Small Breakpoint (sm): 640px-től felfelé --- */
@@ -187,6 +188,19 @@ button:disabled {
   padding-top: var(--extra-vertical-padding02);
   padding-bottom: var(--extra-vertical-padding05);
   min-height: 4.0rem;
+  box-sizing: border-box;
+}
+
+.players-area-wrapper {
+  display: flex;
+  align-items: flex-start;
+  text-align: left; /* A szöveget az elemen belül balra igazítja */
+  justify-content: flex-start;
+  //align-items: center; /* Függőlegesen középre igazítja az elemeket */
+  width: 100%;
+  padding-top: var(--extra-vertical-padding02);
+  padding-bottom: var(--extra-vertical-padding05);
+  min-height: 5.0rem;
   box-sizing: border-box;
 }
 

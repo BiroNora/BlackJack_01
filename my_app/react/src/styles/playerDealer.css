@@ -89,6 +89,16 @@
   flex-direction: column; /* A listaelemek egymás alatt legyenek (alapértelmezett: row) */
   align-items: flex-start; /* A tartalom a sor elejére igazítása vízszintesen */
   /* Ha a listaelemek szélességét szeretnéd befolyásolni, érdemes lehet hozzáadni: */
-  width: 100%;
+  //width: 100%;
+  box-sizing: border-box;
+}
+
+#players-list li {
+  display: flex;
+  flex-wrap: wrap; /* A tartalom sortörése, ha túl hosszú */
+  align-items: center; /* Függőlegesen középre igazítja a sort */
+  gap: 0.5rem; /* Elválasztó tér a tartalomnak */
+  text-align: left;
+  width: 100%; /* A teljes szülő szélességet elfoglalja */
   box-sizing: border-box;
 }

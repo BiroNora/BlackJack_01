@@ -10,9 +10,7 @@ import { Loading } from "./components/Loading";
 import { OutOfTokens } from "./components/OutOfTokens";
 import PlayButtons from "./components/PlayButtons";
 import PlayerDealer from "./components/PlayerDealer";
-import PlayerDealer2 from "./components/PlayerDealer";
 import PlayerDealerMasked from "./components/PlayerDealerMasked";
-import PlayerDealerMasked2 from "./components/PlayerDealerMasked";
 import { Restart } from "./components/RestartGame";
 import { Shuffling } from "./components/Shuffling";
 import SplitPlayButtons from "./components/SplitPlayButtons";
@@ -114,7 +112,7 @@ function App() {
           <HeaderTitles />
           <Cards gameState={gameState} />
           <div className="player-dealer-area-wrapper">
-            <PlayerDealer gameState={gameState} isSplitted={isSplitted}/>
+            <PlayerDealer gameState={gameState} isSplitted={isSplitted} />
           </div>
 
           <div className="game-action-area-wrapper">
@@ -148,7 +146,9 @@ function App() {
             />
           </div>
           <BetBank gameState={gameState} />
-          <SplitPlayers gameState={gameState} />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
         </div>
       );
     case "SPLIT_STAND":
@@ -164,7 +164,9 @@ function App() {
             <SplitPlayDisabledButtons />
           </div>
           <BetBank gameState={gameState} />
-          <SplitPlayers gameState={gameState} />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
         </div>
       );
     case "SPLIT_NAT21_STAND":
@@ -180,7 +182,9 @@ function App() {
             <SplitPlayDisabledButtons />
           </div>
           <BetBank gameState={gameState} />
-          <SplitPlayers gameState={gameState} />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
         </div>
       );
     case "SPLIT_FINISH":
@@ -189,7 +193,7 @@ function App() {
           <HeaderTitles />
           <Cards gameState={gameState} />
           <div className="player-dealer-area-wrapper">
-            <PlayerDealer gameState={gameState} isSplitted={isSplitted}/>
+            <PlayerDealer gameState={gameState} isSplitted={isSplitted} />
           </div>
 
           <div className="game-action-area-wrapper">
@@ -200,7 +204,9 @@ function App() {
             initialBet={preRewardBet}
             initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
           />
-          <SplitPlayers gameState={gameState} />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
         </div>
       );
     case "SPLIT_FINISH_TRANSIT":
@@ -220,7 +226,9 @@ function App() {
             initialBet={preRewardBet}
             initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
           />
-          <SplitPlayers gameState={gameState} />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
         </div>
       );
     case "OUT_OF_TOKENS":
