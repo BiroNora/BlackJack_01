@@ -14,14 +14,11 @@
 
 /* Stílus a "Dealer:" és "Player:" feliratoknak */
 .play .label-text {
-  /* Alapértelmezés szerint ezek a feliratok már az első elemek a flex containerben,
-       így automatikusan a sor elején lesznek. Ha a szöveg rövid, nem kell további stílus.
-       Ha szeretnéd, hogy ne ugorjon be a második sorba, állíthatod a flex-shrink-et. */
   flex-shrink: 0; /* Megakadályozza, hogy ez az elem zsugorodjon és a szöveg törjön. */
   font-weight: bold; /* Vastagabb betűtípus a címkéknek */
   white-space: nowrap; /* Megakadályozza a szövegtörést a címkénél */
   color: #403d3d; /* Sötétebb szín a jobb olvashatóságért */
-  //margin-right: 0.33rem;
+
 }
 
 .play .label-text1 {
@@ -29,7 +26,6 @@
   font-weight: bold; /* Vastagabb betűtípus a címkéknek */
   white-space: nowrap; /* Megakadályozza a szövegtörést a címkénél */
   color: #050505ff; /* Sötétebb szín a jobb olvashatóságért */
-  //margin-right: 0.33rem;
 }
 
 .hand {
@@ -42,14 +38,6 @@
   font-size: clamp(1.4rem, 1.2vw, 2.0rem);
   font-weight: 500;
   gap: 0.1rem;
-}
-
-.playdeal-up {
-  padding-top: var(--extra-vertical-padding05);
-}
-
-.playdeal-down {
-  padding-bottom: var(--extra-vertical-padding05);
 }
 
 /* Stílus a kártyák szív/káró piros színéhez */
@@ -88,8 +76,6 @@
   display: flex; /* Engedélyezi a flexbox elrendezést */
   flex-direction: column; /* A listaelemek egymás alatt legyenek (alapértelmezett: row) */
   align-items: flex-start; /* A tartalom a sor elejére igazítása vízszintesen */
-  /* Ha a listaelemek szélességét szeretnéd befolyásolni, érdemes lehet hozzáadni: */
-  //width: 100%;
   box-sizing: border-box;
 }
 

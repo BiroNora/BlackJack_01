@@ -79,7 +79,7 @@ const PlayerDealer2: React.FC<TableProps> = ({ gameState, isSplitted }) => {
         <div className="hand">
           {formattedDealerHand}
         </div>
-        <div>
+        <div className="score-area-wrapper">
           <span className="score-mood merriweather5grey2">{d_mood}</span>
         </div>
         <div>
@@ -90,7 +90,7 @@ const PlayerDealer2: React.FC<TableProps> = ({ gameState, isSplitted }) => {
         <div>
           <span className="label-text">Player:{" "}</span><span className="label-text1">{player[1]}</span>
         </div>
-        <div>
+        <div className="score-area-wrapper">
           <span className="score-mood merriweather5grey">{p_mood}</span>
         </div>
         <div className="hand">

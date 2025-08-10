@@ -133,7 +133,6 @@ function App() {
           <div className="player-dealer-area-wrapper">
             <PlayerDealerMasked gameState={gameState} />
           </div>
-
           <div className="game-action-area-wrapper">
             <SplitPlayButtons
               gameState={gameState}
@@ -159,7 +158,6 @@ function App() {
           <div className="player-dealer-area-wrapper">
             <PlayerDealerMasked gameState={gameState} />
           </div>
-
           <div className="game-action-area-wrapper">
             <SplitPlayDisabledButtons />
           </div>
@@ -177,7 +175,6 @@ function App() {
           <div className="player-dealer-area-wrapper">
             <PlayerDealerMasked gameState={gameState} />
           </div>
-
           <div className="game-action-area-wrapper">
             <SplitPlayDisabledButtons />
           </div>
@@ -195,7 +192,6 @@ function App() {
           <div className="player-dealer-area-wrapper">
             <PlayerDealer gameState={gameState} isSplitted={isSplitted} />
           </div>
-
           <div className="game-action-area-wrapper">
             <SplitWinner gameState={gameState} />
           </div>
@@ -217,7 +213,6 @@ function App() {
           <div className="player-dealer-area-wrapper">
             <PlayerDealer gameState={gameState} isSplitted={isSplitted} />
           </div>
-
           <div className="game-action-area-wrapper">
             <SplitWinner gameState={gameState} />
           </div>

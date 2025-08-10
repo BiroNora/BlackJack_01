@@ -15,7 +15,6 @@
   -moz-osx-font-smoothing: grayscale;
 
   min-height: 100vh; /* Legalább a teljes viewport magasságát foglalja el */
-  width: 100%; /* Mindig a teljes szélességet foglalja el */
   box-sizing: border-box; /* Fontos: padding és border is beleszámít a szélességbe */
   padding: 1rem; /* Kisebb padding mobilra */
   margin: 0 auto; /* Középre igazítás és nincs felesleges margó */
@@ -196,7 +195,6 @@ button:disabled {
   align-items: flex-start;
   text-align: left; /* A szöveget az elemen belül balra igazítja */
   justify-content: flex-start;
-  //align-items: center; /* Függőlegesen középre igazítja az elemeket */
   width: 100%;
   padding-top: var(--extra-vertical-padding02);
   padding-bottom: var(--extra-vertical-padding05);
@@ -204,16 +202,16 @@ button:disabled {
   box-sizing: border-box;
 }
 
+.score-area-wrapper {
+  min-height: 1.6rem;
+}
+
 .winners {
-  display: flex; /* Flexbox használata a belső elemek (pl. a nyertes üzenet) elrendezéséhez */
-  align-items: flex-start; /* Függőlegesen az elem tetejére igazítja a tartalmat */
-  text-align: left; /* A szöveget az elemen belül balra igazítja */
-  justify-content: flex-start;
-  font-size: var(--root-font-size); /* Ha definiáltad a rootban */
+  display: flex;
+  font-size: var(--root-font-size);
   font-weight: 700;
   font-size: clamp(1.4rem, 1.2vw, 2.0rem);
-  position: relative; /* <-- Add hozzá */
-  padding-top: var(--extra-vertical-padding05);
+  position: relative;
 }
 
 .ins {
@@ -221,8 +219,8 @@ button:disabled {
   align-items: flex-start; /* Függőlegesen az elem tetejére igazítja a tartalmat */
   text-align: left; /* A szöveget az elemen belül balra igazítja */
   justify-content: flex-start;
-  font-size: var(--root-font-size); /* Ha definiáltad a rootban */
-  line-height: var(--root-line-height); /* Ha definiáltad a rootban */
+  font-size: var(--root-font-size);
+  line-height: var(--root-line-height);
   font-weight: 700;
   padding-top: 0.2em; /* Megfelel a gombok vertikális paddingjének */
   padding-bottom: 0.2em;
@@ -278,7 +276,7 @@ button:disabled {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif; /* A betűtípusod */
   font-size: clamp(1.5rem, 2.3vw, 3rem);
   font-weight: 500;
-  color: #504343ff; /* A szöveg színe */
+  color: #504343ff;
   display: inline-flex; /* <-- Módosítva: inline-flex, hogy jobban viselkedjen az alapvonallal */
   align-items: baseline; /* <-- Módosítva: A pontok a szöveg alapvonalához igazodnak */
   gap: 0; /* Ne legyen extra rés a "LOADING" és az első pont között */

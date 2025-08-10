@@ -43,7 +43,10 @@ const PlayerDealerMasked2: React.FC<TableProps> = ({ gameState }) => {
       // Elválasztó elem, ha nem az első lap (fontos a 'key' prop!)
       const separator =
         index > 0 ? (
-          <span key={`hand-sep-${index}`} className="equal-text merriweather5grey">
+          <span
+            key={`hand-sep-${index}`}
+            className="equal-text merriweather5grey"
+          >
             {" "}
             +{" "}
           </span>
@@ -74,15 +77,23 @@ const PlayerDealerMasked2: React.FC<TableProps> = ({ gameState }) => {
   return (
     <div className="player-dealer-area">
       <div id="dealer-hand" className="play">
-        <div className="hand">{formattedDealerHand}</div>
-        <div className="playdeal-up">
-          <span className="label-text">Dealer:</span><span className="label-text1">{" "}{dealerMaskedScore}</span>
+        <div className="hand">
+          {formattedDealerHand}
+        </div>
+        <div className="score-area-wrapper">
+
+        </div>
+        <div >
+          <span className="label-text">Dealer:</span>
+          <span className="label-text1"> {dealerMaskedScore}</span>
         </div>
       </div>
       <div id="player-hand" className="play">
-        <div className="playdeal-down">
-          <span className="label-text">Player:</span><span className="label-text1">{" "}{player[1]}</span>
+        <div>
+          <span className="label-text">Player:</span>
+          <span className="label-text1"> {player[1]}</span>
         </div>
+        <div className="score-area-wrapper"></div>
         <div className="hand">{formattedPlayerHand}</div>
       </div>
     </div>
