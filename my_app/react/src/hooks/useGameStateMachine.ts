@@ -232,7 +232,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const resp = extractGameStateData(response);
       if (resp && resp.player) {
         if (resp.player[6] === 1 || resp.player[6] === 2) {
-          transitionToState('SPLIT_STAND', resp);
+          transitionToState('SPLIT_NAT21_TRANSIT', resp);
         } else {
           transitionToState('SPLIT_TURN', resp);
         }
@@ -508,6 +508,28 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         }
       };
       SplitStand();
+    }
+
+    else if (gameState.currentGameState === 'SPLIT_NAT21_TRANSIT') {
+      console.log("Játék a SPLIT_NAT21_TRANSIT állapotban.");
+      console.log("SPLIT_NAT21_TRANSIT gameState: ", gameState)
+      setHasHitTurn(false);
+      setHasOver21(false);
+
+      const SplitNat21Stand = async () => {
+        if (!isMountedRef.current) return;
+
+        try {
+          timeoutIdRef.current = window.setTimeout(() => {
+            if (isMountedRef.current) {
+              transitionToState('SPLIT_STAND');
+            }
+          }, 2000);
+        } catch {
+          transitionToState('ERROR');
+        }
+      };
+      SplitNat21Stand();
     }
 
     else if (gameState.currentGameState === 'SPLIT_NAT21_STAND') {

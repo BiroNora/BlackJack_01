@@ -7,6 +7,7 @@ export type GameState =
   | 'MAIN_STAND'
   | 'SPLIT_TURN'
   | 'SPLIT_STAND'
+  | 'SPLIT_NAT21_TRANSIT'
   | 'SPLIT_NAT21_STAND'
   | 'SPLIT_FINISH'
   | 'SPLIT_FINISH_TRANSIT'

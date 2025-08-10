@@ -167,6 +167,23 @@ function App() {
           </div>
         </div>
       );
+    case "SPLIT_NAT21_TRANSIT":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealerMasked gameState={gameState} />
+          </div>
+          <div className="game-action-area-wrapper">
+            <SplitPlayDisabledButtons />
+          </div>
+          <BetBank gameState={gameState} />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
+        </div>
+      );
     case "SPLIT_NAT21_STAND":
       return (
         <div>
