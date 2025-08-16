@@ -15,6 +15,7 @@ import { Restart } from "./components/RestartGame";
 import { Shuffling } from "./components/Shuffling";
 import SplitPlayButtons from "./components/SplitPlayButtons";
 import SplitPlayDisabledButtons from "./components/SplitPlayDisabledButtons";
+import SplitPlayDoubleDisabledButtons from "./components/SplitPlayDoubleDisabledButtons";
 import SplitPlayers from "./components/SplitPlayers";
 import SplitWinner from "./components/SplitWinner";
 import Winner from "./components/Winner";
@@ -41,6 +42,7 @@ function App() {
     showInsLost,
     hasOver21,
     isSplitted,
+    hitCounter,
   } = useGameStateMachine();
   //console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
@@ -140,7 +142,7 @@ function App() {
               onStand={handleSplitStandRequest}
               onSplit={handleSplitRequest}
               onDouble={handleSplitDoubleRequest}
-              hasHitTurn={hasHitTurn}
+              hitCounter={hitCounter}
               hasOver21={hasOver21}
             />
           </div>
@@ -159,7 +161,27 @@ function App() {
             <PlayerDealerMasked gameState={gameState} />
           </div>
           <div className="game-action-area-wrapper">
-            <SplitPlayDisabledButtons />
+            <SplitPlayDisabledButtons gameState={gameState} />
+          </div>
+          <BetBank gameState={gameState} />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
+        </div>
+      );
+    case "SPLIT_STAND_DOUBLE":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealerMasked gameState={gameState} />
+          </div>
+          <div className="game-action-area-wrapper">
+            <SplitPlayDoubleDisabledButtons
+              gameState={gameState}
+              hitCounter={hitCounter}
+            />
           </div>
           <BetBank gameState={gameState} />
           <div className="players-area-wrapper">
@@ -176,24 +198,7 @@ function App() {
             <PlayerDealerMasked gameState={gameState} />
           </div>
           <div className="game-action-area-wrapper">
-            <SplitPlayDisabledButtons />
-          </div>
-          <BetBank gameState={gameState} />
-          <div className="players-area-wrapper">
-            <SplitPlayers gameState={gameState} />
-          </div>
-        </div>
-      );
-    case "SPLIT_NAT21_STAND":
-      return (
-        <div>
-          <HeaderTitles />
-          <Cards gameState={gameState} />
-          <div className="player-dealer-area-wrapper">
-            <PlayerDealerMasked gameState={gameState} />
-          </div>
-          <div className="game-action-area-wrapper">
-            <SplitPlayDisabledButtons />
+            <SplitPlayDisabledButtons gameState={gameState} />
           </div>
           <BetBank gameState={gameState} />
           <div className="players-area-wrapper">

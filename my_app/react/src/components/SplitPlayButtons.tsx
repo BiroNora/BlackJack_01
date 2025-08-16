@@ -7,7 +7,7 @@ interface SplitPlayButtonsProps {
   onStand: () => void;
   onDouble: () => void;
   onSplit: () => void;
-  hasHitTurn: boolean;
+  hitCounter: number | null;
   hasOver21: boolean;
 }
 
@@ -17,21 +17,24 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
   onStand,
   onDouble,
   onSplit,
-  hasHitTurn,
+  hitCounter,
   hasOver21,
 }) => {
   const { tokens, bet, player, players } = gameState;
-  const canDouble = tokens >= bet && !hasHitTurn;
+  const canDouble = tokens >= bet && hitCounter === null;
   const canSplit =
-    player[0].length == 2 && player[3] && tokens >= bet && !hasHitTurn;
+    player[0].length == 2 && player[3] && tokens >= bet && hitCounter === null;
   const playersLength = players.length < 3 ? true : false;
   const [showButtons, setShowButtons] = useState(false);
   const timeoutIdRef = useRef<number | null>(null);
+  console.log("SPLIT_TURN, hasHitTurn:", hitCounter);
+  console.log("SPLIT_TURN, hasOver21:", hasOver21);
 
   useEffect(() => {
     timeoutIdRef.current = window.setTimeout(() => {
       setShowButtons(true);
-    }, 400);
+      console.log("HERE");
+    }, 1000);
 
     return () => {
       if (timeoutIdRef.current !== null) {
@@ -66,7 +69,7 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
         Stand
       </button>
 
-      {canDouble && (
+      {canDouble && hitCounter === null && (
         <button
           id="double-button"
           onClick={() => handleAnyButtonClick(onDouble)}

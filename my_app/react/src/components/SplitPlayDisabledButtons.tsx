@@ -1,10 +1,16 @@
-function SplitPlayDisabledButtons() {
+import type { GameStateData } from "../types/game-types";
+
+interface SplitPlayDisabledButtonsProps {
+  gameState: GameStateData;
+}
+
+const SplitPlayDisabledButtons: React.FC<SplitPlayDisabledButtonsProps> = ({
+  gameState,
+}) => {
+  console.log("SplitPlayDisabledButtons: ", gameState);
 
   return (
-    <div
-      id="play-buttons"
-      className="button-container1"
-    >
+    <div id="play-buttons" className="button-container1">
       <button id="hit-button" disabled={true}>
         Hit
       </button>
@@ -13,6 +19,6 @@ function SplitPlayDisabledButtons() {
       </button>
     </div>
   );
-}
+};
 
 export default SplitPlayDisabledButtons;

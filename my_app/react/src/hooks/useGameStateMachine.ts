@@ -54,6 +54,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const [hasHitTurn, setHasHitTurn] = useState(false);
   const [hasOver21, setHasOver21] = useState(false);
   const [isSplitted, setIsSplitted] = useState(false);
+  const [hitCounter, setHitCounter] = useState<number | null>(null);
 
   const timeoutIdRef = useRef<number | null>(null);
 
@@ -88,6 +89,16 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       setPreRewardTokens(null);
     }
   }, [gameState, setPreRewardBet, setPreRewardTokens]);
+
+  // A counter növelésére szolgáló callback
+  const incrementHitCounter = useCallback(() => {
+    setHitCounter(prevCount => (prevCount === null ? 1 : prevCount + 1));
+  }, []);
+
+  // A counter nullázására szolgáló callback
+  const resetHitCounter = useCallback(() => {
+    setHitCounter(null);
+  }, []);
 
   const handlePlaceBet = useCallback(async (amount: number) => {
     if (gameState.tokens >= amount && amount > 0) {
@@ -248,25 +259,41 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     try {
       const data = await handleHit();
       const response = extractGameStateData(data);
+      const newHitCounter = hitCounter === null ? 1 : hitCounter + 1;
+      incrementHitCounter();
 
       if (response && response.player) {
         const playerHandValue = response.player[1];
+        console.log("playerHandValue: ", response.player[1])
+        console.log("counter: ", newHitCounter)
 
         if (playerHandValue >= 21) {
-          setHasOver21(true);
-          transitionToState('SPLIT_STAND', response);
-        } else {
+          if (newHitCounter === 1) {
+            setHasOver21(true);
+            transitionToState('SPLIT_STAND_DOUBLE', response);
+          }
+          else {
+            setHasOver21(true);
+            transitionToState('SPLIT_STAND', response);
+          }
+        }
+        else {
           transitionToState('SPLIT_TURN', response);
         }
       }
     } catch {
       transitionToState('ERROR');
     }
-  }, [transitionToState]);
+  }, [hitCounter, incrementHitCounter, transitionToState]);
 
   const handleSplitStandRequest = useCallback(async () => {
-    transitionToState('SPLIT_STAND');
-  }, [transitionToState]);
+    console.log("handleSplitStandRequest, hasHitTurn: ", hasHitTurn)
+    if (hasHitTurn === false) {
+      transitionToState('SPLIT_STAND_DOUBLE');
+    } else {
+      transitionToState('SPLIT_STAND');
+    }
+  }, [hasHitTurn, transitionToState]);
 
   const handleSplitDoubleRequest = useCallback(async () => {
     setHasHitTurn(true);
@@ -279,7 +306,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const data = await handleHit();
         const response = extractGameStateData(data);
         if (response) {
-          transitionToState('SPLIT_STAND', response);
+          transitionToState('SPLIT_STAND_DOUBLE', response);
         }
       } else {
         transitionToState('SPLIT_TURN');
@@ -461,10 +488,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }, 3000);
     }
 
-    else if (gameState.currentGameState === 'SPLIT_STAND') {
+    else if (gameState.currentGameState === 'SPLIT_STAND' || gameState.currentGameState === 'SPLIT_STAND_DOUBLE') {
       //console.log("Játék a SPLIT_STAND állapotban.");
-      setHasHitTurn(false);
+      setHasHitTurn(false); // See handleSplitStandRequest
       setHasOver21(false);
+      resetHitCounter();
 
       const SplitStand = async () => {
         if (!isMountedRef.current) return;
@@ -479,13 +507,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             const ans = extractGameStateData(splitResponse);
 
             if (ans && ans.player) {
-              if (ans.player[6] === 1 || ans.player[6] === 2) {
-                timeoutIdRef.current = window.setTimeout(() => {
-                  // Csak akkor váltsunk állapotot, ha a komponens még mountolva van!
-                  if (isMountedRef.current) {
-                    transitionToState('SPLIT_NAT21_STAND', ans);
-                  }
-                }, 2000);
+              if (ans.player[0].length === 2 && (ans.player[6] === 1 || ans.player[6] === 2)) {
+                if (gameState.currentGameState === 'SPLIT_STAND_DOUBLE') {
+                  timeoutIdRef.current = window.setTimeout(() => {
+                    // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+                    if (isMountedRef.current) {
+                      transitionToState('SPLIT_NAT21_TRANSIT', ans);
+                    }
+                  }, 2000);
+                } else {
+                  transitionToState('SPLIT_NAT21_TRANSIT', ans);
+                }
               } else {
                 timeoutIdRef.current = window.setTimeout(() => {
                   // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
@@ -513,10 +545,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     else if (gameState.currentGameState === 'SPLIT_NAT21_TRANSIT') {
       console.log("Játék a SPLIT_NAT21_TRANSIT állapotban.");
       console.log("SPLIT_NAT21_TRANSIT gameState: ", gameState)
-      setHasHitTurn(false);
-      setHasOver21(false);
 
-      const SplitNat21Stand = async () => {
+      const SplitNat21Transit = async () => {
         if (!isMountedRef.current) return;
 
         try {
@@ -529,29 +559,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           transitionToState('ERROR');
         }
       };
-      SplitNat21Stand();
-    }
-
-    else if (gameState.currentGameState === 'SPLIT_NAT21_STAND') {
-      console.log("Játék a SPLIT_NAT21_STAND állapotban.");
-      console.log("SPLIT_NAT21_STAND gameState: ", gameState)
-      setHasHitTurn(false);
-      setHasOver21(false);
-
-      const SplitNat21Stand = async () => {
-        if (!isMountedRef.current) return;
-
-        try {
-          transitionToState('SPLIT_STAND');
-        } catch {
-          transitionToState('ERROR');
-        }
-      };
-      SplitNat21Stand();
+      SplitNat21Transit();
     }
 
     else if (gameState.currentGameState === 'SPLIT_FINISH') {
       console.log("Játék a SPLIT_FINISH állapotban. Elindítjuk a feldolgozást.");
+      setHasHitTurn(false);
 
       const SplitFinish = async () => {
         try {
@@ -709,6 +722,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     hasHitTurn,
     hasOver21,
     isSplitted,
+    hitCounter,
     showInsLost,
   };
 }

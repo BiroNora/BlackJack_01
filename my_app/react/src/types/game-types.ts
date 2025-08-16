@@ -7,8 +7,8 @@ export type GameState =
   | 'MAIN_STAND'
   | 'SPLIT_TURN'
   | 'SPLIT_STAND'
+  | 'SPLIT_STAND_DOUBLE'
   | 'SPLIT_NAT21_TRANSIT'
-  | 'SPLIT_NAT21_STAND'
   | 'SPLIT_FINISH'
   | 'SPLIT_FINISH_TRANSIT'
   | 'OUT_OF_TOKENS'
@@ -87,6 +87,7 @@ export type GameStateMachineHookResult = {
   hasOver21: boolean;
   showInsLost: boolean;
   isSplitted: boolean;
+  hitCounter: number | null;
 };
 
 export const states = [
