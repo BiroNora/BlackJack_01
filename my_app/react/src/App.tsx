@@ -1,4 +1,3 @@
-import "./App.css";
 import BetBank from "./components/BetBank";
 import BetBankDelayed from "./components/BetBankDelayed";
 import Betting from "./components/Betting";

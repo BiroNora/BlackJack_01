@@ -88,3 +88,18 @@
   width: 100%; /* A teljes szülő szélességet elfoglalja */
   box-sizing: border-box;
 }
+
+@media (min-width: 1024px) {
+  #players-list {
+    flex-direction: row; /* Vízszintes elrendezés a lista elemeknek */
+    flex-wrap: wrap;     /* Ha nem férnek el, új sorba törnek */
+    justify-content: center; /* Középre igazítja az elemeket */
+    gap: 1.55rem;         /* Nagyobb térköz az elemek között horizontálisan */
+  }
+
+  #players-list li {
+    /* Az elemek szélességét most a tartalom határozza meg, nem a 100% */
+    width: auto;
+    gap: 0.2rem; /* Elválasztó tér a tartalomnak */
+  }
+}

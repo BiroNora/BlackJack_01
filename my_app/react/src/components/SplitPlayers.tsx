@@ -58,7 +58,7 @@ const SplitPlayers: React.FC<TableProps> = ({ gameState }) => {
 
   return (
     <div>
-      <ul id="players-list">
+      <ul id="players-list" className="players-list-responsive">
         {players.map((player, index) => {
           const hand = loop(player[0]);
           const formattedHand = formatHand(hand); // Formázzuk a lapokat JSX-re
