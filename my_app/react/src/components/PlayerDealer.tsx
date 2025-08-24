@@ -7,7 +7,7 @@ interface TableProps {
   isSplitted: boolean;
 }
 
-const PlayerDealer2: React.FC<TableProps> = ({ gameState, isSplitted }) => {
+const PlayerDealer: React.FC<TableProps> = ({ gameState, isSplitted }) => {
   const { player, dealer } = gameState;
 
   const formatCard = (card: string): JSX.Element | string => {
@@ -101,4 +101,4 @@ const PlayerDealer2: React.FC<TableProps> = ({ gameState, isSplitted }) => {
   );
 };
 
-export default PlayerDealer2;
+export default PlayerDealer;

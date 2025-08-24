@@ -7,7 +7,7 @@ interface TableProps {
   gameState: GameStateData;
 }
 
-const PlayerDealerMasked2: React.FC<TableProps> = ({ gameState }) => {
+const PlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
   const { player, dealer } = gameState;
 
   const dealerMasked = dealer[0][1][1];
@@ -100,4 +100,4 @@ const PlayerDealerMasked2: React.FC<TableProps> = ({ gameState }) => {
   );
 };
 
-export default PlayerDealerMasked2;
+export default PlayerDealerMasked;

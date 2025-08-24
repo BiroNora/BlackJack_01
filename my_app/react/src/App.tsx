@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import BetBank from "./components/BetBank";
 import BetBankDelayed from "./components/BetBankDelayed";
 import Betting from "./components/Betting";
@@ -45,6 +46,22 @@ function App() {
   } = useGameStateMachine();
   //console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
+  const transitionProps1 = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    duration: 1,
+    delay: 0.5,
+    ease: [0, 0, 0.58, 1],
+  };
+
+  const transitionProps2 = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    duration: 2,
+    delay: 0.5,
+    ease: [0, 0, 0.58, 1],
+  };
+
   // A React itt dönti el, mit jelenítsen meg az aktuális állapot alapján
   // A `gameState.currentGameState` fogja vezérelni a megjelenítést
   switch (gameState.currentGameState) {
@@ -52,14 +69,18 @@ function App() {
       return (
         <div>
           <HeaderTitles />
-          <Loading />
+          <motion.div key="loading" {...transitionProps1}>
+            <Loading />
+          </motion.div>
         </div>
       );
     case "SHUFFLING":
       return (
         <div>
           <HeaderTitles />
-          <Shuffling />
+          <motion.div key="shuffling" {...transitionProps2}>
+            <Shuffling />
+          </motion.div>
         </div>
       );
     case "INIT_GAME":
@@ -73,12 +94,14 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <Betting
-            gameState={gameState}
-            onPlaceBet={handlePlaceBet}
-            retakeBet={handleRetakeBet}
-            onStartGame={handleStartGame}
-          />
+          <motion.div key="betting" {...transitionProps2}>
+            <Betting
+              gameState={gameState}
+              onPlaceBet={handlePlaceBet}
+              retakeBet={handleRetakeBet}
+              onStartGame={handleStartGame}
+            />
+          </motion.div>
         </div>
       );
     case "MAIN_TURN":
@@ -86,9 +109,11 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <div className="player-dealer-area-wrapper">
-            <PlayerDealerMasked gameState={gameState} />
-          </div>
+          <motion.div key="MAIN_TURN" {...transitionProps2}>
+            <div className="player-dealer-area-wrapper">
+              <PlayerDealerMasked gameState={gameState} />
+            </div>
+          </motion.div>
 
           <div className="game-action-area-wrapper">
             <PlayButtons
@@ -112,13 +137,14 @@ function App() {
         <div>
           <HeaderTitles />
           <Cards gameState={gameState} />
-          <div className="player-dealer-area-wrapper">
-            <PlayerDealer gameState={gameState} isSplitted={isSplitted} />
-          </div>
-
+          <motion.div key="loading-state" {...transitionProps1}>
+            <div className="player-dealer-area-wrapper">
+              <PlayerDealer gameState={gameState} isSplitted={isSplitted} />
+            </div>
           <div className="game-action-area-wrapper">
             <Winner gameState={gameState} />
           </div>
+          </motion.div>
           <BetBankDelayed
             finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
             initialBet={preRewardBet}

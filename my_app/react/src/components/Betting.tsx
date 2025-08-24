@@ -2,6 +2,7 @@ import type { GameStateData } from "../types/game-types";
 import "../styles/betting.css";
 import { formatNumber } from "../utilities/utils";
 import { useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
 
 interface BettingProps {
   gameState: GameStateData;
@@ -45,20 +46,66 @@ const Betting: React.FC<BettingProps> = ({
     onStartGame(shouldShuffle);
   };
 
+  const isDisabled = bet === 0;
+
+  const variants = {
+    disabled: {
+      opacity: 0.7,
+      scale: 1,
+      transition: {
+        duration: 0.7,
+      },
+    },
+    enabled: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.7,
+      },
+    },
+  };
+
+  const textVariants = {
+    disabled: {
+      opacity: 0.4,
+      scale: 1,
+      transition: {
+        duration: 1,
+      },
+    },
+    enabled: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 1,
+      },
+    },
+  };
+
   return (
     <div className="betting-screen-container">
-      <button id="start-button" onClick={handleStartGame} disabled={bet === 0}>
-        Start Game
-      </button>
+      <motion.button
+        id="start-button"
+        onClick={handleStartGame}
+        disabled={isDisabled}
+        variants={variants}
+        animate={isDisabled ? "disabled" : "enabled"}
+      >
+        <motion.span variants={textVariants}>Start Game</motion.span>
+      </motion.button>
 
       <div id="deal-bank" className="deal-bank">
-        <button
+        <motion.button
           id="deal-button"
           onClick={() => retakeBet()}
-          disabled={bet === 0}
+          disabled={isDisabled}
+          variants={variants}
+          animate={isDisabled ? "disabled" : "enabled"}
         >
-          Bet: {"  " + formatNumber(bet)}
-        </button>
+          <motion.span variants={textVariants}>
+            Bet: {"  " + formatNumber(bet)}
+          </motion.span>
+        </motion.button>
       </div>
       <div id="bank" className="bank merriweather">
         Player's bank:{" "}

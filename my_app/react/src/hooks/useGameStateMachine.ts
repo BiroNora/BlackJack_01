@@ -421,10 +421,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     else if (gameState.currentGameState === 'INIT_GAME') {
       const InitGame = async () => {
         resetGameVariables();
-        if (!isMountedRef.current) return;
 
         try {
-          if (!isMountedRef.current) return;
           const data = await startGame();
           const response = extractGameStateData(data);
 
@@ -433,13 +431,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               savePreActionState();
               const rewards = await handleReward(false);
               const resp = extractGameStateData(rewards);
-
-              timeoutIdRef.current = window.setTimeout(() => {
-                // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-                if (isMountedRef.current) {
-                  transitionToState('MAIN_STAND', resp);
-                }
-              }, 3000);
+              transitionToState('MAIN_STAND', resp);
             } else {
               transitionToState('MAIN_TURN', response);
             }
