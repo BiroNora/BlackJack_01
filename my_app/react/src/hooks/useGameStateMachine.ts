@@ -54,6 +54,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const [hasHitTurn, setHasHitTurn] = useState(false);
   const [hasOver21, setHasOver21] = useState(false);
   const [isSplitted, setIsSplitted] = useState(false);
+  const [hasSplitNat21, setHasSplitNat21] = useState(false);
   const [hitCounter, setHitCounter] = useState<number | null>(null);
 
   const timeoutIdRef = useRef<number | null>(null);
@@ -493,7 +494,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       setHasHitTurn(false); // See handleSplitStandRequest
       setHasOver21(false);
       resetHitCounter();
-
+      console.log("**** hasSplitNat21: ", hasSplitNat21)
       const SplitStand = async () => {
         if (!isMountedRef.current) return;
 
@@ -519,21 +520,31 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                   transitionToState('SPLIT_NAT21_TRANSIT', ans);
                 }
               } else {
-                timeoutIdRef.current = window.setTimeout(() => {
-                  // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-                  if (isMountedRef.current) {
-                    transitionToState('SPLIT_TURN', ans);
-                  }
-                }, 2000);
+                if (hasSplitNat21) {
+                  setHasSplitNat21(false);
+                  transitionToState('SPLIT_TURN', ans);
+                } else {
+                  timeoutIdRef.current = window.setTimeout(() => {
+                    // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+                    if (isMountedRef.current) {
+                      transitionToState('SPLIT_TURN', ans);
+                    }
+                  }, 2000);
+                }
               }
             }
           } else {
-            timeoutIdRef.current = window.setTimeout(() => {
-              // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-              if (isMountedRef.current) {
-                transitionToState('SPLIT_FINISH', response);
-              }
-            }, 2000);
+            if (hasSplitNat21) {
+              setHasSplitNat21(false);
+              transitionToState('SPLIT_FINISH', response);
+            } else {
+              timeoutIdRef.current = window.setTimeout(() => {
+                // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+                if (isMountedRef.current) {
+                  transitionToState('SPLIT_FINISH', response);
+                }
+              }, 2000);
+            }
           }
         } catch {
           transitionToState('ERROR');
@@ -545,6 +556,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     else if (gameState.currentGameState === 'SPLIT_NAT21_TRANSIT') {
       console.log("Játék a SPLIT_NAT21_TRANSIT állapotban.");
       console.log("SPLIT_NAT21_TRANSIT gameState: ", gameState)
+      setHasSplitNat21(true);
 
       const SplitNat21Transit = async () => {
         if (!isMountedRef.current) return;
@@ -694,12 +706,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       HandleOutOfTokens();
     }
 
-  }, [gameState,
-    transitionToState,
-    savePreActionState,
-    isMountedRef,
-    timeoutIdRef,
-  ]);
+  }, [gameState, transitionToState, savePreActionState, isMountedRef, timeoutIdRef, resetHitCounter]);
 
   return {
     gameState,
