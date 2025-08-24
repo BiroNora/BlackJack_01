@@ -27,13 +27,10 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
   const playersLength = players.length < 3 ? true : false;
   const [showButtons, setShowButtons] = useState(false);
   const timeoutIdRef = useRef<number | null>(null);
-  console.log("SPLIT_TURN, hasHitTurn:", hitCounter);
-  console.log("SPLIT_TURN, hasOver21:", hasOver21);
 
   useEffect(() => {
     timeoutIdRef.current = window.setTimeout(() => {
       setShowButtons(true);
-      console.log("HERE");
     }, 1000);
 
     return () => {

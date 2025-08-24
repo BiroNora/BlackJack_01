@@ -36,14 +36,12 @@ const BetBankDelayed: React.FC<BetBankDelayedProps> = ({
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [finalGameState, initialBet, initialTokens]); // Az initial érték is függőség
-  //console.log("displayedBet: ", displayedBet);
+  }, [finalGameState, initialBet, initialTokens]);
 
   const tokensToDisplay =
     displayedTokens !== null ? formatNumber(displayedTokens) : "---";
   const betToDisplay =
     displayedBet !== null ? formatNumber(displayedBet) : "---";
-  //console.log("betToDisplay: ", betToDisplay);
 
   return (
     <div>

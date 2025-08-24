@@ -10,8 +10,6 @@ const SplitPlayDoubleDisabledButtons: React.FC<
 > = ({ gameState }) => {
   const { tokens, bet } = gameState;
   const canDouble = tokens >= bet;
-  console.log("SplitPlayDisabledButtons: ", gameState);
-  console.log("SplitPlayDisabledButtons: ", canDouble);
 
   return (
     <div id="play-buttons" className="button-container1">

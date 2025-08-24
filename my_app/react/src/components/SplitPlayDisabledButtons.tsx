@@ -4,11 +4,9 @@ interface SplitPlayDisabledButtonsProps {
   gameState: GameStateData;
 }
 
-const SplitPlayDisabledButtons: React.FC<SplitPlayDisabledButtonsProps> = ({
-  gameState,
-}) => {
-  console.log("SplitPlayDisabledButtons: ", gameState);
-
+const SplitPlayDisabledButtons: React.FC<
+  SplitPlayDisabledButtonsProps
+> = () => {
   return (
     <div id="play-buttons" className="button-container1">
       <button id="hit-button" disabled={true}>

@@ -83,8 +83,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     if (gameState) {
       setPreRewardBet(gameState.player[5]);
       setPreRewardTokens(gameState.tokens);
-      //console.log("!!!!!!Pre-reward bet elmentve:", gameState.player[5]);
-      //console.log("!!!!!!Pre-reward tokens elmentve:", gameState.tokens);
     } else {
       setPreRewardBet(null);
       setPreRewardTokens(null);
@@ -101,6 +99,18 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     setHitCounter(null);
   }, []);
 
+  const resetGameVariables = useCallback(() => {
+    setPreRewardBet(null);
+    setPreRewardTokens(null);
+    setInsPlaced(false);
+    setShowInsLost(false);
+    setHasHitTurn(false);
+    setHasOver21(false);
+    setIsSplitted(false);
+    setHasSplitNat21(false);
+    setHitCounter(null);
+  }, []);
+
   const handlePlaceBet = useCallback(async (amount: number) => {
     if (gameState.tokens >= amount && amount > 0) {
       try {
@@ -108,7 +118,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const response = extractGameStateData(data);
 
         if (response) {
-          //console.log("handlePlaceBet - Feldolgozott GameState adat (ezt kapja az állapot):", response);
           transitionToState('BETTING', response);
         }
       } catch {
@@ -124,7 +133,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const response = extractGameStateData(data);
 
         if (response) {
-          //console.log("handleRetakeBet - Feldolgozott GameState adat (ezt kapja az állapot):", response);
           transitionToState('BETTING', response);
         }
       } catch {
@@ -135,10 +143,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
   const handleStartGame = useCallback((shouldShuffle: boolean) => {
     if (shouldShuffle) {
-      //console.log("Pakli hossza nem megfelelő, keverés szükséges.");
       transitionToState('SHUFFLING');
     } else {
-      //console.log("Pakli rendben, játék indítása.");
       transitionToState('INIT_GAME');
     }
   }, [transitionToState]); // Függőség: transitionToState
@@ -199,6 +205,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const hitState = extractGameStateData(hitResponse);
 
         if (hitState) {
+          await handleStand();
           const rewardsResponse = await handleReward(false);
           const finalState = extractGameStateData(rewardsResponse);
 
@@ -265,8 +272,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
       if (response && response.player) {
         const playerHandValue = response.player[1];
-        console.log("playerHandValue: ", response.player[1])
-        console.log("counter: ", newHitCounter)
 
         if (playerHandValue >= 21) {
           if (newHitCounter === 1) {
@@ -288,7 +293,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [hitCounter, incrementHitCounter, transitionToState]);
 
   const handleSplitStandRequest = useCallback(async () => {
-    console.log("handleSplitStandRequest, hasHitTurn: ", hasHitTurn)
     if (hasHitTurn === false) {
       transitionToState('SPLIT_STAND_DOUBLE');
     } else {
@@ -320,18 +324,18 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   // --- useEffect blokkok ---
 
   useEffect(() => {
-    isMountedRef.current = true; // Mountoláskor igazra állítjuk
-    console.log("isMountedRef: Komponens mountolva, isMountedRef.current = true");
+    isMountedRef.current = true;
+    //console.log("isMountedRef: Komponens mountolva, isMountedRef.current = true");
 
     return () => {
-      isMountedRef.current = false; // Unmountoláskor hamisra állítjuk
-      console.log("isMountedRef: Komponens unmountolva, isMountedRef.current = false");
+      isMountedRef.current = false;
+      //console.log("isMountedRef: Komponens unmountolva, isMountedRef.current = false");
     };
   }, []);
 
   // MÁSODIK (FŐ) useEffect: Játékállapot változások kezelése
   useEffect(() => {
-    console.log("Fő useEffect futott. Jelenlegi állapot:", gameState.currentGameState);
+    //console.log("Fő useEffect futott. Jelenlegi állapot:", gameState.currentGameState);
     // Minden újrafutáskor töröljük az előzőleg beállított időzítőt, ha van.
     // Ez megakadályozza, hogy több időzítő fusson egyszerre, vagy "szellem" időzítők maradjanak.
     if (timeoutIdRef.current) {
@@ -345,19 +349,16 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         try {
           const minLoadingTimePromise = new Promise(resolve => setTimeout(resolve, 4000));
 
-          const [sessionData] = await Promise.all([
+          await Promise.all([
             initializeSessionAPI(),
             minLoadingTimePromise
           ]);
-          console.log("Session data loaded:", sessionData);
 
           const tokensResponse = await getTokensAPI() as TokensResponse;
           const deckLenResponse = await getDeckLenAPI() as DeckLenResponse;
 
           const userTokens = tokensResponse.user_tokens;
           const deckLength = deckLenResponse.deckLen;
-
-          console.log("Alkalmazás inicializálva. Tokenek:", userTokens, "Pakli hossza:", deckLength);
 
           if (userTokens === 0) {
             transitionToState('RESTART_GAME', {
@@ -382,14 +383,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       initializeApplicationOnLoad();
     }
 
-    // --- A BETTING ÁLLAPOT KEZELÉSE ---
-    else if (gameState.currentGameState === 'BETTING') {
-      //console.log("Játék a BETTING állapotban. Várjuk a tétet...");
-    }
-
     // --- A SHUFFLING ÁLLAPOT KEZELÉSE ---
     else if (gameState.currentGameState === 'SHUFFLING') {
-      console.log("Játék a SHUFFLING állapotban."); // Ezt már látod
       const shufflingAct = async () => {
         // Early exit if component unmounted while awaiting (optional but good practice)
         if (!isMountedRef.current) {
@@ -411,9 +406,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                 transitionToState('INIT_GAME', response);
               }
             }, 2000);
-          } else {
-            // EZ A BLOKK FUT LE, HA A RESPONSE ÉRVÉNYTELEN!
-            console.warn("SHUFFLING: AZ 'extractGameStateData' ÉRVÉNYTELEN VÁLASZT ADOTT VISSZA!");
           }
         } catch (e) {
           // EZ A BLOKK FUT LE, HA A GETSHUFFLING() VAGY AZ EXTRACTGAMESTATEDATA() HIBÁVAL VÉGZŐDIK!
@@ -427,15 +419,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
 
     else if (gameState.currentGameState === 'INIT_GAME') {
-      //console.log("Játék a INIT_GAME állapotban.");
       const InitGame = async () => {
-        setInsPlaced(false);
-        setShowInsLost(false);
-        setHasHitTurn(false);
-        setHasOver21(false);
-        setIsSplitted(false);
+        resetGameVariables();
+        if (!isMountedRef.current) return;
 
         try {
+          if (!isMountedRef.current) return;
           const data = await startGame();
           const response = extractGameStateData(data);
 
@@ -444,9 +433,14 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               savePreActionState();
               const rewards = await handleReward(false);
               const resp = extractGameStateData(rewards);
-              transitionToState('MAIN_STAND', resp);
+
+              timeoutIdRef.current = window.setTimeout(() => {
+                // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+                if (isMountedRef.current) {
+                  transitionToState('MAIN_STAND', resp);
+                }
+              }, 3000);
             } else {
-              //console.log("handleStartGame - INIT_GAME to MAIN_TURN:", response);
               transitionToState('MAIN_TURN', response);
             }
           }
@@ -457,13 +451,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       InitGame();
     }
 
-    else if (gameState.currentGameState === 'MAIN_TURN') {
-      console.log("Játék a MAIN_TURN állapotban gameState.", gameState);
-    }
-
     else if (gameState.currentGameState === 'MAIN_STAND') {
-      console.log("Játék a MAIN_STAND állapotban.", gameState);
-      //console.log("Játék a MAIN_STAND állapotban. Vár 2 másodpercet...");
       if (!isMountedRef.current) return;
 
       timeoutIdRef.current = window.setTimeout(() => {
@@ -486,15 +474,14 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             transitionToState('BETTING', nextRoundGameState);
           }
         }
-      }, 3000);
+      }, 4000);
     }
 
     else if (gameState.currentGameState === 'SPLIT_STAND' || gameState.currentGameState === 'SPLIT_STAND_DOUBLE') {
-      //console.log("Játék a SPLIT_STAND állapotban.");
       setHasHitTurn(false); // See handleSplitStandRequest
       setHasOver21(false);
       resetHitCounter();
-      console.log("**** hasSplitNat21: ", hasSplitNat21)
+
       const SplitStand = async () => {
         if (!isMountedRef.current) return;
 
@@ -554,8 +541,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
 
     else if (gameState.currentGameState === 'SPLIT_NAT21_TRANSIT') {
-      console.log("Játék a SPLIT_NAT21_TRANSIT állapotban.");
-      console.log("SPLIT_NAT21_TRANSIT gameState: ", gameState)
       setHasSplitNat21(true);
 
       const SplitNat21Transit = async () => {
@@ -575,19 +560,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
 
     else if (gameState.currentGameState === 'SPLIT_FINISH') {
-      console.log("Játék a SPLIT_FINISH állapotban. Elindítjuk a feldolgozást.");
       setHasHitTurn(false);
 
       const SplitFinish = async () => {
         try {
           savePreActionState();
-          console.log("SPLIT FINISH BEÉRKEZÉS: ", gameState)
           const standData = await handleStand();
           const stand = extractGameStateData(standData);
-          console.log("SPLIT FINISH STAND: ", stand)
+
           const rewardData = await handleReward(true);
           const reward = extractGameStateData(rewardData);
-          console.log("SPLIT FINISH REWARD: ", reward)
+
           if (reward && reward?.players && stand) {
             const combinedState = { ...stand, ...reward };
             transitionToState('SPLIT_FINISH_TRANSIT', combinedState);
@@ -603,8 +586,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
 
     else if (gameState.currentGameState === 'SPLIT_FINISH_TRANSIT') {
-      console.log("Játék a SPLIT_FINISH_TRANSIT állapotban. Elindítjuk a feldolgozást.");
-
       const SplitFinishTransit = async () => {
         if (!isMountedRef.current) return;
 
@@ -637,7 +618,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                       is_round_active: true,
                     });
                   }
-                }, 3000);
+                }, 4000);
               }
             } else {
               const updateData = await updatePlayerFromPlayers();
@@ -647,7 +628,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                 if (isMountedRef.current) {
                   transitionToState('SPLIT_FINISH', response);
                 }
-              }, 3000);
+              }, 4000);
             }
           }
         } catch (e) {
@@ -659,8 +640,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
 
     else if (gameState.currentGameState === 'OUT_OF_TOKENS') {
-      console.log("Játék a OUT_OF_TOKENS állapotban. Elindítjuk a feldolgozást.");
-
       const HandleOutOfTokens = async () => {
         if (!isMountedRef.current) return;
 
@@ -669,8 +648,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           const data = await setRestart();
           const response = extractGameStateData(data);
           if (response) {
-            setHasHitTurn(false);
-            setHasOver21(false);
             timeoutIdRef.current = window.setTimeout(() => {
               // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
               transitionToState('RESTART_GAME', response);
@@ -685,15 +662,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
 
     else if (gameState.currentGameState === 'RESTART_GAME') {
-      console.log("Játék a RESTART_GAME állapotban. Elindítjuk a feldolgozást.");
-
       const HandleOutOfTokens = async () => {
         if (!isMountedRef.current) return;
 
         try {
           if (!isMountedRef.current) return;
-          setHasHitTurn(false);
-          setHasOver21(false);
+          resetGameVariables();
           timeoutIdRef.current = window.setTimeout(() => {
             // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
             transitionToState('LOADING');
@@ -706,7 +680,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       HandleOutOfTokens();
     }
 
-  }, [gameState, transitionToState, savePreActionState, isMountedRef, timeoutIdRef, resetHitCounter]);
+  }, [gameState, transitionToState, savePreActionState, isMountedRef, timeoutIdRef, resetHitCounter, hasSplitNat21, resetGameVariables]);
 
   return {
     gameState,
