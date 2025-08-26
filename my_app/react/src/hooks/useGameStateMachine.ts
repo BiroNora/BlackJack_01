@@ -347,7 +347,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     if (gameState.currentGameState === 'LOADING') {
       const initializeApplicationOnLoad = async () => {
         try {
-          const minLoadingTimePromise = new Promise(resolve => setTimeout(resolve, 4000));
+          const minLoadingTimePromise = new Promise(resolve => setTimeout(resolve, 7000));
 
           await Promise.all([
             initializeSessionAPI(),
@@ -405,7 +405,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               if (isMountedRef.current) {
                 transitionToState('INIT_GAME', response);
               }
-            }, 2000);
+            }, 5000);
           }
         } catch (e) {
           // EZ A BLOKK FUT LE, HA A GETSHUFFLING() VAGY AZ EXTRACTGAMESTATEDATA() HIBÁVAL VÉGZŐDIK!
@@ -663,7 +663,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           timeoutIdRef.current = window.setTimeout(() => {
             // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
             transitionToState('LOADING');
-          }, 3000);
+          }, 5000);
         } catch (e) {
           console.error("Hiba a RESTART_GAME fázisban:", e);
           transitionToState('ERROR');

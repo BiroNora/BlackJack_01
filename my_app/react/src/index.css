@@ -229,7 +229,7 @@ button:disabled {
 }
 
 .score-area-wrapper {
-  min-height: 1.6rem;
+  min-height: 1.8rem;
 }
 
 .winners {
@@ -267,9 +267,9 @@ button:disabled {
   color: #000000ff;
 }
 
-.merriweather9 {
+.merriweather4red {
   font-family: "Merriweather", serif;
-  font-weight: 900;
+  font-weight: 400;
   font-style: italic;
   font-variation-settings: "wdth" 100;
   color: #ba1616ff;
@@ -280,6 +280,14 @@ button:disabled {
   font-weight: 900;
   font-style: italic;
   font-variation-settings: "wdth" 100;
+}
+
+.merriweather9 {
+  font-family: "Merriweather", serif;
+  font-weight: 900;
+  font-style: italic;
+  font-variation-settings: "wdth" 100;
+  color: #ba1616ff;
 }
 
 .merriweather5grey {

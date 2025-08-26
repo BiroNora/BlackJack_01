@@ -5,13 +5,9 @@ import { maskedScore } from "../utilities/utils";
 
 interface TableProps {
   gameState: GameStateData;
-  insMessage: boolean;
 }
 
-const PlayerDealerMasked: React.FC<TableProps> = ({
-  gameState,
-  insMessage,
-}) => {
+const SplitPlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
   const { player, dealer } = gameState;
 
   const dealerMasked = dealer[0][1][1];
@@ -93,15 +89,11 @@ const PlayerDealerMasked: React.FC<TableProps> = ({
           <span className="label-text">Player:</span>
           <span className="label-text1"> {player[1]}</span>
         </div>
-        <div className="score-area-wrapper">
-          {insMessage && (
-            <span className="score-mood merriweather4red">Insurance lost</span>
-          )}
-        </div>
+        <div className="score-area-wrapper"></div>
         <div className="hand">{formattedPlayerHand}</div>
       </div>
     </div>
   );
 };
 
-export default PlayerDealerMasked;
+export default SplitPlayerDealerMasked;
