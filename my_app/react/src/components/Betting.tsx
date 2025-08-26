@@ -1,7 +1,8 @@
 import type { GameStateData } from "../types/game-types";
 import "../styles/betting.css";
+import { formatNumber } from "../utilities/utils";
 import { useEffect, useRef, useState } from "react";
-import BettingScreen from "../screens/BettingScreen";
+import { motion } from "motion/react";
 
 interface BettingProps {
   gameState: GameStateData;
@@ -35,7 +36,11 @@ const Betting: React.FC<BettingProps> = ({
 
   const betAmounts = [1, 5, 10, 50, 100, 500, 1000, 5000, 10000];
 
-  const handleStartGame = () => {
+  const handleAllIn = () => {
+    onPlaceBet(tokens);
+  };
+
+  const handleStartGame = async () => {
     const shouldShuffle = deckLen === 0 || deckLen < 60;
     // Mindig meghívjuk az onStartGame-et, átadva neki, hogy kell-e keverni
     onStartGame(shouldShuffle);
@@ -48,14 +53,14 @@ const Betting: React.FC<BettingProps> = ({
       opacity: 0.7,
       scale: 1,
       transition: {
-        duration: 1,
+        duration: 0.7,
       },
     },
     enabled: {
       opacity: 1,
       scale: 1,
       transition: {
-        duration: 1,
+        duration: 0.7,
       },
     },
   };
@@ -78,19 +83,62 @@ const Betting: React.FC<BettingProps> = ({
   };
 
   return (
-    <BettingScreen
-      gameState={gameState}
-      onPlaceBet={onPlaceBet}
-      retakeBet={retakeBet}
-      onStartGame={handleStartGame}
-      tokens={tokens}
-      bet={bet}
-      betAmounts={betAmounts}
-      isDisabled={isDisabled}
-      showButtons={showButtons}
-      variants={variants}
-      textVariants={textVariants}
-    />
+    <div className="betting-screen-container">
+      <motion.button
+        id="start-button"
+        onClick={handleStartGame}
+        disabled={isDisabled}
+        variants={variants}
+        animate={isDisabled ? "disabled" : "enabled"}
+      >
+        <motion.span variants={textVariants}>Start Game</motion.span>
+      </motion.button>
+
+      <div id="deal-bank" className="deal-bank">
+        <motion.button
+          id="deal-button"
+          onClick={() => retakeBet()}
+          disabled={isDisabled}
+          variants={variants}
+          animate={isDisabled ? "disabled" : "enabled"}
+        >
+          <motion.span variants={textVariants}>
+            Bet: {"  " + formatNumber(bet)}
+          </motion.span>
+        </motion.button>
+      </div>
+      <div id="bank" className="bank merriweather">
+        Player's bank:{" "}
+        <span className="bank-amount">{formatNumber(tokens)}</span>
+      </div>
+
+      <div
+        id="chips"
+        className={`button-container ${showButtons ? "show-buttons" : ""}`}
+      >
+        <button
+          id="all-in"
+          type="button"
+          onClick={handleAllIn}
+          disabled={tokens === 0}
+        >
+          All In
+        </button>
+
+        {betAmounts.map((amount) => (
+          <button
+            key={amount}
+            id={String(amount)}
+            type="button"
+            data-bet={amount}
+            onClick={() => onPlaceBet(amount)}
+            disabled={tokens < amount}
+          >
+            {formatNumber(amount)}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 };
 

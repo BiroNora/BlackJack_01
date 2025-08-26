@@ -1,4 +1,3 @@
-import { AnimatePresence,motion, type Transition, type Variants } from "motion/react";
 import BetBank from "./components/BetBank";
 import BetBankDelayed from "./components/BetBankDelayed";
 import Cards from "./components/Cards";
@@ -69,255 +68,257 @@ function App() {
     exit: { opacity: 0 },
   }; */
 
-  const motionVariants = {
+  /* const motionVariants = {
     // A belépő animáció
     initial: { opacity: 0 },
     animate: { opacity: 1 },
     // A kilépő animáció
     exit: { opacity: 0 },
     // Az animáció időtartama
-    transition: { duration: 1, ease: "easeInOut" },
+    transition: { duration: 2, ease: "easeInOut" },
   };
 
-  return (
-    <div>
-      <HeaderTitles />
-      <AnimatePresence mode="wait">
-        {(() => {
-          switch (gameState.currentGameState) {
-            case "LOADING":
-              return (
-                //<motion.div key="LOADING" transition={{transition}} variants={{variation}}>
-                <motion.div key="LOADING" {...motionVariants}>
-                  <Loading />
-                </motion.div>
-              );
-            case "SHUFFLING":
-              return (
-                <motion.div key="SHUFFLING" {...motionVariants}>
-                  <Shuffling />
-                </motion.div>
-              );
-            case "INIT_GAME":
-              return (
-                <motion.div key="INIT_GAME" {...motionVariants}>
-                  {/* Itt nem jelenik meg semmi, de az animáció működik a következő állapotra való átmenetkor */}
-                </motion.div>
-              );
-            case "BETTING":
-              return (
-                <motion.div key="BETTING" {...motionVariants}>
-                  <Betting
-                    gameState={gameState}
-                    onPlaceBet={handlePlaceBet}
-                    retakeBet={handleRetakeBet}
-                    onStartGame={handleStartGame}
-                  />
-                </motion.div>
-              );
-            case "MAIN_TURN":
-              return (
-                <motion.div
-                  key="MAIN_TURN" {...motionVariants}
-                >
-                  <Cards gameState={gameState} />
-                  <div className="player-dealer-area-wrapper">
-                    <PlayerDealerMasked gameState={gameState} />
-                  </div>
+  const motionVariants4 = {
+    // A belépő animáció
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    // A kilépő animáció
+    exit: {
+      opacity: 0,
+    },
+    // Az animáció időtartama
+    transition: { duration: 0.5, ease: "easeInOut" },
+  }; */
 
-                  <div className="game-action-area-wrapper">
-                    <PlayButtons
-                      gameState={gameState}
-                      onHit={handleHitRequest}
-                      onStand={handleStandRequest}
-                      onDouble={handleDoubleRequest}
-                      onSplit={handleSplitRequest}
-                      onInsurance={handleInsRequest}
-                      insPlaced={insPlaced}
-                      hasHitTurn={hasHitTurn}
-                      hasOver21={hasOver21}
-                    />
-                  </div>
-                  <BetBank gameState={gameState} />
-                  <InsMessage insMessage={showInsLost} />
-                </motion.div>
-              );
-            case "MAIN_STAND":
-              return (
-                <motion.div
-                  key="MAIN_STAND"
-                  {...motionVariants}
-                >
-                  <Cards gameState={gameState} />
-                  <div className="game-action-area-wrapper">
-                    <PlayerDealer
-                      gameState={gameState}
-                      isSplitted={isSplitted}
-                    />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <Winner gameState={gameState} />
-                  </div>
-                  <BetBankDelayed
-                    finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    initialBet={preRewardBet}
-                    initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                  />
-                </motion.div>
-              );
-            case "SPLIT_TURN":
-              return (
-                <div>
-                  <Cards gameState={gameState} />
-                  <div className="player-dealer-area-wrapper">
-                    <PlayerDealerMasked gameState={gameState} />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayButtons
-                      gameState={gameState}
-                      onHit={handleSplitHitRequest}
-                      onStand={handleSplitStandRequest}
-                      onSplit={handleSplitRequest}
-                      onDouble={handleSplitDoubleRequest}
-                      hitCounter={hitCounter}
-                      hasOver21={hasOver21}
-                    />
-                  </div>
-                  <BetBank gameState={gameState} />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
-                </div>
-              );
-            case "SPLIT_STAND":
-              return (
-                <div>
-                  <Cards gameState={gameState} />
-                  <div className="player-dealer-area-wrapper">
-                    <PlayerDealerMasked gameState={gameState} />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayDisabledButtons gameState={gameState} />
-                  </div>
-                  <BetBank gameState={gameState} />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
-                </div>
-              );
-            case "SPLIT_STAND_DOUBLE":
-              return (
-                <div>
-                  <Cards gameState={gameState} />
-                  <div className="player-dealer-area-wrapper">
-                    <PlayerDealerMasked gameState={gameState} />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayDoubleDisabledButtons
-                      gameState={gameState}
-                      hitCounter={hitCounter}
-                    />
-                  </div>
-                  <BetBank gameState={gameState} />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
-                </div>
-              );
-            case "SPLIT_NAT21_TRANSIT":
-              return (
-                <div>
-                  <Cards gameState={gameState} />
-                  <div className="player-dealer-area-wrapper">
-                    <PlayerDealerMasked gameState={gameState} />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayDisabledButtons gameState={gameState} />
-                  </div>
-                  <BetBank gameState={gameState} />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
-                </div>
-              );
-            case "SPLIT_FINISH":
-              return (
-                <div>
-                  <Cards gameState={gameState} />
-                  <div className="player-dealer-area-wrapper">
-                    <PlayerDealer
-                      gameState={gameState}
-                      isSplitted={isSplitted}
-                    />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <SplitWinner gameState={gameState} />
-                  </div>
-                  <BetBankDelayed
-                    finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    initialBet={preRewardBet}
-                    initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                  />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
-                </div>
-              );
-            case "SPLIT_FINISH_TRANSIT":
-              return (
-                <div>
-                  <Cards gameState={gameState} />
-                  <div className="player-dealer-area-wrapper">
-                    <PlayerDealer
-                      gameState={gameState}
-                      isSplitted={isSplitted}
-                    />
-                  </div>
-                  <div className="game-action-area-wrapper">
-                    <SplitWinner gameState={gameState} />
-                  </div>
-                  <BetBankDelayed
-                    finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
-                    initialBet={preRewardBet}
-                    initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
-                  />
-                  <div className="players-area-wrapper">
-                    <SplitPlayers gameState={gameState} />
-                  </div>
-                </div>
-              );
-            case "OUT_OF_TOKENS":
-              return (
-                <div>
-                  <OutOfTokens />
-                </div>
-              );
-            case "RESTART_GAME":
-              return (
-                <div>
-                  <Restart />
-                </div>
-              );
-            case "ERROR":
-              return (
-                <div>
-                  <ErrorPage />
-                </div>
-              );
-            default:
-              return (
-                <div>
-                  <ErrorPage />
-                </div>
-              );
-          }
-        })()}
-      </AnimatePresence>
-    </div>
-  );
+switch (gameState.currentGameState) {
+    case "LOADING":
+      return (
+        <div>
+          <HeaderTitles />
+          <Loading />
+        </div>
+      );
+    case "SHUFFLING":
+      return (
+        <div>
+          <HeaderTitles />
+          <Shuffling />
+        </div>
+      );
+    case "INIT_GAME":
+      return (
+        <div>
+          <HeaderTitles />
+        </div>
+      );
+    case "BETTING":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <Betting
+            gameState={gameState}
+            onPlaceBet={handlePlaceBet}
+            retakeBet={handleRetakeBet}
+            onStartGame={handleStartGame}
+          />
+        </div>
+      );
+    case "MAIN_TURN":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealerMasked gameState={gameState} />
+          </div>
 
-  // A React itt dönti el, mit jelenítsen meg az aktuális állapot alapján
-  // A `gameState.currentGameState` fogja vezérelni a megjelenítést
+          <div className="game-action-area-wrapper">
+            <PlayButtons
+              gameState={gameState}
+              onHit={handleHitRequest}
+              onStand={handleStandRequest}
+              onDouble={handleDoubleRequest}
+              onSplit={handleSplitRequest}
+              onInsurance={handleInsRequest}
+              insPlaced={insPlaced}
+              hasHitTurn={hasHitTurn}
+              hasOver21={hasOver21}
+            />
+          </div>
+          <BetBank gameState={gameState} />
+          <InsMessage insMessage={showInsLost} />
+        </div>
+      );
+    case "MAIN_STAND":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealer gameState={gameState} isSplitted={isSplitted} />
+          </div>
+
+          <div className="game-action-area-wrapper">
+            <Winner gameState={gameState} />
+          </div>
+          <BetBankDelayed
+            finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
+            initialBet={preRewardBet}
+            initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
+          />
+        </div>
+      );
+    case "SPLIT_TURN":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealerMasked gameState={gameState} />
+          </div>
+          <div className="game-action-area-wrapper">
+            <SplitPlayButtons
+              gameState={gameState}
+              onHit={handleSplitHitRequest}
+              onStand={handleSplitStandRequest}
+              onSplit={handleSplitRequest}
+              onDouble={handleSplitDoubleRequest}
+              hitCounter={hitCounter}
+              hasOver21={hasOver21}
+            />
+          </div>
+          <BetBank gameState={gameState} />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
+        </div>
+      );
+    case "SPLIT_STAND":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealerMasked gameState={gameState} />
+          </div>
+          <div className="game-action-area-wrapper">
+            <SplitPlayDisabledButtons gameState={gameState} />
+          </div>
+          <BetBank gameState={gameState} />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
+        </div>
+      );
+    case "SPLIT_STAND_DOUBLE":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealerMasked gameState={gameState} />
+          </div>
+          <div className="game-action-area-wrapper">
+            <SplitPlayDoubleDisabledButtons
+              gameState={gameState}
+              hitCounter={hitCounter}
+            />
+          </div>
+          <BetBank gameState={gameState} />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
+        </div>
+      );
+    case "SPLIT_NAT21_TRANSIT":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealerMasked gameState={gameState} />
+          </div>
+          <div className="game-action-area-wrapper">
+            <SplitPlayDisabledButtons gameState={gameState} />
+          </div>
+          <BetBank gameState={gameState} />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
+        </div>
+      );
+    case "SPLIT_FINISH":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealer gameState={gameState} isSplitted={isSplitted} />
+          </div>
+          <div className="game-action-area-wrapper">
+            <SplitWinner gameState={gameState} />
+          </div>
+          <BetBankDelayed
+            finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
+            initialBet={preRewardBet}
+            initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
+          />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
+        </div>
+      );
+    case "SPLIT_FINISH_TRANSIT":
+      return (
+        <div>
+          <HeaderTitles />
+          <Cards gameState={gameState} />
+          <div className="player-dealer-area-wrapper">
+            <PlayerDealer gameState={gameState} isSplitted={isSplitted} />
+          </div>
+          <div className="game-action-area-wrapper">
+            <SplitWinner gameState={gameState} />
+          </div>
+          <BetBankDelayed
+            finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
+            initialBet={preRewardBet}
+            initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
+          />
+          <div className="players-area-wrapper">
+            <SplitPlayers gameState={gameState} />
+          </div>
+        </div>
+      );
+    case "OUT_OF_TOKENS":
+      return (
+        <div>
+          <HeaderTitles />
+          <OutOfTokens />
+        </div>
+      );
+    case "RESTART_GAME":
+      return (
+        <div>
+          <HeaderTitles />
+          <Restart />
+        </div>
+      );
+    case "ERROR":
+      return (
+        <div>
+          <HeaderTitles />
+          <ErrorPage />
+        </div>
+      );
+    default:
+      return (
+        <div>
+          <HeaderTitles />
+          <ErrorPage />
+        </div>
+      );
+  }
 }
 
 export default App;
