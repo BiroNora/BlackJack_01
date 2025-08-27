@@ -240,18 +240,6 @@ button:disabled {
   position: relative;
 }
 
-.ins {
-  display: flex; /* Flexbox használata a belső elemek (pl. a nyertes üzenet) elrendezéséhez */
-  align-items: flex-start; /* Függőlegesen az elem tetejére igazítja a tartalmat */
-  text-align: left; /* A szöveget az elemen belül balra igazítja */
-  justify-content: flex-start;
-  font-size: var(--root-font-size);
-  line-height: var(--root-line-height);
-  font-weight: 700;
-  padding-top: 0.2em; /* Megfelel a gombok vertikális paddingjének */
-  padding-bottom: 0.2em;
-}
-
 .merriweather {
   font-family: "Merriweather", serif;
   font-weight: 600;
@@ -267,9 +255,9 @@ button:disabled {
   color: #000000ff;
 }
 
-.merriweather4red {
+.merriweather9red {
   font-family: "Merriweather", serif;
-  font-weight: 400;
+  font-weight: 800;
   font-style: italic;
   font-variation-settings: "wdth" 100;
   color: #ba1616ff;

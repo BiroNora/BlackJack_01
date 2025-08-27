@@ -95,7 +95,7 @@ const PlayerDealerMasked: React.FC<TableProps> = ({
         </div>
         <div className="score-area-wrapper">
           {insMessage && (
-            <span className="score-mood merriweather4red">Insurance lost</span>
+            <span className="score-mood merriweather9red">Insurance lost</span>
           )}
         </div>
         <div className="hand">{formattedPlayerHand}</div>

@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { states, type GameStateData } from "../types/game-types";
 
 interface TableProps {
@@ -11,9 +12,18 @@ const SplitWinner: React.FC<TableProps> = ({ gameState }) => {
   const state = states[winner];
   const winners = nat21 !== 0 ? states[nat21] : state;
 
+  const props = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: {
+      duration: 1,
+      delay: 0.5,
+    },
+  };
+
   return (
-    <div className="winners merriweather">
-      {winners}
+    <div className="winners merriweather9black">
+      <motion.span {...props}>{winners}</motion.span>
     </div>
   );
 };

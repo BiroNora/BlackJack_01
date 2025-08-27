@@ -34,7 +34,7 @@ const initialGameState: GameStateData = {
   currentGameState: 'LOADING',
   player: [[], 0, 0, false, false, 0, 0],
   dealer: [[], [], 0, 0, false, 0],
-  deckLen: 0,
+  deckLen: 104,
   tokens: 0,
   splitReq: 0,
   bet: 0,
@@ -56,6 +56,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const [isSplitted, setIsSplitted] = useState(false);
   const [hasSplitNat21, setHasSplitNat21] = useState(false);
   const [hitCounter, setHitCounter] = useState<number | null>(null);
+  const [initDeckLen, setInitDeckLen] = useState<number | null>(null);
 
   const timeoutIdRef = useRef<number | null>(null);
 
@@ -74,7 +75,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         ...newData,
         currentGameState: newState,
       };
-      //console.log(`>>> Állapotváltás: ${prev.currentGameState} -> ${newState}`, updatedState);
+      console.log(`>>> Állapotváltás: ${prev.currentGameState} -> ${newState}`, updatedState);
       return updatedState;
     });
   }, []);
@@ -360,6 +361,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           const userTokens = tokensResponse.user_tokens;
           const deckLength = deckLenResponse.deckLen;
 
+          setInitDeckLen(gameState.deckLen);
+
           if (userTokens === 0) {
             transitionToState('RESTART_GAME', {
               tokens: userTokens,
@@ -421,6 +424,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     else if (gameState.currentGameState === 'INIT_GAME') {
       const InitGame = async () => {
         resetGameVariables();
+        setInitDeckLen(gameState.deckLen);
 
         try {
           const data = await startGame();
@@ -697,5 +701,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     isSplitted,
     hitCounter,
     showInsLost,
+    initDeckLen,
   };
 }

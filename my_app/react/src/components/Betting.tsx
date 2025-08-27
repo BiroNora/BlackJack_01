@@ -41,8 +41,7 @@ const Betting: React.FC<BettingProps> = ({
   };
 
   const handleStartGame = async () => {
-    const shouldShuffle = deckLen === 0 || deckLen < 60;
-    // Mindig meghívjuk az onStartGame-et, átadva neki, hogy kell-e keverni
+    const shouldShuffle = deckLen === 0 || deckLen === 104 || deckLen < 60;
     onStartGame(shouldShuffle);
   };
 
