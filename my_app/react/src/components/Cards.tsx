@@ -8,32 +8,33 @@ interface CardsProps {
 
 const Cards: React.FC<CardsProps> = ({ gameState, initDeckLen }) => {
   const { deckLen } = gameState;
-  const [, setDisplayedDeckLen] = useState(deckLen);
-  console.log("init, decklen, gameState: ", initDeckLen, deckLen, gameState.currentGameState)
+  const [displayedDeckLen, setDisplayedDeckLen] = useState(deckLen);
+  const [tmp, setTmp] = useState(initDeckLen);
+  console.log("init, decklen, tmp,  gameState: ", initDeckLen, deckLen, tmp, gameState.currentGameState)
 
   useEffect(() => {
+    setDisplayedDeckLen(tmp!);
     if (initDeckLen !== null && initDeckLen > deckLen) {
       const interval = setInterval(() => {
-        setDisplayedDeckLen((initDeckLen) => {
-          if (initDeckLen <= deckLen) {
+        setDisplayedDeckLen((prevDisplayedLen) => {
+          if (prevDisplayedLen <= deckLen) {
             clearInterval(interval);
+            setTmp(deckLen);
             return deckLen;
           }
-          return initDeckLen - 1;
+          return prevDisplayedLen - 1;
         });
-      }, 1000);
+      }, 400);
 
-      // A cleanup funkció, ami leállítja az intervallumot, ha a komponens lecsatolódik
       return () => clearInterval(interval);
     } else {
-      // Ha nincs szükség visszaszámlálásra, szinkronizáljuk a kijelzett értéket
       setDisplayedDeckLen(deckLen);
     }
-  }, [deckLen, initDeckLen]);
+  }, [deckLen, initDeckLen, tmp]);
 
   return (
     <div className="cards merriweather" id="cards">
-      Cards: {deckLen}
+      Cards: {displayedDeckLen}
     </div>
   );
 };

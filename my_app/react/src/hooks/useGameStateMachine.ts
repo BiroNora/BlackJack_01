@@ -676,7 +676,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       HandleOutOfTokens();
     }
 
-  }, [gameState, transitionToState, savePreActionState, isMountedRef, timeoutIdRef, resetHitCounter, hasSplitNat21, resetGameVariables]);
+  }, [gameState, transitionToState, savePreActionState, isMountedRef, timeoutIdRef, resetHitCounter, hasSplitNat21, resetGameVariables, setInitDeckLen]);
 
   return {
     gameState,

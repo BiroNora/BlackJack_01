@@ -47,13 +47,13 @@ function App() {
   } = useGameStateMachine();
   //console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
-  function PageWrapper({ children }) {
+  function PageWrapper({ children }: React.PropsWithChildren<object>) {
     return (
       <motion.div
-        initial={{ opacity: 0.8 }}
+        initial={{ opacity: 0.2 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0.5 }}
-        transition={{ duration: 2 }}
+        exit={{ opacity: 0.2 }}
+        transition={{ duration: 3, ease: "easeOut" }}
       >
         {children}
       </motion.div>
@@ -87,7 +87,7 @@ function App() {
             case "BETTING":
               return (
                 <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen}/>
+                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <Betting
                     gameState={gameState}
                     onPlaceBet={handlePlaceBet}
@@ -99,7 +99,7 @@ function App() {
             case "MAIN_TURN":
               return (
                 <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen}/>
+                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <PageWrapper>
                     <div className="player-dealer-area-wrapper">
                       <PlayerDealerMasked
@@ -127,7 +127,7 @@ function App() {
             case "MAIN_STAND":
               return (
                 <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen}/>
+                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <PageWrapper>
                     <div className="player-dealer-area-wrapper">
                       <PlayerDealer
@@ -149,45 +149,43 @@ function App() {
             case "SPLIT_TURN":
               return (
                 <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen}/>
-                  <PageWrapper>
+                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
+                  {/* <PageWrapper> */}
                     <div className="player-dealer-area-wrapper">
                       <SplitPlayerDealerMasked gameState={gameState} />
                     </div>
-
-
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayButtons
-                      gameState={gameState}
-                      onHit={handleSplitHitRequest}
-                      onStand={handleSplitStandRequest}
-                      onSplit={handleSplitRequest}
-                      onDouble={handleSplitDoubleRequest}
-                      hitCounter={hitCounter}
-                      hasOver21={hasOver21}
-                    />
-                  </div></PageWrapper>
+                    <div className="game-action-area-wrapper">
+                      <SplitPlayButtons
+                        gameState={gameState}
+                        onHit={handleSplitHitRequest}
+                        onStand={handleSplitStandRequest}
+                        onSplit={handleSplitRequest}
+                        onDouble={handleSplitDoubleRequest}
+                        hitCounter={hitCounter}
+                        hasOver21={hasOver21}
+                      />
+                    </div>
+                  {/* </PageWrapper> */}
                   <BetBank gameState={gameState} />
-                  <PageWrapper>
+                  {/* <PageWrapper> */}
                     <div className="players-area-wrapper">
                       <SplitPlayers gameState={gameState} />
                     </div>
-                  </PageWrapper>
+                  {/* </PageWrapper> */}
                 </div>
               );
             case "SPLIT_STAND":
               return (
                 <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen}/>
+                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <PageWrapper>
                     <div className="player-dealer-area-wrapper">
                       <SplitPlayerDealerMasked gameState={gameState} />
                     </div>
-
-
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayDisabledButtons gameState={gameState} />
-                  </div></PageWrapper>
+                    <div className="game-action-area-wrapper">
+                      <SplitPlayDisabledButtons gameState={gameState} />
+                    </div>
+                  </PageWrapper>
                   <BetBank gameState={gameState} />
                   <PageWrapper>
                     <div className="players-area-wrapper">
@@ -199,19 +197,18 @@ function App() {
             case "SPLIT_STAND_DOUBLE":
               return (
                 <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen}/>
+                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <PageWrapper>
                     <div className="player-dealer-area-wrapper">
                       <SplitPlayerDealerMasked gameState={gameState} />
                     </div>
-
-
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayDoubleDisabledButtons
-                      gameState={gameState}
-                      hitCounter={hitCounter}
-                    />
-                  </div></PageWrapper>
+                    <div className="game-action-area-wrapper">
+                      <SplitPlayDoubleDisabledButtons
+                        gameState={gameState}
+                        hitCounter={hitCounter}
+                      />
+                    </div>
+                  </PageWrapper>
                   <BetBank gameState={gameState} />
                   <PageWrapper>
                     <div className="players-area-wrapper">
@@ -223,16 +220,15 @@ function App() {
             case "SPLIT_NAT21_TRANSIT":
               return (
                 <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen}/>
+                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <PageWrapper>
                     <div className="player-dealer-area-wrapper">
                       <SplitPlayerDealerMasked gameState={gameState} />
                     </div>
-
-
-                  <div className="game-action-area-wrapper">
-                    <SplitPlayDisabledButtons gameState={gameState} />
-                  </div></PageWrapper>
+                    <div className="game-action-area-wrapper">
+                      <SplitPlayDisabledButtons gameState={gameState} />
+                    </div>
+                  </PageWrapper>
                   <BetBank gameState={gameState} />
                   <PageWrapper>
                     <div className="players-area-wrapper">
@@ -244,7 +240,7 @@ function App() {
             case "SPLIT_FINISH":
               return (
                 <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen}/>
+                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <PageWrapper>
                     <div className="player-dealer-area-wrapper">
                       <PlayerDealer
@@ -252,7 +248,6 @@ function App() {
                         isSplitted={isSplitted}
                       />
                     </div>
-
                     <div className="game-action-area-wrapper">
                       <SplitWinner gameState={gameState} />
                     </div>
@@ -272,7 +267,7 @@ function App() {
             case "SPLIT_FINISH_TRANSIT":
               return (
                 <div>
-                  <Cards gameState={gameState} initDeckLen={initDeckLen}/>
+                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
                   <PageWrapper>
                     <div className="player-dealer-area-wrapper">
                       <PlayerDealer
@@ -280,11 +275,10 @@ function App() {
                         isSplitted={isSplitted}
                       />
                     </div>
-
-
-                  <div className="game-action-area-wrapper">
-                    <SplitWinner gameState={gameState} />
-                  </div></PageWrapper>
+                    <div className="game-action-area-wrapper">
+                      <SplitWinner gameState={gameState} />
+                    </div>
+                  </PageWrapper>
                   <BetBankDelayed
                     finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
                     initialBet={preRewardBet}
@@ -300,25 +294,33 @@ function App() {
             case "OUT_OF_TOKENS":
               return (
                 <div>
-                  <OutOfTokens />
+                  <PageWrapper>
+                    <OutOfTokens />
+                  </PageWrapper>
                 </div>
               );
             case "RESTART_GAME":
               return (
                 <div>
-                  <Restart />
+                  <PageWrapper>
+                    <Restart />
+                  </PageWrapper>
                 </div>
               );
             case "ERROR":
               return (
                 <div>
-                  <ErrorPage />
+                  <PageWrapper>
+                    <ErrorPage />
+                  </PageWrapper>
                 </div>
               );
             default:
               return (
                 <div>
-                  <ErrorPage />
+                  <PageWrapper>
+                    <ErrorPage />
+                  </PageWrapper>
                 </div>
               );
           }
