@@ -37,7 +37,6 @@ class Game:
         self.split_req = 0
         self.suits = ["♥", "♦", "♣", "♠"]
         self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-        # self.ranks = ["A", "K", "Q", "J", "10"]
         self.bet = 0
         self.bet_list = []
         self.is_round_active = False
@@ -56,22 +55,20 @@ class Game:
         self.split_req = 0
         self.players = []
         self.bet_list = []
-        # card1 = self.deck.pop(0)
-        # card2 = self.deck.pop(0)
-        # card3 = self.deck.pop(0)
-        # card4 = self.deck.pop(0)
-        player_hand = ["♥10", "♣K"]
-        dealer_hand = ["♥2", "♥A"]
+        card1 = self.deck.pop(0)
+        card2 = self.deck.pop(0)
+        card3 = self.deck.pop(0)
+        card4 = self.deck.pop(0)
         # PLAYER
-        # [[], 0, NONE, False, False, 0, 0]
+        [[], 0, NONE, False, False, 0, 0]
         # 0 player, 1 sum, 2 state, 3 can_split, 4 checked, 5 bet, 6 tokens
-        # player_hand = [card1, card3]
+        player_hand = [card1, card3]
         # DEALER
-        # [[], [], 0, NONE, False]
+        [[], [], 0, NONE, False]
         # 0 dealer_masked, 1 dealer, 2 sum, 3 state, 4 can_insure, 5 natural_21
-        # dealer_hand = [card2, card4]
+        dealer_hand = [card2, card4]
         self.dealer_hand = dealer_hand
-        dealer_masked = ["✪ ", "♥A"]
+        dealer_masked = ["✪ ", card4]
 
         player_sum = self.sum(player_hand, True)
         dealer_sum = self.sum(dealer_hand, False)
@@ -164,7 +161,10 @@ class Game:
         self.split_req += count
 
     def get_deck_len(self):
-        return len(self.deck)
+        if len(self.deck) > 0:
+            return len(self.deck)
+        else:
+            return self.deck_len
 
     def get_is_round_active(self):
         return self.is_round_active
@@ -261,7 +261,6 @@ class Game:
 
     def rewards(self, is_splitted: bool) -> int:
         bet = self.player[5]
-        print("264 BET: ", bet)
         winner = self.winner_state()
         natural_21_scenario = self.player[6] if is_splitted else self.dealer[5]
 
@@ -275,7 +274,6 @@ class Game:
             reward_amount = bet
 
         self.set_bet_to_null()
-        print("278 reward_amount: ", reward_amount)
         return reward_amount
 
     def hit(self):
@@ -308,7 +306,7 @@ class Game:
         bet = self.bet
         ins_cost = math.ceil(self.bet / 2)
         if self.dealer[5] == 3:
-            self.bet = 0
+            self.set_bet_to_null()
 
         return bet if self.dealer[5] == 3 else -ins_cost
 
@@ -352,29 +350,32 @@ class Game:
         if self.players[0][4] == False:
             self.player[4] = not self.stated
             self.players.append(self.player)
-        print("game 354 players: ", self.players)
 
         return self.players
 
     def add_split_player_to_game(self):
-        self.player = self.players.pop(0)
-        if self.deck:
-            card = self.deck.pop(0)
-            self.set_player_hand(card)
-            hand = self.player[0]
-            player_sum = self.sum(hand, True)
-            can_split = self.can_split(hand)
-            self.player[1] = player_sum
-            self.player[2] = self.state(player_sum)
-            self.player[3] = can_split
-            self.player[6] = self.natural_21_state(hand, self.dealer_hand)
-        self.set_split_req(-1)
+        if not self.players:
+            return None
 
-        return self.player
+        if self.players:
+            self.player = self.players.pop(0)
+
+            if self.deck:
+                card = self.deck.pop(0)
+                self.set_player_hand(card)
+                hand = self.player[0]
+                player_sum = self.sum(hand, True)
+                can_split = self.can_split(hand)
+                self.player[1] = player_sum
+                self.player[2] = self.state(player_sum)
+                self.player[3] = can_split
+                self.player[6] = self.natural_21_state(hand, self.dealer_hand)
+            self.set_split_req(-1)
+        return self.players
+
 
     def add_player_from_players(self):
         self.player = self.players.pop(0)
-        print("378 players: ", self.players)
 
     def serialize(self):
         return {
