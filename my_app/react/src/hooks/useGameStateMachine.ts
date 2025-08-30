@@ -75,7 +75,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         ...newData,
         currentGameState: newState,
       };
-      console.log(`>>> Állapotváltás: ${prev.currentGameState} -> ${newState}`, updatedState);
+      //console.log(`>>> Állapotváltás: ${prev.currentGameState} -> ${newState}`, updatedState);
       return updatedState;
     });
   }, []);

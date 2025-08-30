@@ -10,7 +10,6 @@ const Cards: React.FC<CardsProps> = ({ gameState, initDeckLen }) => {
   const { deckLen } = gameState;
   const [displayedDeckLen, setDisplayedDeckLen] = useState(deckLen);
   const [tmp, setTmp] = useState(initDeckLen);
-  console.log("init, decklen, tmp,  gameState: ", initDeckLen, deckLen, tmp, gameState.currentGameState)
 
   useEffect(() => {
     setDisplayedDeckLen(tmp!);
