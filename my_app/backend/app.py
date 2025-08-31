@@ -3,7 +3,7 @@ import math
 import os
 from sqlalchemy import select
 from flask import Flask, json, jsonify, render_template, request, session
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta, timezone
 import uuid
 import logging
