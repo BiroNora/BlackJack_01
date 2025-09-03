@@ -8,7 +8,8 @@ from datetime import datetime, timedelta, timezone
 import uuid
 import logging
 
-from my_app.backend.game import Game
+# from my_app.backend.game import Game
+from game import Game
 
 MINIMUM_BET = 1
 
@@ -28,7 +29,7 @@ app.config["SECRET_KEY"] = os.environ.get(
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=31)  # Például 31 nap
 app.config["SESSION_COOKIE_SECURE"] = False
 
-
+# DATABASE_URL = os.environ.get('DATABASE_URL_SIMPLE', 'postgresql://player:pass@localhost:5433/blackjack_game')
 DATABASE_URL = os.environ.get(
     "DATABASE_URL", "postgresql://player:pass@localhost:5433/blackjack_game"
 )
@@ -46,6 +47,7 @@ log.setLevel(logging.ERROR)
 
 
 class User(db.Model):
+    __tablename__ = 'users'
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     client_id = db.Column(
         db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4())

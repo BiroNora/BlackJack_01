@@ -75,7 +75,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         ...newData,
         currentGameState: newState,
       };
-      //console.log(`>>> Állapotváltás: ${prev.currentGameState} -> ${newState}`, updatedState);
+      console.log(`>>> Állapotváltás: ${prev.currentGameState} -> ${newState}`, updatedState);
       return updatedState;
     });
   }, []);
@@ -157,20 +157,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     try {
       const data = await handleHit();
       const response = extractGameStateData(data);
-
       if (response && response.player) {
         const playerHandValue = response.player[1];
-
         if (playerHandValue >= 21) {
           setHasOver21(true);
-          await handleStand();
-          const rewards = await handleReward(false);
-          const resp = extractGameStateData(rewards);
-          transitionToState('MAIN_STAND', resp);
-        } else {
-          setHasHitTurn(true);
-          transitionToState('MAIN_TURN', response);
         }
+        setHasHitTurn(true);
+        transitionToState('MAIN_TURN', response);
       }
     } catch {
       transitionToState('ERROR');
@@ -447,6 +440,22 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       InitGame();
     }
 
+    else if (gameState.currentGameState === 'MAIN_TURN') {
+      const MainTurn = async () => {
+        try {
+          if (hasOver21) {
+            await handleStand();
+            const rewards = await handleReward(false);
+            const resp = extractGameStateData(rewards);
+            transitionToState('MAIN_STAND', resp);
+          }
+        } catch {
+          transitionToState('ERROR');
+        }
+      };
+      MainTurn();
+    }
+
     else if (gameState.currentGameState === 'MAIN_STAND') {
       if (!isMountedRef.current) return;
 
@@ -676,7 +685,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       HandleOutOfTokens();
     }
 
-  }, [gameState, transitionToState, savePreActionState, isMountedRef, timeoutIdRef, resetHitCounter, hasSplitNat21, resetGameVariables, setInitDeckLen]);
+  }, [gameState, transitionToState, savePreActionState, isMountedRef, timeoutIdRef, resetHitCounter, hasSplitNat21, resetGameVariables, setInitDeckLen, hasOver21]);
 
   return {
     gameState,

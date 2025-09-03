@@ -51,55 +51,59 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
   };
 
   return (
-    <div
-      id="play-buttons"
-      className={`button-container1 ${showButtons ? "show-buttons" : ""}`}
-    >
-      <button
-        id="hit-button"
-        onClick={() => handleAnyButtonClick(() => onHit())}
-        disabled={hasOver21}
-      >
-        Hit
-      </button>
-      <button
-        id="stand-button"
-        onClick={() => handleAnyButtonClick(onStand)}
-        disabled={hasOver21}
-      >
-        Stand
-      </button>
-
-      {canDouble && (
-        <button
-          id="double-button"
-          onClick={() => handleAnyButtonClick(onDouble)}
-          disabled={hasOver21}
+    <>
+      {!hasOver21 && (
+        <div
+          id="play-buttons"
+          className={`button-container1 ${showButtons ? "show-buttons" : ""}`}
         >
-          Double
-        </button>
-      )}
+          <button
+            id="hit-button"
+            onClick={() => handleAnyButtonClick(() => onHit())}
+            disabled={hasOver21}
+          >
+            Hit
+          </button>
+          <button
+            id="stand-button"
+            onClick={() => handleAnyButtonClick(onStand)}
+            disabled={hasOver21}
+          >
+            Stand
+          </button>
 
-      {canSplit && (
-        <button
-          id="split-button"
-          onClick={() => handleAnyButtonClick(onSplit)}
-          disabled={hasOver21}
-        >
-          Split
-        </button>
-      )}
+          {canDouble && (
+            <button
+              id="double-button"
+              onClick={() => handleAnyButtonClick(onDouble)}
+              disabled={hasOver21}
+            >
+              Double
+            </button>
+          )}
 
-      {canInsure && !insPlaced && (
-        <button
-          id="insurance-button"
-          onClick={() => handleAnyButtonClick(onInsurance)}
-          disabled={hasOver21}
-        >
-          Insurance
-        </button>
+          {canSplit && (
+            <button
+              id="split-button"
+              onClick={() => handleAnyButtonClick(onSplit)}
+              disabled={hasOver21}
+            >
+              Split
+            </button>
+          )}
+
+          {canInsure && !insPlaced && (
+            <button
+              id="insurance-button"
+              onClick={() => handleAnyButtonClick(onInsurance)}
+              disabled={hasOver21}
+            >
+              Insurance
+            </button>
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 };
 
