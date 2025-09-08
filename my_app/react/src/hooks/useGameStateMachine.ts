@@ -390,10 +390,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           setInitDeckLen(gameState.deckLen);
 
           if (userTokens === 0) {
-            transitionToState('RESTART_GAME', {
-              tokens: userTokens,
-              deckLen: deckLength,
-            });
+            transitionToState('OUT_OF_TOKENS');
           } else {
             transitionToState('BETTING', {
               tokens: userTokens,
@@ -710,7 +707,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
 
     else if (gameState.currentGameState === 'RESTART_GAME') {
-      const HandleOutOfTokens = async () => {
+      const RestartGame = async () => {
         if (!isMountedRef.current) return;
 
         try {
@@ -725,7 +722,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           transitionToState('ERROR');
         }
       };
-      HandleOutOfTokens();
+      RestartGame();
+    }
+
+    else if (gameState.currentGameState === 'ERROR') {
+
     }
 
   }, [gameState, transitionToState, savePreActionState, isMountedRef, timeoutIdRef, resetHitCounter, hasSplitNat21, resetGameVariables, setInitDeckLen, hasOver21]);
