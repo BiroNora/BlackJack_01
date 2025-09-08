@@ -148,6 +148,19 @@ export async function setRestart() {
   return data;
 }
 
+export async function forceRestart() {
+  const clientUuid = localStorage.getItem('blackjack_client_uuid');
+  if (!clientUuid) {
+    throw new Error("No id.");
+  }
+
+  const data = await callApiEndpoint("/api/force_restart", "POST", {
+    client_id: clientUuid
+  });
+
+  return data;
+}
+
 export async function roundToEnd() {
   const data = await callApiEndpoint("/api/round_end", "POST");
 

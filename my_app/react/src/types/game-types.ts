@@ -13,7 +13,8 @@ export type GameState =
   | 'SPLIT_FINISH_TRANSIT'
   | 'OUT_OF_TOKENS'
   | 'RESTART_GAME'
-  | 'ERROR';
+  | 'ERROR'
+  | 'RELOADING';
 
 export interface GameStateData {
   currentGameState: GameState;

@@ -18,6 +18,7 @@ import {
   updatePlayerFromPlayers,
   getGameData,
   setRestart,
+  forceRestart,
 } from '../api/api-calls';
 import type {
   DeckLenResponse,
@@ -715,7 +716,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           resetGameVariables();
           timeoutIdRef.current = window.setTimeout(() => {
             // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-            transitionToState('LOADING');
+            transitionToState('RELOADING');
           }, 5000);
         } catch (e) {
           console.error("Hiba a RESTART_GAME fázisban:", e);
@@ -726,7 +727,42 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
 
     else if (gameState.currentGameState === 'ERROR') {
+      const ForceRestart = async () => {
+        if (!isMountedRef.current) return;
 
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        setIsWFSR(true);
+
+        try {
+          const data = await forceRestart();
+          const response = extractGameStateData(data);
+          if (response) {
+            transitionToState('RELOADING', response);
+          }
+        } catch (error) {
+          console.error("Hiba a kényszerített újraindítás során:", error);
+        } finally {
+          setIsWFSR(false);
+        }
+      };
+      ForceRestart();
+    }
+
+    else if (gameState.currentGameState === 'RELOADING') {
+      const Reloading = async () => {
+        if (!isMountedRef.current) return;
+
+        try {
+          timeoutIdRef.current = window.setTimeout(() => {
+            // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+            transitionToState('BETTING', gameState);
+          }, 5000);
+        } catch (error) {
+          console.error("Error: ", error);
+        }
+      };
+      Reloading();
     }
 
   }, [gameState, transitionToState, savePreActionState, isMountedRef, timeoutIdRef, resetHitCounter, hasSplitNat21, resetGameVariables, setInitDeckLen, hasOver21]);

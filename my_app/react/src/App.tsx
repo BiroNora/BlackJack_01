@@ -20,6 +20,7 @@ import { useGameStateMachine } from "./hooks/useGameStateMachine";
 import Betting from "./components/Betting";
 import { AnimatePresence, motion } from "motion/react";
 import SplitPlayerDealerMasked from "./components/SplitPlayerDealerMasked";
+import { Reloading } from "./components/Reloading";
 
 function App() {
   const {
@@ -288,6 +289,14 @@ function App() {
                 <div>
                   <PageWrapper>
                     <ErrorPage />
+                  </PageWrapper>
+                </div>
+              );
+            case "RELOADING":
+              return (
+                <div>
+                  <PageWrapper>
+                    <Reloading />
                   </PageWrapper>
                 </div>
               );

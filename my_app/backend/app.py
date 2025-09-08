@@ -18,10 +18,7 @@ BUST = 9
 UNDER_21 = 10
 
 
-app = Flask(__name__,
-    static_folder='../react/dist',
-    template_folder='../react/dist'
-)
+app = Flask(__name__, static_folder="../react/dist", template_folder="../react/dist")
 app.config["SECRET_KEY"] = os.environ.get(
     "FLASK_SECRET_KEY", "default-dev-secret-key-NEVER-USE-IN-PROD"
 )
@@ -47,7 +44,7 @@ log.setLevel(logging.ERROR)
 
 
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = "users"
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     client_id = db.Column(
         db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4())
@@ -872,6 +869,55 @@ def set_restart(user, game):
 
 
 # 20
+@app.route("/api/force_restart", methods=["POST"])
+@api_error_handler
+def force_restart_by_client_id():
+    """
+    Ez az útvonal kezeli a játék újraindítását a kliensoldali hibák esetén.
+    A client_id alapján azonosítja a felhasználót, és visszaállítja a játékállapotot
+    a tokenek elvesztése nélkül.
+    """
+    data = request.get_json()
+    client_id = data.get("client_id")
+
+    if not client_id:
+        return jsonify({"error": "client_id is required"}), 400
+
+    # Megkeressük a felhasználót a client_id alapján
+    stmt = select(User).filter_by(client_id=client_id)
+    user = db.session.execute(stmt).scalar_one_or_none()
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # === Új session létrehozása a felhasználó számára ===
+    # Ez a lépés pótolja a hiányzó vagy törölt session cookie-t.
+    session.pop("game", None) # Töröljük a régi, potenciálisan hibás játék sessiont
+    session["user_id"] = user.id
+    session.permanent = True
+
+    # A játék egy új, alapértelmezett állapotból indul,
+    # mivel a régi játékállapot (pl. a bet) elveszett a sessionnel együtt.
+    game = Game()
+    game.restart_game()
+
+    # A frissített játékállapot mentése a sessionbe.
+    session["game"] = game.serialize()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "current_tokens": user.tokens,
+                "game_state": game.serialize(),
+                "game_state_hint": "HIT_RESTART",
+            }
+        ),
+        200,
+    )
+
+
+# 21
 @app.route("/error_page", methods=["GET"])
 def error_page():
     return render_template("error.html")
