@@ -40,7 +40,7 @@
 
 @media (min-width: 300px) {
   #root {
-    padding-top: 1rem;
+    padding-top: 4rem;
     padding-left: 2.0rem;
     padding-right: 2.0rem;
   }
@@ -49,7 +49,7 @@
 /* --- Small Breakpoint (sm): 640px-től felfelé --- */
 @media (min-width: 640px) {
   #root {
-    padding-top: 2.0rem;
+    padding-top: 4.0rem;
     padding-left: 2.0rem;
     padding-right: 2.0rem;
     max-width: 640px; /* Max szélesség a sm breakpointig */
@@ -59,7 +59,7 @@
 /* --- Medium Breakpoint (md): 768px-től felfelé --- */
 @media (min-width: 768px) {
   #root {
-    padding-top: 2.0rem;
+    padding-top: 4.0rem;
     padding-left: 4.0rem;
     padding-right: 4.0rem;
     max-width: 768px; /* Max szélesség az md breakpointig */
@@ -69,7 +69,7 @@
 /* --- Large Breakpoint (lg): 1024px-től felfelé --- */
 @media (min-width: 1024px) {
   #root {
-    padding-top: 2.0rem;
+    padding-top: 4.0rem;
     padding-left: 3.45rem;
     padding-right: 3.45rem;
     max-width: 1024px; /* Max szélesség az lg breakpointig */
@@ -79,7 +79,7 @@
 /* --- Extra Large Breakpoint (xl): 1280px-től felfelé --- */
 @media (min-width: 1280px) {
   #root {
-    padding-top: 1.5rem;
+    padding-top: 2.5rem;
     padding-left: 5.5rem;
     padding-right: 5.5rem;
     max-width: 1280px; /* Max szélesség az xl breakpointig */
@@ -89,7 +89,7 @@
 /* --- Double Extra Large Breakpoint (2xl): 1536px-től felfelé --- */
 @media (min-width: 1536px) {
   #root {
-    padding-top: 1.5rem;
+    padding-top: 2.5rem;
     padding-left: 5.5rem;
     padding-right: 5.5rem;
     max-width: 1536px; /* Max szélesség a 2xl breakpointig */

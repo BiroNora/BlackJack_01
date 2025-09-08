@@ -44,6 +44,7 @@ function App() {
     isSplitted,
     hitCounter,
     initDeckLen,
+    isWFSR,
   } = useGameStateMachine();
   //console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
@@ -93,6 +94,7 @@ function App() {
                     onPlaceBet={handlePlaceBet}
                     retakeBet={handleRetakeBet}
                     onStartGame={handleStartGame}
+                    isWFSR={isWFSR}
                   />
                 </div>
               );
@@ -117,6 +119,7 @@ function App() {
                       insPlaced={insPlaced}
                       hasHitTurn={hasHitTurn}
                       hasOver21={hasOver21}
+                      isWFSR={isWFSR}
                     />
                   </div>
                   <BetBank gameState={gameState} />
@@ -158,6 +161,7 @@ function App() {
                       onDouble={handleSplitDoubleRequest}
                       hitCounter={hitCounter}
                       hasOver21={hasOver21}
+                      isWFSR={isWFSR}
                     />
                   </div>
                   <BetBank gameState={gameState} />

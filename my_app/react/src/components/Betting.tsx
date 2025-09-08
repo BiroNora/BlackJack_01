@@ -9,6 +9,7 @@ interface BettingProps {
   onPlaceBet: (amount: number) => void;
   retakeBet: () => void;
   onStartGame: (shouldShuffle: boolean) => void;
+  isWFSR: boolean;
 }
 
 const Betting: React.FC<BettingProps> = ({
@@ -16,6 +17,7 @@ const Betting: React.FC<BettingProps> = ({
   onPlaceBet,
   retakeBet,
   onStartGame,
+  isWFSR,
 }) => {
   const { tokens, bet, deckLen } = gameState;
 
@@ -48,13 +50,6 @@ const Betting: React.FC<BettingProps> = ({
   const isDisabled = bet === 0;
 
   const variants = {
-    disabled: {
-      opacity: 0.7,
-      scale: 1,
-      transition: {
-        duration: 0.7,
-      },
-    },
     enabled: {
       opacity: 1,
       scale: 1,
@@ -62,8 +57,21 @@ const Betting: React.FC<BettingProps> = ({
         duration: 0.7,
       },
     },
+    disabledByUser: {
+      opacity: 0.7, // Alapértelmezett letiltott állapot
+      scale: 1,
+      transition: {
+        duration: 0.7,
+      },
+    },
+    disabledByServer: {
+      opacity: 0.7, // Vagy 1, ha a gombnak aktívnak kell kinéznie
+      scale: 1,
+      transition: {
+        duration: 0.3,
+      },
+    },
   };
-
   const textVariants = {
     disabled: {
       opacity: 0.4,
@@ -86,9 +94,10 @@ const Betting: React.FC<BettingProps> = ({
       <motion.button
         id="start-button"
         onClick={handleStartGame}
-        disabled={isDisabled}
+        disabled={isDisabled || isWFSR}
         variants={variants}
-        animate={isDisabled ? "disabled" : "enabled"}
+        animate={isDisabled || isWFSR ? "disabled" : "enabled"}
+        transition={isWFSR ? { duration: 0.3 } : undefined}
       >
         <motion.span variants={textVariants}>Start Game</motion.span>
       </motion.button>
@@ -97,9 +106,10 @@ const Betting: React.FC<BettingProps> = ({
         <motion.button
           id="deal-button"
           onClick={() => retakeBet()}
-          disabled={isDisabled}
+          disabled={isDisabled || isWFSR}
           variants={variants}
-          animate={isDisabled ? "disabled" : "enabled"}
+          animate={isDisabled || isWFSR ? "disabled" : "enabled"}
+          transition={isWFSR ? { duration: 0.3 } : undefined}
         >
           <motion.span variants={textVariants}>
             Bet: {"  " + formatNumber(bet)}
@@ -115,26 +125,44 @@ const Betting: React.FC<BettingProps> = ({
         id="chips"
         className={`button-container ${showButtons ? "show-buttons" : ""}`}
       >
-        <button
+        <motion.button
           id="all-in"
           type="button"
           onClick={handleAllIn}
-          disabled={tokens === 0}
+          variants={variants}
+          disabled={tokens === 0 || isWFSR}
+          animate={
+            tokens === 0
+              ? "disabledByUser"
+              : isWFSR
+              ? "disabledByServer"
+              : "enabled"
+          }
+          transition={isWFSR ? { duration: 0.3 } : undefined}
         >
           All In
-        </button>
+        </motion.button>
 
         {betAmounts.map((amount) => (
-          <button
+          <motion.button
             key={amount}
             id={String(amount)}
             type="button"
             data-bet={amount}
             onClick={() => onPlaceBet(amount)}
-            disabled={tokens < amount}
+            variants={variants}
+            disabled={tokens < amount || isWFSR}
+            animate={
+              tokens < amount
+                ? "disabledByUser"
+                : isWFSR
+                ? "disabledByServer"
+                : "enabled"
+            }
+            transition={isWFSR ? { duration: 0.3 } : undefined}
           >
             {formatNumber(amount)}
-          </button>
+          </motion.button>
         ))}
       </div>
     </div>

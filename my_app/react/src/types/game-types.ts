@@ -89,6 +89,7 @@ export type GameStateMachineHookResult = {
   isSplitted: boolean;
   hitCounter: number | null;
   initDeckLen: number | null;
+  isWFSR: boolean;
 };
 
 export const states = [

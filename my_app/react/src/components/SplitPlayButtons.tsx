@@ -9,6 +9,7 @@ interface SplitPlayButtonsProps {
   onSplit: () => void;
   hitCounter: number | null;
   hasOver21: boolean;
+  isWFSR: boolean;
 }
 
 const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
@@ -19,6 +20,7 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
   onSplit,
   hitCounter,
   hasOver21,
+  isWFSR,
 }) => {
   const { tokens, bet, player, players } = gameState;
   const canDouble = tokens >= bet && hitCounter === null;
@@ -54,14 +56,14 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
       <button
         id="hit-button"
         onClick={() => handleAnyButtonClick(() => onHit())}
-        disabled={hasOver21}
+        disabled={hasOver21 || isWFSR}
       >
         Hit
       </button>
       <button
         id="stand-button"
         onClick={() => handleAnyButtonClick(onStand)}
-        disabled={hasOver21}
+        disabled={hasOver21 || isWFSR}
       >
         Stand
       </button>
@@ -70,7 +72,7 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
         <button
           id="double-button"
           onClick={() => handleAnyButtonClick(onDouble)}
-          disabled={hasOver21}
+          disabled={hasOver21 || isWFSR}
         >
           Double
         </button>
@@ -80,7 +82,7 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
         <button
           id="split-button"
           onClick={() => handleAnyButtonClick(onSplit)}
-          disabled={hasOver21}
+          disabled={hasOver21 || isWFSR}
         >
           Split
         </button>

@@ -57,6 +57,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const [hasSplitNat21, setHasSplitNat21] = useState(false);
   const [hitCounter, setHitCounter] = useState<number | null>(null);
   const [initDeckLen, setInitDeckLen] = useState<number | null>(null);
+  // isWaitingForServerResponse = isWFSR
+  // setIsWaitingForServerResponse = setIsWFSR
+  const [isWFSR, setIsWFSR] = useState(false);
 
   const timeoutIdRef = useRef<number | null>(null);
 
@@ -110,10 +113,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     setIsSplitted(false);
     setHasSplitNat21(false);
     setHitCounter(null);
+    setIsWFSR(false);
   }, []);
 
   const handlePlaceBet = useCallback(async (amount: number) => {
     if (gameState.tokens >= amount && amount > 0) {
+      setIsWFSR(true);
       try {
         const data = await setBet(amount);
         const response = extractGameStateData(data);
@@ -123,12 +128,15 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         }
       } catch {
         transitionToState('ERROR');
+      } finally {
+        setIsWFSR(false);
       }
     }
   }, [gameState.tokens, transitionToState]);
 
   const handleRetakeBet = useCallback(async () => {
     if (gameState.bet_list) {
+      setIsWFSR(true);
       try {
         const data = await takeBackDeal();
         const response = extractGameStateData(data);
@@ -138,6 +146,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         }
       } catch {
         transitionToState('ERROR');
+      } finally {
+        setIsWFSR(false);
       }
     }
   }, [gameState.bet_list, transitionToState]);
@@ -151,6 +161,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [transitionToState]); // Függőség: transitionToState
 
   const handleHitRequest = useCallback(async () => {
+    setIsWFSR(true);
     setShowInsLost(false);
     savePreActionState();
 
@@ -167,10 +178,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
     } catch {
       transitionToState('ERROR');
+    } finally {
+      setIsWFSR(false);
     }
   }, [transitionToState, savePreActionState]);
 
   const handleStandRequest = useCallback(async () => {
+    setIsWFSR(true);
     setShowInsLost(false);
     savePreActionState();
 
@@ -181,10 +195,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       transitionToState('MAIN_STAND', resp);
     } catch {
       transitionToState('ERROR');
+    } finally {
+      setIsWFSR(false);
     }
   }, [transitionToState, savePreActionState]);
 
   const handleDoubleRequest = useCallback(async () => {
+    setIsWFSR(true);
     setShowInsLost(false);
 
     try {
@@ -210,10 +227,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
     } catch {
       transitionToState('ERROR');
+    } finally {
+      setIsWFSR(false);
     }
   }, [transitionToState, setPreRewardBet, setPreRewardTokens]);
 
   const handleInsRequest = useCallback(async () => {
+    setIsWFSR(true);
     setInsPlaced(true);
     savePreActionState();
 
@@ -230,12 +250,15 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
     } catch {
       transitionToState('ERROR');
+    } finally {
+      setIsWFSR(false);
     }
   }, [transitionToState, gameState, savePreActionState]);
 
 
   // SPLIT part
   const handleSplitRequest = useCallback(async () => {
+    setIsWFSR(true);
     setShowInsLost(false);
     setIsSplitted(true);
     savePreActionState();
@@ -252,10 +275,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
     } catch {
       transitionToState('ERROR');
+    } finally {
+      setIsWFSR(false);
     }
   }, [savePreActionState, transitionToState]);
 
   const handleSplitHitRequest = useCallback(async () => {
+    setIsWFSR(true);
     setHasHitTurn(true);
 
     try {
@@ -283,10 +309,14 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
     } catch {
       transitionToState('ERROR');
+    } finally {
+      setIsWFSR(false);
     }
   }, [hitCounter, incrementHitCounter, transitionToState]);
 
   const handleSplitStandRequest = useCallback(async () => {
+    setIsWFSR(true); // reset in case state
+
     if (hasHitTurn === false) {
       transitionToState('SPLIT_STAND_DOUBLE');
     } else {
@@ -295,6 +325,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [hasHitTurn, transitionToState]);
 
   const handleSplitDoubleRequest = useCallback(async () => {
+    setIsWFSR(true);
     setHasHitTurn(true);
 
     try {
@@ -312,6 +343,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
     } catch {
       transitionToState('ERROR');
+    } finally {
+      setIsWFSR(false);
     }
   }, [transitionToState]);
 
@@ -416,6 +449,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     else if (gameState.currentGameState === 'INIT_GAME') {
       const InitGame = async () => {
+        setIsWFSR(true);
         resetGameVariables();
         setInitDeckLen(gameState.deckLen);
 
@@ -435,6 +469,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           }
         } catch {
           transitionToState('ERROR');
+        } finally {
+          setIsWFSR(false);
         }
       };
       InitGame();
@@ -442,6 +478,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     else if (gameState.currentGameState === 'MAIN_TURN') {
       const MainTurn = async () => {
+        setIsWFSR(true);
+
         try {
           if (hasOver21) {
             await handleStand();
@@ -451,6 +489,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           }
         } catch {
           transitionToState('ERROR');
+        } finally {
+          setIsWFSR(false);
         }
       };
       MainTurn();
@@ -483,6 +523,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     }
 
     else if (gameState.currentGameState === 'SPLIT_STAND' || gameState.currentGameState === 'SPLIT_STAND_DOUBLE') {
+      setIsWFSR(true);
       setHasHitTurn(false); // See handleSplitStandRequest
       setHasOver21(false);
       resetHitCounter();
@@ -540,6 +581,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           }
         } catch {
           transitionToState('ERROR');
+        } finally {
+          setIsWFSR(false);
         }
       };
       SplitStand();
@@ -711,5 +754,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     hitCounter,
     showInsLost,
     initDeckLen,
+    isWFSR,
   };
 }

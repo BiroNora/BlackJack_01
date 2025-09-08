@@ -11,6 +11,7 @@ interface PlayButtonsProps {
   insPlaced: boolean;
   hasHitTurn: boolean;
   hasOver21: boolean;
+  isWFSR: boolean;
 }
 
 const PlayButtons: React.FC<PlayButtonsProps> = ({
@@ -23,6 +24,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
   insPlaced,
   hasHitTurn,
   hasOver21,
+  isWFSR,
 }) => {
   const { tokens, bet, player, dealer } = gameState;
   const canDouble = tokens >= bet && !hasHitTurn;
@@ -60,14 +62,14 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
           <button
             id="hit-button"
             onClick={() => handleAnyButtonClick(() => onHit())}
-            disabled={hasOver21}
+            disabled={hasOver21 || isWFSR}
           >
             Hit
           </button>
           <button
             id="stand-button"
             onClick={() => handleAnyButtonClick(onStand)}
-            disabled={hasOver21}
+            disabled={hasOver21 || isWFSR}
           >
             Stand
           </button>
@@ -76,7 +78,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
             <button
               id="double-button"
               onClick={() => handleAnyButtonClick(onDouble)}
-              disabled={hasOver21}
+              disabled={hasOver21 || isWFSR}
             >
               Double
             </button>
@@ -86,7 +88,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
             <button
               id="split-button"
               onClick={() => handleAnyButtonClick(onSplit)}
-              disabled={hasOver21}
+              disabled={hasOver21 || isWFSR}
             >
               Split
             </button>
@@ -96,7 +98,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
             <button
               id="insurance-button"
               onClick={() => handleAnyButtonClick(onInsurance)}
-              disabled={hasOver21}
+              disabled={hasOver21 || isWFSR}
             >
               Insurance
             </button>
