@@ -63,6 +63,7 @@ class Game:
         [[], 0, NONE, False, False, 0, 0]
         # 0 player, 1 sum, 2 state, 3 can_split, 4 checked, 5 bet, 6 tokens
         player_hand = [card1, card3]
+        # player_hand = ["♦10", "♠Q"]
         # DEALER
         [[], [], 0, NONE, False]
         # 0 dealer_masked, 1 dealer, 2 sum, 3 state, 4 can_insure, 5 natural_21

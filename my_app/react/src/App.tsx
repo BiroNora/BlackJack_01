@@ -233,7 +233,7 @@ function App() {
                     />
                   </div>
                   <div className="game-action-area-wrapper">
-                    <SplitWinner gameState={gameState} />
+                    {/* <SplitWinner gameState={gameState} /> */}
                   </div>
                   <BetBankDelayed
                     finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
