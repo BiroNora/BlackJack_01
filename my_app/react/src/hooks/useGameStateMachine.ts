@@ -34,7 +34,8 @@ import { extractGameStateData } from '../utilities/utils';
 const initialGameState: GameStateData = {
   currentGameState: 'LOADING',
   player: [[], 0, 0, false, false, 0, 0],
-  dealer: [[], [], 0, 0, false, 0],
+  dealer: [[], 0, false, 0],
+  dealer_nat_21: false,
   deckLen: 104,
   tokens: 0,
   splitReq: 0,
@@ -238,7 +239,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     setInsPlaced(true);
     savePreActionState();
 
-    const insWon = gameState.dealer[5] === 3 ? true : false;
+    const insWon = gameState.dealer_nat_21;
 
     try {
       const data = await handleInsurance();
@@ -375,7 +376,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     if (gameState.currentGameState === 'LOADING') {
       const initializeApplicationOnLoad = async () => {
         try {
-          const minLoadingTimePromise = new Promise(resolve => setTimeout(resolve, 7000));
+          const minLoadingTimePromise = new Promise(resolve => setTimeout(resolve, 500));
 
           await Promise.all([
             initializeSessionAPI(),
@@ -432,7 +433,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               if (isMountedRef.current) {
                 transitionToState('INIT_GAME', response);
               }
-            }, 5000);
+            }, 500);
           }
         } catch (e) {
           // EZ A BLOKK FUT LE, HA A GETSHUFFLING() VAGY AZ EXTRACTGAMESTATEDATA() HIBÁVAL VÉGZŐDIK!
@@ -454,9 +455,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         try {
           const data = await startGame();
           const response = extractGameStateData(data);
-
+          console.log(response)
           if (response && response.dealer) {
-            if (response.dealer[5] === 1 || response.dealer[5] === 2) {
+            console.log("startGame response.dealer: ", response.dealer)
+            if (response.dealer[3] === 1 || response.dealer[3] === 2) {
+              console.log("NAT_21 állapot", response.dealer[3])
               savePreActionState();
               const rewards = await handleReward(false);
               const resp = extractGameStateData(rewards);
@@ -505,7 +508,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             const nextRoundGameState: Partial<GameStateData> = {
               currentGameState: 'BETTING',
               player: [[], 0, 0, false, false, 0, 0],
-              dealer: [[], [], 0, 0, false, 0],
+              dealer: [[], 0, false, 0],
               deckLen: gameState.deckLen, // A deckLen értéke is átkerül
               tokens: gameState.tokens,
               bet: 0,
@@ -654,7 +657,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                     transitionToState('BETTING', {
                       currentGameState: 'BETTING',
                       player: [[], 0, 0, false, false, 0, 0],
-                      dealer: [[], [], 0, 0, false, 0],
+                      dealer: [[], 0, false, 0],
                       deckLen: gameState.deckLen,
                       tokens: gameState.tokens,
                       bet: 0,

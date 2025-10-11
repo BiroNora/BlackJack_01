@@ -3,6 +3,7 @@ import random
 
 from collections import Counter
 
+NONE = 0
 BLACKJACK_PLAYER_WON = 1
 BLACKJACK_PUSH = 2
 BLACKJACK_DEALER_WON = 3
@@ -13,30 +14,34 @@ DEALER_WON = 7
 TWENTY_ONE = 8
 BUST = 9
 UNDER_21 = 10
-NONE = 0
+BLACKJACK = 11
 
 
 class Game:
     def __init__(self):
-        self.deck = []
-        self.deck_len = 104
         self.player = [[], 0, NONE, False, False, 0, NONE]
         # 0 player, 1 sum, 2 state, 3 can_split, 4 self.stated, 5 bet, 6 natural_21 in split
-        self.players = []
-        self.stated = False
-        self.player_state = NONE
-        self.dealer = [[], [], 0, NONE, False, NONE]
-        # 0 dealer_masked, 1 dealer, 2 sum, 3 state, 4 can_insure, 5 natural_21
+        self.dealer_masked = [[], 0, False, NONE]
+        # 0 dealer_masked, 1 sum, 2 can_insure, 3 natural_21
+        self.dealer_unmasked = [[], 0, NONE, NONE]
+        # 0 dealer, 1 sum, 2 state, 3 natural_21
         self.dealer_hand = []
+        self.player_state = NONE
         self.dealer_state = NONE
         self.player_sum = 0
         self.dealer_sum = 0
         self.natural_21 = NONE
+        self.dealer_natural_21 = False
         self.split_natural_21 = NONE
         self.winner = NONE
+        self.players = []
+        self.stated = False
         self.split_req = 0
         self.suits = ["♥", "♦", "♣", "♠"]
-        self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+        # self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+        self.ranks = ["A", "K", "Q", "J", "10"]
+        self.deck = []
+        self.deck_len = 104
         self.bet = 0
         self.bet_list = []
         self.is_round_active = False
@@ -49,9 +54,10 @@ class Game:
         return self.deck
 
     def initialize_new_round(self):
-        self.dealer_hand = []
-        self.dealer = [[], [], 0, NONE, False, NONE]
         self.player = [[], 0, NONE, False, False, 0, NONE]
+        self.dealer_masked = [[], 0, False, NONE]
+        self.dealer_unmasked = [[], 0, NONE, NONE]
+        self.dealer_hand = []
         self.split_req = 0
         self.players = []
         self.bet_list = []
@@ -60,27 +66,34 @@ class Game:
         card3 = self.deck.pop(0)
         card4 = self.deck.pop(0)
         # PLAYER
-        [[], 0, NONE, False, False, 0, 0]
+        # [[], 0, NONE, False, False, 0, 0]
         # 0 player, 1 sum, 2 state, 3 can_split, 4 checked, 5 bet, 6 tokens
         player_hand = [card1, card3]
         # player_hand = ["♦10", "♠Q"]
         # DEALER
-        [[], [], 0, NONE, False]
-        # 0 dealer_masked, 1 dealer, 2 sum, 3 state, 4 can_insure, 5 natural_21
+        # [[], 0, False, NONE]
+        # 0 dealer_masked, 1 sum, 2 can_insure, 3 natural_21
         dealer_hand = [card2, card4]
         self.dealer_hand = dealer_hand
+        print("78: ", self.dealer_hand)
         dealer_masked = ["✪ ", card4]
 
         player_sum = self.sum(player_hand, True)
-        dealer_sum = self.sum(dealer_hand, False)
+        dealer_sum = self.sum([card4], False)
 
-        player_state = self.state(player_sum)
-        dealer_state = self.state(dealer_sum)
+        player_state = self.state(player_hand, player_sum)
 
         can_split = self.can_split(player_hand)
-        can_insure = self.can_insure(dealer_hand)
+        can_insure = card4[-1] == "A"
 
-        natural_21 = self.natural_21_state(player_hand, dealer_hand)
+        nat_21 = self.natural_21_state(player_hand, dealer_hand)
+        print("90 nat_21: ", nat_21)
+        natural_21 = 1 if nat_21 == 1 else 2 if nat_21 == 2 else 0
+        self.dealer_sum = self.sum(dealer_hand, False)
+        print("92: ", self.dealer_sum)
+        self.dealer_state = self.state(self.dealer_hand, self.dealer_sum)
+        print("95: ", self.dealer_state)
+
         bet = self.get_bet()
 
         self.player = [
@@ -92,14 +105,20 @@ class Game:
             bet,
             self.natural_21,
         ]
-        self.dealer = [
+        self.dealer_masked = [
             dealer_masked,
-            dealer_hand,
             dealer_sum,
-            dealer_state,
             can_insure,
             natural_21,
         ]
+        self.dealer_unmasked = [
+            self.dealer_hand,
+            self.dealer_sum,
+            True if nat_21 != 0 else False,
+            self.dealer_state
+        ]
+
+        print("111", self.dealer_masked,self.dealer_unmasked, self.player)
         self.is_round_active = True
 
     def load_state_from_data(self, data):
@@ -115,19 +134,13 @@ class Game:
         self.player[1] = sum
 
     def set_dealer_sum(self, sum):
-        self.dealer[2] = sum
+        self.dealer_masked[1] = sum
 
     def get_player_state(self):
         return self.player[2]
 
     def set_player_state(self, state):
         self.player[2] = state
-
-    def get_dealer_state(self):
-        return self.dealer[3]
-
-    def set_dealer_state(self, state):
-        self.dealer[3] = state
 
     def get_players(self):
         return self.players
@@ -174,12 +187,13 @@ class Game:
         self.set_bet_list_to_null()
         self.set_bet_to_null()
         self.player = [[], 0, NONE, False, False, 0, NONE]
-        self.dealer = [[], [], 0, NONE, False, NONE]
+        self.dealer_masked = [[], 0, False, NONE]
         self.players = []
         self.split_req = 0
         self.winner = NONE
         self.stated = False
         self.player_state = NONE
+        self.dealer_natural_21 = False
         self.is_round_active = False
 
     def restart_game(self):
@@ -187,10 +201,6 @@ class Game:
 
     def hand_to_ranks(self, hand):
         return "".join(c[-1] for c in hand)
-
-    def can_insure(self, hand):
-        ranks = self.hand_to_ranks(hand)
-        return ranks[1] == "A"
 
     def can_split(self, hand):
         ranks = self.hand_to_ranks(hand)
@@ -218,10 +228,10 @@ class Game:
                     res += 1
         if is_player:
             self.set_player_sum(res)
-            self.set_player_state(self.state(res))
+            self.set_player_state(self.state(hand, res))
         else:
             self.set_dealer_sum(res)
-            self.set_dealer_state(self.state(res))
+            self.dealer_state = self.state(hand, res)
 
         return res
 
@@ -240,14 +250,14 @@ class Game:
 
         return self.natural_21
 
-    def state(self, count):
-        state = TWENTY_ONE if count == 21 else BUST if count > 21 else UNDER_21
-
+    def state(self, hand, count):
+        state = BLACKJACK if (len(hand) == 2 and count == 21) else TWENTY_ONE if count == 21 else BUST if count > 21 else UNDER_21
+        print("255: ", state)
         return state
 
     def winner_state(self):
         player = self.player[1]
-        dealer = self.dealer[2]
+        dealer = self.dealer_unmasked[1]
 
         if player > 21:
             self.winner = PLAYER_LOST
@@ -263,7 +273,9 @@ class Game:
     def rewards(self, is_splitted: bool) -> int:
         bet = self.player[5]
         winner = self.winner_state()
-        natural_21_scenario = self.player[6] if is_splitted else self.dealer[5]
+        print("277: ", self.dealer_unmasked)
+        print("278: ", self.dealer_masked)
+        natural_21_scenario = self.player[6] if is_splitted else self.dealer_unmasked[3]
 
         reward_amount = 0  # Alapértelmezett érték: 0 (veszteség)
 
@@ -287,13 +299,23 @@ class Game:
 
     def stand(self):
         if self.sum(self.player[0], True) <= 21:
-            count = self.sum(self.dealer[1], False)
+            count = self.sum(self.dealer_hand, False)
             while count < 17:
                 card = self.deck.pop(0)
-                self.dealer[1].append(card)
-                count = self.sum(self.dealer[1], False)
+                self.self.dealer_hand.append(card)
+                count = self.sum(self.dealer_hand, False)
 
-        return self.dealer
+        self.unmasked_const(count)
+        print("300: ", self.dealer_unmasked)
+        return self.dealer_unmasked
+
+    def unmasked_const(self, count):
+        self.dealer_unmasked[0] = self.dealer_hand
+        self.dealer_unmasked[1] = count
+        # self.dealer_unmasked[2] = base False or True / initialize_new_round
+        self.dealer_unmasked[3] = 11 if self.dealer_unmasked[2] == True else self.state(self.dealer_unmasked[0], count)
+
+        return self.dealer_unmasked
 
     def retake_bet_from_bet_list(self):
         if len(self.bet_list) != 0:
@@ -306,10 +328,10 @@ class Game:
     def insurance_request(self):
         bet = self.bet
         ins_cost = math.ceil(self.bet / 2)
-        if self.dealer[5] == 3:
+        if self.dealer_natural_21:
             self.set_bet_to_null()
 
-        return bet if self.dealer[5] == 3 else -ins_cost
+        return bet if self.dealer_natural_21 else -ins_cost
 
     def double_request(self):
         self.player[5] += self.bet
@@ -333,8 +355,9 @@ class Game:
             hand.append(self.deck.pop(0))
         player_sum = self.sum(hand, True)
         can_split = self.can_split(hand)
-        player_state = self.state(player_sum)
-        split_natural_21 = self.natural_21_state(hand, self.dealer_hand)
+        player_state = self.state(hand, player_sum)
+        nat_21 = self.natural_21_state(hand, self.dealer_hand)
+        split_natural_21 = 1 if nat_21 == 1 else 2 if nat_21 == 2 else 0
         player = [
             hand,
             player_sum,
@@ -368,7 +391,7 @@ class Game:
                 player_sum = self.sum(hand, True)
                 can_split = self.can_split(hand)
                 self.player[1] = player_sum
-                self.player[2] = self.state(player_sum)
+                self.player[2] = self.state(hand, player_sum)
                 self.player[3] = can_split
                 self.player[6] = self.natural_21_state(hand, self.dealer_hand)
             self.set_split_req(-1)
@@ -382,8 +405,9 @@ class Game:
         return {
             "deck": self.deck,
             "player": self.player,
-            "dealer": self.dealer,
+            "dealer": self.dealer_masked,
             "dealer_hand": self.dealer_hand,
+            "dealer_nat_21": self.dealer_natural_21,
             "splitReq": self.split_req,
             "players": self.players,
             "bet": self.bet,
@@ -400,6 +424,7 @@ class Game:
         game.player = data["player"]
         game.dealer = data["dealer"]
         game.dealer_hand = data["dealer_hand"]
+        game.dealer_nat_21 = data["dealer_nat_21"]
         game.split_req = data["splitReq"]
         game.players = data["players"]
         game.bet = data["bet"]
