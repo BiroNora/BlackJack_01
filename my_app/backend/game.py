@@ -38,8 +38,8 @@ class Game:
         self.stated = False
         self.split_req = 0
         self.suits = ["♥", "♦", "♣", "♠"]
-        # self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-        self.ranks = ["A", "K", "Q", "J", "10"]
+        self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+        # self.ranks = ["A", "K", "Q", "J"]
         self.deck = []
         self.deck_len = 104
         self.bet = 0
@@ -69,7 +69,7 @@ class Game:
         # [[], 0, NONE, False, False, 0, 0]
         # 0 player, 1 sum, 2 state, 3 can_split, 4 checked, 5 bet, 6 tokens
         player_hand = [card1, card3]
-        # player_hand = ["♦10", "♠Q"]
+        # player_hand = ["♦10", "♠A"]
         # DEALER
         # [[], 0, False, NONE]
         # 0 dealer_masked, 1 sum, 2 can_insure, 3 natural_21
@@ -103,7 +103,7 @@ class Game:
             can_split,
             self.stated,
             bet,
-            self.natural_21,
+            natural_21,
         ]
         self.dealer_masked = [
             dealer_masked,
@@ -118,7 +118,7 @@ class Game:
             self.dealer_state
         ]
 
-        print("111", self.dealer_masked,self.dealer_unmasked, self.player)
+        print("121", self.dealer_masked,self.dealer_unmasked, self.player)
         self.is_round_active = True
 
     def load_state_from_data(self, data):
@@ -141,6 +141,12 @@ class Game:
 
     def set_player_state(self, state):
         self.player[2] = state
+
+    def get_dealer_state(self):
+        return self.dealer_unmasked[2]
+
+    def set_dealer_state(self, state):
+        self.dealer_unmasked[2] = state
 
     def get_players(self):
         return self.players
@@ -232,7 +238,7 @@ class Game:
         else:
             self.set_dealer_sum(res)
             self.dealer_state = self.state(hand, res)
-
+        # print("235: sum: ", self.dealer_masked, self.dealer_unmasked, self.player)
         return res
 
     def natural_21_state(self, player_hand, dealer_hand):
@@ -252,13 +258,13 @@ class Game:
 
     def state(self, hand, count):
         state = BLACKJACK if (len(hand) == 2 and count == 21) else TWENTY_ONE if count == 21 else BUST if count > 21 else UNDER_21
-        print("255: ", state)
+
         return state
 
     def winner_state(self):
         player = self.player[1]
         dealer = self.dealer_unmasked[1]
-
+        
         if player > 21:
             self.winner = PLAYER_LOST
         elif player == dealer:
@@ -273,10 +279,10 @@ class Game:
     def rewards(self, is_splitted: bool) -> int:
         bet = self.player[5]
         winner = self.winner_state()
-        print("277: ", self.dealer_unmasked)
-        print("278: ", self.dealer_masked)
+        print("282: ", self.dealer_unmasked)
+        print("283: ", self.dealer_masked)
         natural_21_scenario = self.player[6] if is_splitted else self.dealer_unmasked[3]
-
+        print("285: ", natural_21_scenario)
         reward_amount = 0  # Alapértelmezett érték: 0 (veszteség)
 
         if natural_21_scenario == 1:
@@ -298,15 +304,15 @@ class Game:
         self.sum(self.player[0], True)
 
     def stand(self):
+        count = self.sum(self.dealer_hand, False)
         if self.sum(self.player[0], True) <= 21:
-            count = self.sum(self.dealer_hand, False)
             while count < 17:
                 card = self.deck.pop(0)
-                self.self.dealer_hand.append(card)
+                self.dealer_hand.append(card)
                 count = self.sum(self.dealer_hand, False)
 
         self.unmasked_const(count)
-        print("300: ", self.dealer_unmasked)
+
         return self.dealer_unmasked
 
     def unmasked_const(self, count):
@@ -406,6 +412,7 @@ class Game:
             "deck": self.deck,
             "player": self.player,
             "dealer": self.dealer_masked,
+            "dealer_unmasked": self.dealer_unmasked,
             "dealer_hand": self.dealer_hand,
             "dealer_nat_21": self.dealer_natural_21,
             "splitReq": self.split_req,
@@ -422,7 +429,8 @@ class Game:
         game = cls()
         game.deck = data["deck"]
         game.player = data["player"]
-        game.dealer = data["dealer"]
+        game.dealer_masked = data["dealer"]
+        game.dealer_unmasked = data["dealer_unmasked"]
         game.dealer_hand = data["dealer_hand"]
         game.dealer_nat_21 = data["dealer_nat_21"]
         game.split_req = data["splitReq"]

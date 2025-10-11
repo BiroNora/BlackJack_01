@@ -30,7 +30,7 @@ const PlayButtons: React.FC<PlayButtonsProps> = ({
   const canDouble = tokens >= bet && !hasHitTurn;
   const canSplit =
     player[0].length == 2 && player[3] && tokens >= bet && !hasHitTurn;
-  const canInsure = tokens >= bet / 2 && dealer[4] && !hasHitTurn;
+  const canInsure = tokens >= bet / 2 && dealer[2] && !hasHitTurn;
   const [showButtons, setShowButtons] = useState(false);
   const timeoutIdRef = useRef<number | null>(null);
 

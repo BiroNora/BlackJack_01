@@ -35,6 +35,7 @@ const initialGameState: GameStateData = {
   currentGameState: 'LOADING',
   player: [[], 0, 0, false, false, 0, 0],
   dealer: [[], 0, false, 0],
+  dealer_unmasked: [[], 0, false, 0],
   dealer_nat_21: false,
   deckLen: 104,
   tokens: 0,
@@ -194,6 +195,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       await handleStand();
       const rewards = await handleReward(false);
       const resp = extractGameStateData(rewards);
+      console.log("+++ --- resp: ", resp)
       transitionToState('MAIN_STAND', resp);
     } catch {
       transitionToState('ERROR');
@@ -463,6 +465,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               savePreActionState();
               const rewards = await handleReward(false);
               const resp = extractGameStateData(rewards);
+              console.log("++++++ resp: ", resp)
+              console.log("++++++ resp.dealer: ", resp?.dealer)
+              console.log("++++++ resp.dealer_unmasked: ", resp?.dealer_unmasked)
               transitionToState('MAIN_STAND', resp);
             } else {
               transitionToState('MAIN_TURN', response);
@@ -509,6 +514,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               currentGameState: 'BETTING',
               player: [[], 0, 0, false, false, 0, 0],
               dealer: [[], 0, false, 0],
+              dealer_unmasked: [[], 0, false, 0],
               deckLen: gameState.deckLen, // A deckLen értéke is átkerül
               tokens: gameState.tokens,
               bet: 0,
@@ -658,6 +664,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                       currentGameState: 'BETTING',
                       player: [[], 0, 0, false, false, 0, 0],
                       dealer: [[], 0, false, 0],
+                      dealer_unmasked: [[], 0, false, 0],
                       deckLen: gameState.deckLen,
                       tokens: gameState.tokens,
                       bet: 0,

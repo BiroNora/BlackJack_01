@@ -29,6 +29,7 @@ export function extractGameStateData(apiResponse: unknown): Partial<GameStateDat
     const processedData: Partial<GameStateData> = {
       player: rawGameState.player as PlayerData,
       dealer: rawGameState.dealer as DealerData,
+      dealer_unmasked: rawGameState.dealer_unmasked as DealerData,
       deckLen: rawGameState.deckLen as number,
       tokens: token,
       splitReq: rawGameState.splitReq as number,

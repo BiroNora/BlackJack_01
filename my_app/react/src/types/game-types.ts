@@ -20,6 +20,7 @@ export interface GameStateData {
   currentGameState: GameState;
   player: PlayerData;
   dealer: DealerData;
+  dealer_unmasked: DealerData;
   deckLen: number;
   dealer_nat_21: boolean;
   tokens: number;

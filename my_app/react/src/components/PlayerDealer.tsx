@@ -61,14 +61,14 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState, isSplitted }) => {
     return data.map((card) => String(card).trim());
   };
 
-  const nat21 = isSplitted ? player[6] : dealer[5];
+  const nat21 = isSplitted ? player[6] : dealer[3];
   const p_state = states[player[2]];
   const d_state = states[dealer[3]];
   const p_mood = nat21 === 1 || nat21 === 2 ? states[11] : p_state;
   const d_mood = nat21 === 3 || nat21 === 2 ? states[11] : d_state;
 
   const playerHand = loop(player[0]);
-  const dealerHand = loop(dealer[1]);
+  const dealerHand = loop(dealer[0]);
 
   const formattedPlayerHand = formatHand(playerHand);
   const formattedDealerHand = formatHand(dealerHand);
@@ -83,7 +83,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState, isSplitted }) => {
           <span className="score-mood merriweather5grey2">{d_mood}</span>
         </div>
         <div>
-          <span className="label-text">Dealer:{" "}</span><span className="label-text1">{dealer[2]}</span>
+          <span className="label-text">Dealer:{" "}</span><span className="label-text1">{dealer[1]}</span>
         </div>
       </div>
       <div id="player-hand" className="play">
