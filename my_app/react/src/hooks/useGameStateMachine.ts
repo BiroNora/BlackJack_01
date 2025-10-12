@@ -516,6 +516,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               player: [[], 0, 0, false, false, 0, 0],
               dealer: [[], 0, false, 0],
               dealer_unmasked: [[], 0, false, 0],
+              dealer_nat_21: false,
               deckLen: gameState.deckLen, // A deckLen értéke is átkerül
               tokens: gameState.tokens,
               bet: 0,
@@ -666,6 +667,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                       player: [[], 0, 0, false, false, 0, 0],
                       dealer: [[], 0, false, 0],
                       dealer_unmasked: [[], 0, false, 0],
+                      dealer_nat_21: false,
                       deckLen: gameState.deckLen,
                       tokens: gameState.tokens,
                       bet: 0,

@@ -62,11 +62,13 @@ class Game:
         self.players = []
         self.bet_list = []
         card1 = self.deck.pop(0)
-        # card2 = self.deck.pop(0)
+        card2 = self.deck.pop(0)
         card3 = self.deck.pop(0)
-        # card4 = self.deck.pop(0)
-        card2 = "♦10"
-        card4 = "♠A"
+        card4 = self.deck.pop(0)
+        # card2 = "♦10"
+        # card4 = "♠A"
+        # card1 = "♦10"
+        # card3 = "♠10"
         # PLAYER
         # [[], 0, NONE, False, False, 0, 0]
         # 0 player, 1 sum, 2 state, 3 can_split, 4 checked, 5 bet, 6 tokens
@@ -77,7 +79,6 @@ class Game:
         # 0 dealer_masked, 1 sum, 2 can_insure, 3 natural_21
         dealer_hand = [card2, card4]
         self.dealer_hand = dealer_hand
-        print("78: ", self.dealer_hand)
         dealer_masked = ["✪ ", card4]
 
         player_sum = self.sum(player_hand, True)
@@ -89,16 +90,13 @@ class Game:
         can_insure = card4[-1] == "A"
 
         nat_21 = self.natural_21_state(player_hand, dealer_hand)
-        print("90 nat_21: ", nat_21)
         natural_21 = 1 if nat_21 == 1 else 2 if nat_21 == 2 else 0
+
         self.dealer_sum = self.sum(dealer_hand, False)
-        print("92: ", self.dealer_sum)
         self.dealer_state = self.state(self.dealer_hand, self.dealer_sum)
-        print("95: ", self.dealer_state)
+        self.dealer_natural_21 = True if (nat_21 == 3 or nat_21 == 2) else False
 
         bet = self.get_bet()
-        self.dealer_natural_21 = True if (nat_21 == 3 or nat_21 == 2) else False
-        print("101: ", self.dealer_natural_21)
 
         self.player = [
             player_hand,
@@ -122,7 +120,6 @@ class Game:
             self.dealer_state
         ]
 
-        print("121", self.dealer_masked,self.dealer_unmasked, self.player)
         self.is_round_active = True
 
     def load_state_from_data(self, data):
@@ -242,7 +239,7 @@ class Game:
         else:
             self.set_dealer_sum(res)
             self.dealer_state = self.state(hand, res)
-        # print("235: sum: ", self.dealer_masked, self.dealer_unmasked, self.player)
+
         return res
 
     def natural_21_state(self, player_hand, dealer_hand):
@@ -283,10 +280,7 @@ class Game:
     def rewards(self, is_splitted: bool) -> int:
         bet = self.player[5]
         winner = self.winner_state()
-        print("282: ", self.dealer_unmasked)
-        print("283: ", self.dealer_masked)
-        natural_21_scenario = self.player[6] if is_splitted else self.dealer_unmasked[3]
-        print("285: ", natural_21_scenario)
+        natural_21_scenario = self.nat21_scen_helper(is_splitted)
         reward_amount = 0  # Alapértelmezett érték: 0 (veszteség)
 
         if natural_21_scenario == 1:
@@ -298,6 +292,18 @@ class Game:
 
         self.set_bet_to_null()
         return reward_amount
+
+    def nat21_scen_helper(self, is_splitted):
+        if is_splitted:
+            if self.player[6] == 2 and self.dealer_unmasked[2] == False:
+                return self.player[6]
+            if self.player[6] == 2 and self.dealer_unmasked[2] == True:
+                return 3
+        else:
+            if self.dealer_masked[3] == 0 and self.dealer_unmasked[2] == True:
+                return 3
+        return self.dealer_masked[3]
+
 
     def hit(self):
         if not self.is_round_active:
