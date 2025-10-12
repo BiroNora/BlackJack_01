@@ -82,7 +82,7 @@ const PlayerDealerMasked: React.FC<TableProps> = ({
   return (
     <div className="player-dealer-area">
       <div id="dealer-hand" className="play">
-        <div className="hand">{formattedDealerHand}</div>
+        <div className="hand"> &nbsp;&nbsp;&nbsp;&nbsp;{formattedDealerHand}</div>
         <div className="score-area-wrapper"></div>
         <div>
           <span className="label-text">Dealer:</span>

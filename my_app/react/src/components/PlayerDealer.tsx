@@ -73,9 +73,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState, isSplitted }) => {
   return (
     <div className="player-dealer-area">
       <div id="dealer-hand" className="play">
-        <div className="hand">
-          {formattedDealerHand}
-        </div>
+        <div className="hand"> {formattedDealerHand} </div>
         <div className="score-area-wrapper">
           <span className="score-mood merriweather5grey2">{d_mood}</span>
         </div>

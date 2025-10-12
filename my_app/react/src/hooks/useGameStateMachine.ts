@@ -240,13 +240,12 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     setIsWFSR(true);
     setInsPlaced(true);
     savePreActionState();
-    console.log("*** insWon: ", gameState.dealer_nat_21)
-    const insWon = gameState.dealer_nat_21;
-    console.log("*** insWon: ", insWon)
 
     try {
       const data = await handleInsurance();
       const resp = extractGameStateData(data);
+      const insWon = resp?.dealer_nat_21;
+
       if (insWon) {
         transitionToState('MAIN_STAND', resp);
       } else {
@@ -258,7 +257,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     } finally {
       setIsWFSR(false);
     }
-  }, [transitionToState, gameState, savePreActionState]);
+  }, [transitionToState, savePreActionState]);
 
 
   // SPLIT part
@@ -379,7 +378,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     if (gameState.currentGameState === 'LOADING') {
       const initializeApplicationOnLoad = async () => {
         try {
-          const minLoadingTimePromise = new Promise(resolve => setTimeout(resolve, 500));
+          const minLoadingTimePromise = new Promise(resolve => setTimeout(resolve, 7000));
 
           await Promise.all([
             initializeSessionAPI(),
@@ -436,7 +435,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               if (isMountedRef.current) {
                 transitionToState('INIT_GAME', response);
               }
-            }, 500);
+            }, 5000);
           }
         } catch (e) {
           // EZ A BLOKK FUT LE, HA A GETSHUFFLING() VAGY AZ EXTRACTGAMESTATEDATA() HIBÁVAL VÉGZŐDIK!
@@ -460,15 +459,10 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           const response = extractGameStateData(data);
           console.log(response)
           if (response && response.dealer) {
-            console.log("startGame response.dealer: ", response.dealer)
             if (response.dealer[3] === 1 || response.dealer[3] === 2) {
-              console.log("NAT_21 állapot", response.dealer[3])
               savePreActionState();
               const rewards = await handleReward(false);
               const resp = extractGameStateData(rewards);
-              console.log("++++++ resp: ", resp)
-              console.log("++++++ resp.dealer: ", resp?.dealer)
-              console.log("++++++ resp.dealer_unmasked: ", resp?.dealer_unmasked)
               transitionToState('MAIN_STAND', resp);
             } else {
               transitionToState('MAIN_TURN', response);

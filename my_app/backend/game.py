@@ -79,7 +79,7 @@ class Game:
         # 0 dealer_masked, 1 sum, 2 can_insure, 3 natural_21
         dealer_hand = [card2, card4]
         self.dealer_hand = dealer_hand
-        dealer_masked = ["✪ ", card4]
+        dealer_masked = [" ✪ ", card4]
 
         player_sum = self.sum(player_hand, True)
         dealer_sum = self.sum([card4], False)
@@ -291,6 +291,7 @@ class Game:
             reward_amount = bet
 
         self.set_bet_to_null()
+        self.is_round_active = False
         return reward_amount
 
     def nat21_scen_helper(self, is_splitted):
