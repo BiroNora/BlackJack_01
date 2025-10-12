@@ -240,8 +240,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     setIsWFSR(true);
     setInsPlaced(true);
     savePreActionState();
-
+    console.log("*** insWon: ", gameState.dealer_nat_21)
     const insWon = gameState.dealer_nat_21;
+    console.log("*** insWon: ", insWon)
 
     try {
       const data = await handleInsurance();

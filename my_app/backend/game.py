@@ -62,9 +62,11 @@ class Game:
         self.players = []
         self.bet_list = []
         card1 = self.deck.pop(0)
-        card2 = self.deck.pop(0)
+        # card2 = self.deck.pop(0)
         card3 = self.deck.pop(0)
-        card4 = self.deck.pop(0)
+        # card4 = self.deck.pop(0)
+        card2 = "♦10"
+        card4 = "♠A"
         # PLAYER
         # [[], 0, NONE, False, False, 0, 0]
         # 0 player, 1 sum, 2 state, 3 can_split, 4 checked, 5 bet, 6 tokens
@@ -95,6 +97,8 @@ class Game:
         print("95: ", self.dealer_state)
 
         bet = self.get_bet()
+        self.dealer_natural_21 = True if (nat_21 == 3 or nat_21 == 2) else False
+        print("101: ", self.dealer_natural_21)
 
         self.player = [
             player_hand,
@@ -264,7 +268,7 @@ class Game:
     def winner_state(self):
         player = self.player[1]
         dealer = self.dealer_unmasked[1]
-        
+
         if player > 21:
             self.winner = PLAYER_LOST
         elif player == dealer:
@@ -334,6 +338,7 @@ class Game:
     def insurance_request(self):
         bet = self.bet
         ins_cost = math.ceil(self.bet / 2)
+
         if self.dealer_natural_21:
             self.set_bet_to_null()
 
@@ -432,7 +437,7 @@ class Game:
         game.dealer_masked = data["dealer"]
         game.dealer_unmasked = data["dealer_unmasked"]
         game.dealer_hand = data["dealer_hand"]
-        game.dealer_nat_21 = data["dealer_nat_21"]
+        game.dealer_natural_21 = data["dealer_nat_21"]
         game.split_req = data["splitReq"]
         game.players = data["players"]
         game.bet = data["bet"]

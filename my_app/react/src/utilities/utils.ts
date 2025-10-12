@@ -30,6 +30,7 @@ export function extractGameStateData(apiResponse: unknown): Partial<GameStateDat
       player: rawGameState.player as PlayerData,
       dealer: rawGameState.dealer as DealerData,
       dealer_unmasked: rawGameState.dealer_unmasked as DealerData,
+      dealer_nat_21: rawGameState.dealer_nat_21 as boolean,
       deckLen: rawGameState.deckLen as number,
       tokens: token,
       splitReq: rawGameState.splitReq as number,
