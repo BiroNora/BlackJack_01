@@ -20,9 +20,9 @@ export interface GameStateData {
   currentGameState: GameState;
   player: PlayerData;
   dealer: DealerData;
-  dealer_unmasked: DealerData;
+  dealer_unmasked: DealerUnmaskedData;
   deckLen: number;
-  dealer_nat_21: boolean;
+  nat_21: number;
   tokens: number;
   splitReq: number;
   bet: number;
@@ -44,6 +44,9 @@ export type PlayerData = [
 
 export type DealerData =
 [string[], number, boolean, number];
+
+export type DealerUnmaskedData =
+[string[], number, number, number];
 
 export type SessionInitResponse = {
   message: string;

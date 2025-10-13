@@ -35,8 +35,8 @@ const initialGameState: GameStateData = {
   currentGameState: 'LOADING',
   player: [[], 0, 0, false, false, 0, 0],
   dealer: [[], 0, false, 0],
-  dealer_unmasked: [[], 0, false, 0],
-  dealer_nat_21: false,
+  dealer_unmasked: [[], 0, 0, 0],
+  nat_21: 0,
   deckLen: 104,
   tokens: 0,
   splitReq: 0,
@@ -244,9 +244,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     try {
       const data = await handleInsurance();
       const resp = extractGameStateData(data);
-      const insWon = resp?.dealer_nat_21;
+      const insWon = resp?.nat_21;
 
-      if (insWon) {
+      if (insWon === 3) {
         transitionToState('MAIN_STAND', resp);
       } else {
         setShowInsLost(true);
@@ -509,8 +509,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               currentGameState: 'BETTING',
               player: [[], 0, 0, false, false, 0, 0],
               dealer: [[], 0, false, 0],
-              dealer_unmasked: [[], 0, false, 0],
-              dealer_nat_21: false,
+              dealer_unmasked: [[], 0, 0, 0],
+              nat_21: 0,
               deckLen: gameState.deckLen, // A deckLen értéke is átkerül
               tokens: gameState.tokens,
               bet: 0,
@@ -647,8 +647,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           if (data && data.players) {
             if (data.players.length === 0) {
               if (data.tokens === 0) {
-                // If tokens are zero, transition to the game over state
-                // We don't need a new state object here, as OUT_OF_TOKENS handles this
                 transitionToState('OUT_OF_TOKENS');
               } else {
                 setHasHitTurn(false);
@@ -660,8 +658,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                       currentGameState: 'BETTING',
                       player: [[], 0, 0, false, false, 0, 0],
                       dealer: [[], 0, false, 0],
-                      dealer_unmasked: [[], 0, false, 0],
-                      dealer_nat_21: false,
+                      dealer_unmasked: [[], 0, 0, 0],
+                      nat_21: 0,
                       deckLen: gameState.deckLen,
                       tokens: gameState.tokens,
                       bet: 0,

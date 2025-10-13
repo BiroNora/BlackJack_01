@@ -8,7 +8,7 @@ interface TableProps {
 }
 
 const PlayerDealer: React.FC<TableProps> = ({ gameState, isSplitted }) => {
-  const { player, dealer, dealer_unmasked } = gameState;
+  const { player, dealer_unmasked } = gameState;
 
   const formatCard = (card: string): JSX.Element | string => {
     const suit = card[0]; // Az első karakter a szín
@@ -57,8 +57,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState, isSplitted }) => {
     return data.map((card) => String(card).trim());
   };
 
-  const nat21_helper = dealer[3] === 1 ? states[1] : dealer[3] === 2 ? states[2] : dealer_unmasked[2] === true ? states[3] : states[0];
-  const nat21 = isSplitted ? player[6] : nat21_helper;
+  const nat21 = isSplitted ? player[6] : dealer_unmasked[2];
   const p_state = states[player[2]];
   const d_state = states[dealer_unmasked[3]];
   const p_mood = nat21 === 1 || nat21 === 2 ? states[11] : p_state;
@@ -78,7 +77,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState, isSplitted }) => {
           <span className="score-mood merriweather5grey2">{d_mood}</span>
         </div>
         <div>
-          <span className="label-text">Dealer:{" "}</span><span className="label-text1">{dealer[1]}</span>
+          <span className="label-text">Dealer:{" "}</span><span className="label-text1">{dealer_unmasked[1]}</span>
         </div>
       </div>
       <div id="player-hand" className="play">

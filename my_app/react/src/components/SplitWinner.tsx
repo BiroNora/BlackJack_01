@@ -7,9 +7,9 @@ interface TableProps {
 
 const SplitWinner: React.FC<TableProps> = ({ gameState }) => {
   const { player, dealer_unmasked, winner } = gameState;
-
-  const nat21_helper = dealer_unmasked[2] === true ? 3 : 0;
-  const nat21 = (nat21_helper === 3 && player[6] === 2) ? player[6] : nat21_helper === 3 ? nat21_helper : player[6];
+  console.log("dealer_unmasked[2]: ", dealer_unmasked[2])
+  console.log("player[6]: ", player[6])
+  const nat21 = player[6];
   const state = states[winner];
   const winners = nat21 !== 0 ? states[nat21] : state;
 
