@@ -63,7 +63,6 @@ class Game:
         self.players = []
         self.stated = False
         self.split_req = 0
-        self.set_bet_to_null()
         self.set_bet_list_to_null()
         self.is_round_active = False
 
@@ -276,7 +275,7 @@ class Game:
         bet = self.player[5]
         winner = self.winner_state()
         natural_21_scenario = self.player[6] if is_splitted else self.natural_21
-        print("283, natural_21_scenario: ", natural_21_scenario)
+        # print("283, natural_21_scenario: ", natural_21_scenario)
         reward_amount = 0  # Alapértelmezett érték: 0 (veszteség)
 
         if self.natural_21 == 1:
@@ -351,7 +350,7 @@ class Game:
         hand_to_list = self.deal_card(new_hand2, False)
         self.player = new_hand
         self.players.insert(0, hand_to_list)
-        print("360: ", self.players)
+        
         self.set_split_req(1)
 
     def deal_card(self, hand, is_first):
@@ -378,7 +377,7 @@ class Game:
         if self.players[0][4] == False:
             self.player[4] = not self.stated
             self.players.append(self.player)
-
+        print("380: ", self.players)
         return self.players
 
     def add_split_player_to_game(self):

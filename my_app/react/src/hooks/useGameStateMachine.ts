@@ -156,12 +156,14 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [gameState.bet_list, transitionToState]);
 
   const handleStartGame = useCallback((shouldShuffle: boolean) => {
-    if (shouldShuffle) {
-      transitionToState('SHUFFLING');
-    } else {
-      transitionToState('INIT_GAME');
+    if (gameState) {
+      if (shouldShuffle) {
+        transitionToState('SHUFFLING', gameState);
+      } else {
+        transitionToState('INIT_GAME', gameState);
+      }
     }
-  }, [transitionToState]); // Függőség: transitionToState
+  }, [gameState, transitionToState]); // Függőség: transitionToState
 
   const handleHitRequest = useCallback(async () => {
     setIsWFSR(true);
@@ -322,11 +324,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     setIsWFSR(true); // reset in case state
 
     if (hasHitTurn === false) {
-      transitionToState('SPLIT_STAND_DOUBLE');
+      transitionToState('SPLIT_STAND_DOUBLE', gameState);
     } else {
-      transitionToState('SPLIT_STAND');
+      transitionToState('SPLIT_STAND', gameState);
     }
-  }, [hasHitTurn, transitionToState]);
+  }, [gameState, hasHitTurn, transitionToState]);
 
   const handleSplitDoubleRequest = useCallback(async () => {
     setIsWFSR(true);
@@ -343,14 +345,14 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           transitionToState('SPLIT_STAND_DOUBLE', response);
         }
       } else {
-        transitionToState('SPLIT_TURN');
+        transitionToState('SPLIT_TURN', gameState);
       }
     } catch {
       transitionToState('ERROR');
     } finally {
       setIsWFSR(false);
     }
-  }, [transitionToState]);
+  }, [gameState, transitionToState]);
 
   // --- useEffect blokkok ---
 
@@ -600,7 +602,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         try {
           timeoutIdRef.current = window.setTimeout(() => {
             if (isMountedRef.current) {
-              transitionToState('SPLIT_STAND');
+              transitionToState('SPLIT_STAND', gameState);
             }
           }, 2000);
         } catch {
@@ -666,7 +668,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                       bet_list: [],
                       players: [],
                       winner: 0,
-                      is_round_active: true,
+                      is_round_active: false,
                     });
                   }
                 }, 4000);
