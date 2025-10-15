@@ -62,13 +62,13 @@ const SplitPlayersFinish: React.FC<TableProps> = ({ gameState }) => {
       <ul id="players-list">
         {players
           .filter((_, index) => index !== 0)
-          .map((player, index) => {
+          .map((player) => {
             const hand = loop(player.hand);
             const formattedHand = formatHand(hand); // Formázzuk a lapokat JSX-re
             const bet = player.bet; // Kivesszük a tétet
 
             return (
-              <li key={index} className="player">
+              <li key={player.id} className="player">
                 Hand: {formattedHand} &nbsp; Bet: {bet}
               </li>
             );

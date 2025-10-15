@@ -678,6 +678,7 @@ def split_request(user, game):
     user.last_activity = datetime.now(timezone.utc)
 
     bet_amount = game.get_bet()
+    print("bet_amount: ", bet_amount)
 
     if user.tokens < bet_amount:
         # Error válasz, ha nincs elég token.
@@ -694,8 +695,7 @@ def split_request(user, game):
             ),
             402,
         )
-
-    if not game.can_split(game.player[0]):
+    if not game.can_split(game.player["hand"]):
         return (
             jsonify(
                 {
@@ -741,7 +741,7 @@ def split_request(user, game):
 
 
 # 16
-@app.route("/api/add_to_list_by_stand", methods=["POST"])
+@app.route("/api/add_to_players_list_by_stand", methods=["POST"])
 @login_required
 @game_session_required
 @api_error_handler
@@ -892,7 +892,7 @@ def force_restart_by_client_id():
 
     # === Új session létrehozása a felhasználó számára ===
     # Ez a lépés pótolja a hiányzó vagy törölt session cookie-t.
-    session.pop("game", None) # Töröljük a régi, potenciálisan hibás játék sessiont
+    session.pop("game", None)  # Töröljük a régi, potenciálisan hibás játék sessiont
     session["user_id"] = user.id
     session.permanent = True
 

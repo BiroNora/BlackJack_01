@@ -131,7 +131,7 @@ export async function splittedToHand() {
 }
 
 export async function updateSplitPlayersByStand() {
-  const data = await callApiEndpoint("/api/add_to_list_by_stand", "POST");
+  const data = await callApiEndpoint("/api/add_to_players_list_by_stand", "POST");
 
   return data;
 }

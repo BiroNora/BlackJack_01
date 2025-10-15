@@ -45,7 +45,6 @@ class Game:
         self.winner = NONE
         self.hand_counter: int = 0
         self.players: Dict[str, Dict[str, Any]] = {}
-        self.players[self.player['id']] = self.player
         self.stated = False
         self.split_req = 0
         self.suits = ["♥", "♦", "♣", "♠"]
@@ -90,8 +89,7 @@ class Game:
         self.natural_21 = False
         self.winner = NONE
         self.players = {}
-        self.players[self.player['id']] = self.player
-        self.hand_counter: int = 0
+        self.hand_counter = 0
         self.stated = False
         self.split_req = 0
         self.set_bet_list_to_null()
@@ -158,7 +156,7 @@ class Game:
             self.natural_21,
             self.dealer_state
         ]
-
+        print("161: ", self.player)
         self.is_round_active = True
 
     def load_state_from_data(self, data):
@@ -369,7 +367,7 @@ class Game:
 
         return self.bet
 
-    def split_hand(self):
+    def split_hand1(self):
         if not self.can_split(self.player['hand']) or len(self.players) > 3:
             return
         card_to_split = self.player['hand'].pop(0)
@@ -382,7 +380,26 @@ class Game:
 
         self.set_split_req(1)
 
-    def deal_card(self, hand, is_first):
+    def split_hand(self):
+        if not self.can_split(self.player['hand']) or len(self.players) > 3:
+            return
+
+        old_id = self.player['id']
+        card_to_split = self.player['hand'].pop(0)
+        new_hand1 = [card_to_split]
+        new_hand2 = [self.player['hand'].pop()]
+
+        new_id_B = self._generate_sequential_id()
+        print("395: ", new_id_B)
+        new_hand = self.deal_card(new_hand1, True, hand_id=old_id)
+        hand_to_list = self.deal_card(new_hand2, False, hand_id=new_id_B)
+
+        self.player = new_hand
+        self.players[hand_to_list['id']] = hand_to_list
+        print("403: ", self.players)
+        self.set_split_req(1)
+
+    def deal_card(self, hand, is_first, hand_id):
         if self.deck and is_first:
             hand.append(self.deck.pop(0))
         player_sum = self.sum(hand, True)
@@ -391,7 +408,7 @@ class Game:
         nat_21 = self.natural_21_state(hand, self.dealer_hand) if is_first else 0
         #split_natural_21 = 1 if nat_21 == 1 else 2 if nat_21 == 2 else 0
         player = {
-            "id": self._generate_sequential_id(),
+            "id": hand_id,
             "hand": hand,
             "sum": player_sum,
             "state": player_state,
@@ -402,12 +419,14 @@ class Game:
         }
 
         return player
-    # ITT
+
     def add_to_players_list_by_stand(self):
-        if self.players[0]['stated'] == False:
+        first_id = list(self.players.keys())[0]
+
+        if self.players[first_id]['stated'] == False:
             self.player['stated'] = not self.stated
             self.players[self.player['id']] = self.player
-        print("380: ", self.players)
+
         return self.players
 
     def add_split_player_to_game(self):
@@ -415,8 +434,8 @@ class Game:
             return None
 
         if self.players:
-            first_hand_id = list(self.players.keys())[0]
-            self.player = self.players.pop(first_hand_id)
+            first_id = list(self.players.keys())[0]
+            self.player = self.players.pop(first_id)
 
             if self.deck:
                 card = self.deck.pop(0)
@@ -436,8 +455,8 @@ class Game:
         if not self.players:
             return
 
-        first_hand_id = list(self.players.keys())[0]
-        self.player = self.players.pop(first_hand_id)
+        first_id = list(self.players.keys())[0]
+        self.player = self.players.pop(first_id)
 
     def serialize(self):
         all_hands = list(self.players.values())
@@ -457,6 +476,7 @@ class Game:
             "bet": self.bet,
             "bet_list": self.bet_list,
             "winner": self.winner,
+            "hand_counter": self.hand_counter,
             "is_round_active": self.is_round_active,
             "deckLen": self.get_deck_len(),
         }
@@ -475,6 +495,7 @@ class Game:
         game.bet = data["bet"]
         game.bet_list = data["bet_list"]
         game.winner = data["winner"]
+        game.hand_counter = data["hand_counter"]
         game.is_round_active = data.get("is_round_active", False)
         game.deck_len = data["deckLen"]
         return game

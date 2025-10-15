@@ -21,6 +21,7 @@ export interface GameStateData {
   player: PlayerData;
   dealer: DealerData;
   dealer_unmasked: DealerUnmaskedData;
+  dealer_hand: string[];
   deckLen: number;
   nat_21: number;
   tokens: number;
@@ -28,6 +29,7 @@ export interface GameStateData {
   bet: number;
   bet_list: number[];
   players: PlayerData[];
+  hand_counter: number;
   winner: number;
   is_round_active: boolean;
 }
