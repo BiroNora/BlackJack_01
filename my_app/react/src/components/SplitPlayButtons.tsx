@@ -25,7 +25,7 @@ const SplitPlayButtons: React.FC<SplitPlayButtonsProps> = ({
   const { tokens, bet, player, players } = gameState;
   const canDouble = tokens >= bet && hitCounter === null;
   const canSplit =
-    player[0].length == 2 && player[3] && tokens >= bet && hitCounter === null;
+    player.hand.length == 2 && player.can_split && tokens >= bet && hitCounter === null;
   const playersLength = players.length < 3 ? true : false;
   const [showButtons, setShowButtons] = useState(false);
   const timeoutIdRef = useRef<number | null>(null);

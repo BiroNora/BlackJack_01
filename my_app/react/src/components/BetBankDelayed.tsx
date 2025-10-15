@@ -29,7 +29,7 @@ const BetBankDelayed: React.FC<BetBankDelayedProps> = ({
     const timeoutId: NodeJS.Timeout = setTimeout(() => {
       //console.log("--- DEBUG --- BetBankDelayed: Késleltetés utáni frissítés.");
       setDisplayedTokens(finalGameState.tokens);
-      setDisplayedBet(finalGameState.player[5]);
+      setDisplayedBet(finalGameState.player.bet);
     }, 2000);
 
 

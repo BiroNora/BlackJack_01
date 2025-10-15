@@ -8,8 +8,8 @@ interface TableProps {
 const SplitWinner: React.FC<TableProps> = ({ gameState }) => {
   const { player, dealer_unmasked, winner } = gameState;
   console.log("dealer_unmasked[2]: ", dealer_unmasked[2])
-  console.log("player[6]: ", player[6])
-  const nat21 = player[6];
+  console.log("player.nat_21: ", player.nat_21)
+  const nat21 = player.nat_21;
   const state = states[winner];
   const winners = nat21 !== 0 ? states[nat21] : state;
 

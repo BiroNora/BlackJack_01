@@ -8,7 +8,7 @@ interface BetBankProps {
 
 const BetBank: React.FC<BetBankProps> = ({ gameState }) => {
   const { player, tokens } = gameState;
-  const currentBet = player[5];
+  const currentBet = player.bet;
 
   return (
     <div>

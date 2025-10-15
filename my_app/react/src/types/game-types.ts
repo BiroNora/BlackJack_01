@@ -32,15 +32,16 @@ export interface GameStateData {
   is_round_active: boolean;
 }
 
-export type PlayerData = [
-  string[],
-  number,
-  number,
-  boolean,
-  boolean,
-  number,
-  number
-];
+export interface PlayerData {
+  id: string;
+  hand: string[];
+  sum: number;
+  state: number;
+  can_split: boolean;
+  stated: boolean;
+  bet: number;
+  nat_21: number;
+}
 
 export type DealerData =
 [string[], number, boolean, number];

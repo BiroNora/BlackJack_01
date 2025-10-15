@@ -73,7 +73,7 @@ const PlayerDealerMasked: React.FC<TableProps> = ({
     return data.map((card) => String(card).trim());
   };
 
-  const playerHand = loop(player[0]);
+  const playerHand = loop(player.hand);
   const dealerHand = loop(dealer[0]);
 
   const formattedPlayerHand = formatHand(playerHand);
@@ -92,7 +92,7 @@ const PlayerDealerMasked: React.FC<TableProps> = ({
       <div id="player-hand" className="play">
         <div>
           <span className="label-text">Player:</span>
-          <span className="label-text1"> {player[1]}</span>
+          <span className="label-text1"> {player.sum}</span>
         </div>
         <div className="score-area-wrapper">
           {insMessage && (

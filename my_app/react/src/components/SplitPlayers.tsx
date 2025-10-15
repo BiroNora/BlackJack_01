@@ -60,9 +60,9 @@ const SplitPlayers: React.FC<TableProps> = ({ gameState }) => {
     <div>
       <ul id="players-list" className="players-list-responsive">
         {players.map((player, index) => {
-          const hand = loop(player[0]);
+          const hand = loop(player.hand);
           const formattedHand = formatHand(hand); // Formázzuk a lapokat JSX-re
-          const bet = player[5]; // Kivesszük a tétet
+          const bet = player.bet; // Kivesszük a tétet
 
           return (
             <li key={index} >

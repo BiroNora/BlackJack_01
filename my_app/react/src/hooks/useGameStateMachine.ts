@@ -33,7 +33,16 @@ import { extractGameStateData } from '../utilities/utils';
 // Kezdeti állapot a játékgép számára
 const initialGameState: GameStateData = {
   currentGameState: 'LOADING',
-  player: [[], 0, 0, false, false, 0, 0],
+  player: {
+    id: 'NONE',
+    hand: [],
+    sum: 0,
+    state: 0,
+    can_split: false,
+    stated: false,
+    bet: 0,
+    nat_21: 0,
+  },
   dealer: [[], 0, false, 0],
   dealer_unmasked: [[], 0, 0, 0],
   nat_21: 0,
@@ -88,7 +97,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
   const savePreActionState = useCallback(() => {
     if (gameState) {
-      setPreRewardBet(gameState.player[5]);
+      setPreRewardBet(gameState.player.bet);
       setPreRewardTokens(gameState.tokens);
     } else {
       setPreRewardBet(null);
@@ -174,7 +183,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const data = await handleHit();
       const response = extractGameStateData(data);
       if (response && response.player) {
-        const playerHandValue = response.player[1];
+        const playerHandValue = response.player.sum;
         if (playerHandValue >= 21) {
           setHasOver21(true);
         }
@@ -215,7 +224,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const doubledState = extractGameStateData(doubleResponse);
 
       if (doubledState && doubledState.player && doubledState.tokens) {
-        setPreRewardBet(doubledState.player[5]);
+        setPreRewardBet(doubledState.player.bet);
         setPreRewardTokens(doubledState.tokens);
 
         const hitResponse = await handleHit();
@@ -273,7 +282,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const response = await splitHand()
       const resp = extractGameStateData(response);
       if (resp && resp.player) {
-        if (resp.player[6] === 1 || resp.player[6] === 2) {
+        if (resp.player.nat_21 === 1 || resp.player.nat_21 === 2) {
           transitionToState('SPLIT_NAT21_TRANSIT', resp);
         } else {
           transitionToState('SPLIT_TURN', resp);
@@ -297,7 +306,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       incrementHitCounter();
 
       if (response && response.player) {
-        const playerHandValue = response.player[1];
+        const playerHandValue = response.player.sum;
 
         if (playerHandValue >= 21) {
           if (newHitCounter === 1) {
@@ -380,7 +389,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     if (gameState.currentGameState === 'LOADING') {
       const initializeApplicationOnLoad = async () => {
         try {
-          const minLoadingTimePromise = new Promise(resolve => setTimeout(resolve, 7000));
+          const minLoadingTimePromise = new Promise(resolve => setTimeout(resolve, 500));
 
           await Promise.all([
             initializeSessionAPI(),
@@ -437,7 +446,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               if (isMountedRef.current) {
                 transitionToState('INIT_GAME', response);
               }
-            }, 5000);
+            }, 500);
           }
         } catch (e) {
           // EZ A BLOKK FUT LE, HA A GETSHUFFLING() VAGY AZ EXTRACTGAMESTATEDATA() HIBÁVAL VÉGZŐDIK!
@@ -509,7 +518,16 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           } else {
             const nextRoundGameState: Partial<GameStateData> = {
               currentGameState: 'BETTING',
-              player: [[], 0, 0, false, false, 0, 0],
+              player: {
+                id: 'NONE',
+                hand: [],
+                sum: 0,
+                state: 0,
+                can_split: false,
+                stated: false,
+                bet: 0,
+                nat_21: 0,
+              },
               dealer: [[], 0, false, 0],
               dealer_unmasked: [[], 0, 0, 0],
               nat_21: 0,
@@ -546,7 +564,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             const ans = extractGameStateData(splitResponse);
 
             if (ans && ans.player) {
-              if (ans.player[0].length === 2 && (ans.player[6] === 1 || ans.player[6] === 2)) {
+              if (ans.player.hand.length === 2 && (ans.player.nat_21 === 1 || ans.player.nat_21 === 2)) {
                 if (gameState.currentGameState === 'SPLIT_STAND_DOUBLE') {
                   timeoutIdRef.current = window.setTimeout(() => {
                     // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
@@ -658,7 +676,16 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                   if (isMountedRef.current) {
                     transitionToState('BETTING', {
                       currentGameState: 'BETTING',
-                      player: [[], 0, 0, false, false, 0, 0],
+                      player: {
+                        id: 'NONE',
+                        hand: [],
+                        sum: 0,
+                        state: 0,
+                        can_split: false,
+                        stated: false,
+                        bet: 0,
+                        nat_21: 0,
+                      },
                       dealer: [[], 0, false, 0],
                       dealer_unmasked: [[], 0, 0, 0],
                       nat_21: 0,
