@@ -15,7 +15,6 @@ const PlayerDealerMasked: React.FC<TableProps> = ({
   const { player, dealer } = gameState;
 
   const dealerMasked = dealer[0][1][1];
-  console.log("dealerMasked: ", dealerMasked)
   const dealerMaskedScore = maskedScore(dealerMasked);
 
   const formatCard = (card: string): JSX.Element | string => {

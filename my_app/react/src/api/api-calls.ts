@@ -124,13 +124,13 @@ export async function splitHand() {
   return data;
 }
 
-export async function splittedToHand() {
+export async function addSplitPlayerToGame() {
   const data = await callApiEndpoint("/api/add_split_player_to_game", "POST");
 
   return data;
 }
 
-export async function updateSplitPlayersByStand() {
+export async function addToPlayersListByStand() {
   const data = await callApiEndpoint("/api/add_to_players_list_by_stand", "POST");
 
   return data;

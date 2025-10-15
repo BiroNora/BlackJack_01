@@ -13,8 +13,8 @@ import {
   handleInsurance,
   handleDouble,
   splitHand,
-  updateSplitPlayersByStand,
-  splittedToHand,
+  addToPlayersListByStand,
+  addSplitPlayerToGame,
   updatePlayerFromPlayers,
   getGameData,
   setRestart,
@@ -71,7 +71,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const [hasSplitNat21, setHasSplitNat21] = useState(false);
   const [hitCounter, setHitCounter] = useState<number | null>(null);
   const [initDeckLen, setInitDeckLen] = useState<number | null>(null);
-  // isWaitingForServerResponse = isWFSR
+  // isWaitingForServerResponse = isWFSR  (button disabling)
   // setIsWaitingForServerResponse = setIsWFSR
   const [isWFSR, setIsWFSR] = useState(false);
 
@@ -560,11 +560,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         try {
           if (!isMountedRef.current) return;
-          const data = await updateSplitPlayersByStand();
+          const data = await addToPlayersListByStand();
           const response = extractGameStateData(data);
 
           if (response && response.splitReq && response.splitReq > 0) {
-            const splitResponse = await splittedToHand();
+            const splitResponse = await addSplitPlayerToGame();
             const ans = extractGameStateData(splitResponse);
 
             if (ans && ans.player) {
@@ -580,10 +580,10 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                   transitionToState('SPLIT_NAT21_TRANSIT', ans);
                 }
               } else {
-                if (hasSplitNat21) {
+                if (hasSplitNat21) { // do not wait 2*2000 sec
                   setHasSplitNat21(false);
                   transitionToState('SPLIT_TURN', ans);
-                } else {
+                } else  {
                   timeoutIdRef.current = window.setTimeout(() => {
                     // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
                     if (isMountedRef.current) {
@@ -642,9 +642,15 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           savePreActionState();
           const standData = await handleStand();
           const stand = extractGameStateData(standData);
+          console.log("STAND")
+          console.log(stand?.player)
+          console.log(stand?.winner)
 
           const rewardData = await handleReward(true);
           const reward = extractGameStateData(rewardData);
+          console.log("REWARD")
+          console.log(reward?.player)
+          console.log(reward?.winner)
 
           if (reward && reward?.players && stand) {
             const combinedState = { ...stand, ...reward };

@@ -289,10 +289,16 @@ class Game:
 
         if player > 21:
             self.winner = PLAYER_LOST
+
+        elif dealer > 21:
+            self.winner = PLAYER_WON
+
         elif player == dealer:
             self.winner = PUSH
-        elif dealer > 21 or player > dealer:
+
+        elif player > dealer:
             self.winner = PLAYER_WON
+
         else:
             self.winner = DEALER_WON
 
@@ -300,20 +306,21 @@ class Game:
 
     def rewards(self, is_splitted: bool) -> int:
         bet = self.player['bet']
-        winner = self.winner_state()
+
         natural_21_scenario = self.player['nat_21'] if is_splitted else self.natural_21
-        # print("283, natural_21_scenario: ", natural_21_scenario)
+        print("283, natural_21_scenario: ", natural_21_scenario)
         reward_amount = 0  # Alapértelmezett érték: 0 (veszteség)
 
         if self.natural_21 == 1:
             reward_amount = math.floor(bet * 2.5)  # Eredeti tét + 1.5x nyeremény
-        elif winner == 6 and natural_21_scenario != 3:
+        elif self.winner == 6 and natural_21_scenario != 3:
             reward_amount = bet * 2  # Eredeti tét + 1x nyeremény
-        elif (winner == 4 and natural_21_scenario != 3) or natural_21_scenario == 2:
+        elif (self.winner == 4 and natural_21_scenario != 3) or natural_21_scenario == 2:
             reward_amount = bet
 
         self.set_bet_to_null()
         self.is_round_active = False
+
         return reward_amount
 
     def hit(self):
@@ -333,7 +340,8 @@ class Game:
                 count = self.sum(self.dealer_hand, False)
 
         self.unmasked_const(count)
-
+        self.winner = self.winner_state()
+        
         return self.dealer_unmasked
 
     def unmasked_const(self, count):
@@ -367,18 +375,6 @@ class Game:
 
         return self.bet
 
-    def split_hand1(self):
-        if not self.can_split(self.player['hand']) or len(self.players) > 3:
-            return
-        card_to_split = self.player['hand'].pop(0)
-        new_hand1 = [card_to_split]
-        new_hand2 = [self.player['hand'].pop()]
-        new_hand = self.deal_card(new_hand1, True)
-        hand_to_list = self.deal_card(new_hand2, False)
-        self.player = new_hand
-        self.players[hand_to_list['id']] = hand_to_list
-
-        self.set_split_req(1)
 
     def split_hand(self):
         if not self.can_split(self.player['hand']) or len(self.players) > 3:
@@ -448,7 +444,8 @@ class Game:
                 self.player['can_split'] = can_split
                 self.player['nat_21'] = self.natural_21_state(hand, self.dealer_hand)
             self.set_split_req(-1)
-        return self.players
+
+        return self.player
 
 
     def add_player_from_players(self):
@@ -457,6 +454,8 @@ class Game:
 
         first_id = list(self.players.keys())[0]
         self.player = self.players.pop(first_id)
+
+        return self.player
 
     def serialize(self):
         all_hands = list(self.players.values())
