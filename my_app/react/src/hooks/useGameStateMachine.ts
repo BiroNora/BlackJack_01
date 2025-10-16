@@ -37,24 +37,32 @@ const initialGameState: GameStateData = {
     id: 'NONE',
     hand: [],
     sum: 0,
-    state: 0,
+    hand_state: 0,
     can_split: false,
     stated: false,
     bet: 0,
+  },
+  dealer_masked: {
+    hand: [],
+    sum: 0,
+    can_insure: false,
     nat_21: 0,
   },
-  dealer: [[], 0, false, 0],
-  dealer_unmasked: [[], 0, 0, 0],
-  dealer_hand: [],
-  nat_21: 0,
+  dealer_unmasked: {
+    hand: [],
+    sum: 0,
+    hand_state: 0,
+    natural_21: 0,
+  },
+  natural_21: 0,
+  winner: 0,
+  hand_counter: 0,
+  players: [],
+  splitReq: 0,
   deckLen: 104,
   tokens: 0,
-  splitReq: 0,
   bet: 0,
   bet_list: [],
-  players: [],
-  hand_counter: 0,
-  winner: 0,
   is_round_active: false,
 };
 
@@ -206,7 +214,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     try {
       await handleStand();
-      const rewards = await handleReward(false);
+      const rewards = await handleReward();
       const resp = extractGameStateData(rewards);
       console.log("+++ --- resp: ", resp)
       transitionToState('MAIN_STAND', resp);
@@ -234,7 +242,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         if (hitState) {
           await handleStand();
-          const rewardsResponse = await handleReward(false);
+          const rewardsResponse = await handleReward();
           const finalState = extractGameStateData(rewardsResponse);
 
           if (finalState) {
@@ -257,7 +265,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     try {
       const data = await handleInsurance();
       const resp = extractGameStateData(data);
-      const insWon = resp?.nat_21;
+      const insWon = resp?.natural_21;
 
       if (insWon === 3) {
         transitionToState('MAIN_STAND', resp);
@@ -284,7 +292,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const response = await splitHand()
       const resp = extractGameStateData(response);
       if (resp && resp.player) {
-        if (resp.player.nat_21 === 1 || resp.player.nat_21 === 2) {
+        if (resp.natural_21 === 1 || resp.natural_21 === 2) {
           transitionToState('SPLIT_NAT21_TRANSIT', resp);
         } else {
           transitionToState('SPLIT_TURN', resp);
@@ -471,10 +479,10 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           const data = await startGame();
           const response = extractGameStateData(data);
           console.log(response)
-          if (response && response.dealer) {
-            if (response.dealer[3] === 1 || response.dealer[3] === 2) {
+          if (response && response.dealer_masked) {
+            if (response.dealer_masked.nat_21 === 1 || response.dealer_masked.nat_21 === 2) {
               savePreActionState();
-              const rewards = await handleReward(false);
+              const rewards = await handleReward();
               const resp = extractGameStateData(rewards);
               transitionToState('MAIN_STAND', resp);
             } else {
@@ -497,7 +505,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         try {
           if (hasOver21) {
             await handleStand();
-            const rewards = await handleReward(false);
+            const rewards = await handleReward();
             const resp = extractGameStateData(rewards);
             transitionToState('MAIN_STAND', resp);
           }
@@ -524,24 +532,33 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                 id: 'NONE',
                 hand: [],
                 sum: 0,
-                state: 0,
+                hand_state: 0,
                 can_split: false,
                 stated: false,
                 bet: 0,
+              },
+              dealer_masked: {
+                hand: [],
+                sum: 0,
+                can_insure: false,
                 nat_21: 0,
               },
-              dealer: [[], 0, false, 0],
-              dealer_unmasked: [[], 0, 0, 0],
-              dealer_hand: [],
-              nat_21: 0,
+              dealer_unmasked: {
+                hand: [],
+                sum: 0,
+                hand_state: 0,
+                natural_21: 0,
+              },
+              natural_21: 0,
+              winner: 0,
+              hand_counter: 0,
+              players: [],
+              splitReq: 0,
               deckLen: gameState.deckLen, // A deckLen értéke is átkerül
               tokens: gameState.tokens,
               bet: 0,
               bet_list: [],
-              players: [],
-              hand_counter: 0,
-              winner: 0,
-              is_round_active: true,
+              is_round_active: false,
             };
             transitionToState('BETTING', nextRoundGameState);
           }
@@ -562,13 +579,15 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           if (!isMountedRef.current) return;
           const data = await addToPlayersListByStand();
           const response = extractGameStateData(data);
+          const currSplitReq = response?.splitReq || 0;
+          console.log("addToPlayersListByStand() response: ", response)
 
-          if (response && response.splitReq && response.splitReq > 0) {
+          if (currSplitReq > 0) {
             const splitResponse = await addSplitPlayerToGame();
             const ans = extractGameStateData(splitResponse);
 
             if (ans && ans.player) {
-              if (ans.player.hand.length === 2 && (ans.player.nat_21 === 1 || ans.player.nat_21 === 2)) {
+              if (ans.player.hand.length === 2 && ans.player.sum === 21) {
                 if (gameState.currentGameState === 'SPLIT_STAND_DOUBLE') {
                   timeoutIdRef.current = window.setTimeout(() => {
                     // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
@@ -583,7 +602,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                 if (hasSplitNat21) { // do not wait 2*2000 sec
                   setHasSplitNat21(false);
                   transitionToState('SPLIT_TURN', ans);
-                } else  {
+                } else {
                   timeoutIdRef.current = window.setTimeout(() => {
                     // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
                     if (isMountedRef.current) {
@@ -646,7 +665,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           console.log(stand?.player)
           console.log(stand?.winner)
 
-          const rewardData = await handleReward(true);
+          const rewardData = await handleReward();
           const reward = extractGameStateData(rewardData);
           console.log("REWARD")
           console.log(reward?.player)
@@ -690,23 +709,32 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                         id: 'NONE',
                         hand: [],
                         sum: 0,
-                        state: 0,
+                        hand_state: 0,
                         can_split: false,
                         stated: false,
                         bet: 0,
+                      },
+                      dealer_masked: {
+                        hand: [],
+                        sum: 0,
+                        can_insure: false,
                         nat_21: 0,
                       },
-                      dealer: [[], 0, false, 0],
-                      dealer_unmasked: [[], 0, 0, 0],
-                      dealer_hand: [],
-                      nat_21: 0,
+                      dealer_unmasked: {
+                        hand: [],
+                        sum: 0,
+                        hand_state: 0,
+                        natural_21: 0,
+                      },
+                      natural_21: 0,
+                      winner: 0,
+                      hand_counter: 0,
+                      players: [],
+                      splitReq: 0,
                       deckLen: gameState.deckLen,
                       tokens: gameState.tokens,
                       bet: 0,
                       bet_list: [],
-                      players: [],
-                      hand_counter: 0,
-                      winner: 0,
                       is_round_active: false,
                     });
                   }

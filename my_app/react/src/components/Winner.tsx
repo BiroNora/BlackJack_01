@@ -8,7 +8,7 @@ interface TableProps {
 const Winner: React.FC<TableProps> = ({ gameState }) => {
   const { dealer_unmasked, winner } = gameState;
 
-  const nat21 = dealer_unmasked[2];
+  const nat21 = dealer_unmasked.natural_21;
   const state = states[winner];
   const winners = nat21 !== 0 ? states[nat21] : state;
 

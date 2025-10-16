@@ -3,21 +3,11 @@ import random
 
 from collections import Counter
 from typing import Any, Dict
-import uuid
+
+from hand_state import HandState
+from winner_state import WinnerState
 
 NONE = 0
-BLACKJACK_PLAYER_WON = 1
-BLACKJACK_PUSH = 2
-BLACKJACK_DEALER_WON = 3
-PUSH = 4
-PLAYER_LOST = 5
-PLAYER_WON = 6
-DEALER_WON = 7
-TWENTY_ONE = 8
-BUST = 9
-UNDER_21 = 10
-BLACKJACK = 11
-
 
 class Game:
     def __init__(self):
@@ -25,75 +15,38 @@ class Game:
             "id": NONE,
             "hand": [],
             "sum": 0,
-            "state": NONE,
+            "hand_state": HandState.NONE,
             "can_split": False,
             "stated": False,
             "bet": 0,
-            "nat_21": NONE
         }
-        # self.player = [[], 0, NONE, False, False, 0, NONE]
-        # 0 player, 1 sum, 2 state, 3 can_split, 4 self.stated, 5 bet, 6 natural_21 in split
-        self.dealer_masked = [[], 0, False, NONE]
-        # 0 dealer_masked, 1 sum, 2 can_insure, 3 natural_21
-        self.dealer_unmasked = [[], 0, NONE, NONE]
-        # 0 dealer, 1 sum, 2 natural_21, 3 state
-        self.dealer_hand = []
-        self.player_state = NONE
-        self.dealer_state = NONE
-        self.dealer_sum = 0
-        self.natural_21 = NONE
-        self.winner = NONE
-        self.hand_counter: int = 0
+        self.dealer_masked: Dict[str, Any] = {
+            "hand": [],
+            "sum": 0,
+            "can_insure": False,
+            "nat_21": WinnerState.NONE, # Only 1/2/0
+        }
+        self.dealer_unmasked: Dict[str, Any] = {
+            "hand": [],
+            "sum": 0,
+            "hand_state": HandState.NONE,
+            "natural_21": WinnerState.NONE,
+        }
+        self.natural_21 = WinnerState.NONE
+        self.winner = WinnerState.NONE
+        self.hand_counter: int = 0 # helper for the players dict
         self.players: Dict[str, Dict[str, Any]] = {}
         self.stated = False
-        self.split_req = 0
+        self.split_req: int = 0
         self.suits = ["♥", "♦", "♣", "♠"]
         # self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
         self.ranks = ["A", "K", "Q", "J", "9"]
         self.deck = []
         self.deck_len = 104
-        self.bet = 0
+        self.bet: int = 0
         self.bet_list = []
         self.is_round_active = False
 
-    def _generate_sequential_id(self) -> str:
-        self.hand_counter += 1
-        formatted_count = f"{self.hand_counter:03d}"
-
-        return f"H-{formatted_count}"
-
-    def create_deck(self):
-        single_deck = [f"{suit}{rank}" for suit in self.suits for rank in self.ranks]
-        self.deck = single_deck * 2
-        random.shuffle(self.deck)
-
-        return self.deck
-
-    def clear_up(self):
-        self.player = {
-            "id": NONE,
-            "hand": [],
-            "sum": 0,
-            "state": NONE,
-            "can_split": False,
-            "stated": False,
-            "bet": 0,
-            "nat_21": NONE
-        }
-        self.dealer_masked = [[], 0, False, NONE]
-        self.dealer_unmasked = [[], 0, NONE, NONE]
-        self.dealer_hand = []
-        self.player_state = NONE
-        self.dealer_state = NONE
-        self.dealer_sum = 0
-        self.natural_21 = False
-        self.winner = NONE
-        self.players = {}
-        self.hand_counter = 0
-        self.stated = False
-        self.split_req = 0
-        self.set_bet_list_to_null()
-        self.is_round_active = False
 
     def initialize_new_round(self):
         self.clear_up()
@@ -102,140 +55,55 @@ class Game:
         #card3 = self.deck.pop(0)
         card4 = self.deck.pop(0)
         #card2 = "♦10"
-        #card4 = "♠A"
+        # card4 = "♠A"
         card1 = "♦10"
         card3 = "♠10"
-        # PLAYER
-        # [[], 0, NONE, False, False, 0, 0]
-        # 0 player, 1 sum, 2 state, 3 can_split, 4 checked, 5 bet, 6 tokens
         player_hand = [card1, card3]
-        # player_hand = ["♦10", "♠A"]
-        # DEALER
-        # [[], 0, False, NONE]
-        # 0 dealer_masked, 1 sum, 2 can_insure, 3 natural_21
         dealer_hand = [card2, card4]
-        self.dealer_hand = dealer_hand
         dealer_masked = [" ✪ ", card4]
+        # dealer_masked = [" ✪ ", card4]
+        # dealer_hand = [card2, card4]
+        # dealer_masked = [" ✪ ", card4]
 
         player_sum = self.sum(player_hand, True)
-        dealer_sum = self.sum([card4], False)
+        dealer_masked_sum = self.sum([card4], False)
+        dealer_unmasked_sum = self.sum(dealer_hand, False)
 
-        player_state = self.state(player_hand, player_sum)
+        self.natural_21 = self.init_natural_21_state(player_hand, dealer_hand)
+        nat_21 = WinnerState.NONE
+        if self.natural_21 == WinnerState.BLACKJACK_PLAYER_WON or self.natural_21 == WinnerState.BLACKJACK_PUSH:
+            nat_21 = self.natural_21
 
         can_split = self.can_split(player_hand)
         can_insure = card4[-1] == "A"
 
-        nat_21 = self.natural_21_state(player_hand, dealer_hand)
-        natural_21 = 1 if nat_21 == 1 else 2 if nat_21 == 2 else 0
-
-        self.dealer_sum = self.sum(dealer_hand, False)
-        self.dealer_state = self.state(self.dealer_hand, self.dealer_sum)
-        self.natural_21 = nat_21
+        dealer_unmasked_state = self.hand_state(dealer_unmasked_sum, False)
 
         bet = self.get_bet()
+        self.is_round_active = True
 
         self.player = {
             "id": self._generate_sequential_id(),
             "hand": player_hand,
             "sum": player_sum,
-            "state": player_state,
+            "hand_state": HandState.NONE,
             "can_split": can_split,
             "stated": self.stated,
             "bet": bet,
-            "nat_21": natural_21
         }
-        self.dealer_masked = [
-            dealer_masked,
-            dealer_sum,
-            can_insure,
-            natural_21,
-        ]
-        self.dealer_unmasked = [
-            self.dealer_hand,
-            self.dealer_sum,
-            self.natural_21,
-            self.dealer_state
-        ]
-        print("161: ", self.player)
-        self.is_round_active = True
+        self.dealer_masked: Dict[str, Any] = {
+            "hand": dealer_masked,
+            "sum": dealer_masked_sum,
+            "can_insure": can_insure,
+            "nat_21": nat_21, # Only 1/2/0
+        }
+        self.dealer_unmasked: Dict[str, Any] = {
+            "hand": dealer_hand,
+            "sum": dealer_unmasked_sum,
+            "hand_state": dealer_unmasked_state,
+            "natural_21": self.natural_21,
+        }
 
-    def load_state_from_data(self, data):
-        self.is_round_active = data.get("is_round_active", False)
-
-    def set_player_hand(self, card):
-        self.player['hand'].append(card)
-
-    def set_player_sum(self, sum):
-        self.player['sum'] = sum
-
-    def set_dealer_sum(self, sum):
-        self.dealer_masked[1] = sum
-
-    def get_player_state(self):
-        return self.player['state']
-
-    def set_player_state(self, state):
-        self.player['state'] = state
-
-    def get_dealer_state(self):
-        return self.dealer_unmasked[2]
-
-    def set_dealer_state(self, state):
-        self.dealer_unmasked[2] = state
-
-    def get_players(self):
-        return self.players
-
-    def set_bet(self, amount):
-        self.bet += amount
-        self.player['bet'] = self.player['bet'] + amount
-
-    def set_bet_to_null(self):
-        self.bet = 0
-        self.player['bet'] = 0
-
-    def get_bet(self):
-        return self.bet
-
-    def get_tokens(self):
-        return self.user_tokens
-
-    def get_bet_list(self):
-        return self.bet_list
-
-    def set_bet_list(self, bet):
-        self.bet_list.append(bet)
-
-    def set_bet_list_to_null(self):
-        self.bet_list = []
-
-    def get_split_req(self):
-        return self.split_req
-
-    def set_split_req(self, count):
-        self.split_req += count
-
-    def get_deck_len(self):
-        if len(self.deck) > 0:
-            return len(self.deck)
-        else:
-            return self.deck_len
-
-    def get_is_round_active(self):
-        return self.is_round_active
-
-    def restart_game(self):
-        self.__init__()
-
-    def hand_to_ranks(self, hand):
-        return "".join(c[-1] for c in hand)
-
-    def can_split(self, hand):
-        ranks = self.hand_to_ranks(hand)
-        tens = ["K", "Q", "J", "0"]
-        return len(ranks) == 2 and (
-            (ranks[0] == ranks[1]) or (ranks[0] in tens and ranks[1] in tens)
-        )
 
     def sum(self, hand, is_player):
         ranks = self.hand_to_ranks(hand)
@@ -256,58 +124,93 @@ class Game:
                     res += 1
         if is_player:
             self.set_player_sum(res)
-            self.set_player_state(self.state(hand, res))
         else:
             self.set_dealer_sum(res)
-            self.dealer_state = self.state(hand, res)
 
         return res
 
-    def natural_21_state(self, player_hand, dealer_hand):
+
+    def init_natural_21_state(self, player_hand, dealer_hand):
         player_natural = self.sum(player_hand, True) == 21 and len(player_hand) == 2
         dealer_natural = self.sum(dealer_hand, False) == 21 and len(dealer_hand) == 2
 
         if player_natural and dealer_natural:
-            self.natural_21 = BLACKJACK_PUSH
+            self.natural_21 = WinnerState.BLACKJACK_PUSH
         elif player_natural:
-            self.natural_21 = BLACKJACK_PLAYER_WON
+            self.natural_21 = WinnerState.BLACKJACK_PLAYER_WON
         elif dealer_natural:
-            self.natural_21 = BLACKJACK_DEALER_WON
+            self.natural_21 = WinnerState.BLACKJACK_DEALER_WON
         else:
-            self.natural_21 = NONE
+            self.natural_21 = WinnerState.NONE
 
         return self.natural_21
 
-    def state(self, hand, count):
-        state = BLACKJACK if (len(hand) == 2 and count == 21) else TWENTY_ONE if count == 21 else BUST if count > 21 else UNDER_21
+
+    def hand_state(self, count, is_player):
+        if count > 21:
+            state = HandState.BUST
+        elif count == 21:
+            state = HandState.TWENTY_ONE
+        else:
+            state = HandState.UNDER_21
+
+        if is_player and (self.natural_21 == WinnerState.BLACKJACK_PLAYER_WON or self.natural_21 == WinnerState.BLACKJACK_PUSH):
+            state = HandState.BLACKJACK
+
+        if not is_player and (self.natural_21 == WinnerState.BLACKJACK_DEALER_WON or self.natural_21 == WinnerState.BLACKJACK_PUSH):
+            state = HandState.BLACKJACK
 
         return state
 
     def winner_state(self):
         player = self.player['sum']
-        dealer = self.dealer_unmasked[1]
+        dealer = self.dealer_unmasked['sum']
 
         if player > 21:
-            self.winner = PLAYER_LOST
+            self.winner = WinnerState.PLAYER_LOST
 
         elif dealer > 21:
-            self.winner = PLAYER_WON
+            self.winner = WinnerState.PLAYER_WON
 
         elif player == dealer:
-            self.winner = PUSH
+            self.winner = WinnerState.PUSH
 
         elif player > dealer:
-            self.winner = PLAYER_WON
+            self.winner = WinnerState.PLAYER_WON
 
         else:
-            self.winner = DEALER_WON
+            self.winner = WinnerState.DEALER_WON
 
         return self.winner
 
-    def rewards(self, is_splitted: bool) -> int:
+    def hit(self):
+        if not self.is_round_active:
+            return
+        new_card = self.deck.pop(0)
+        self.set_player_hand(new_card)
+
+        self.sum(self.player['hand'], True)
+
+
+    def stand(self):
+        count = self.sum(self.dealer_unmasked['hand'], False)
+        if self.sum(self.player['hand'], True) <= 21:
+            while count < 17:
+                card = self.deck.pop(0)
+                self.dealer_unmasked['hand'].append(card)
+                count = self.sum(self.dealer_unmasked['hand'], False)
+                self.dealer_unmasked['sum'] = count
+
+        self.dealer_unmasked['hand_state'] = self.hand_state(count, False)
+        self.player['hand_state'] = self.hand_state(self.player['sum'], True)
+        self.winner = NONE
+        self.winner = self.winner_state()
+
+
+    def rewards(self) -> int:
         bet = self.player['bet']
 
-        natural_21_scenario = self.player['nat_21'] if is_splitted else self.natural_21
+        natural_21_scenario = self.dealer_unmasked['natural_21']
         print("283, natural_21_scenario: ", natural_21_scenario)
         reward_amount = 0  # Alapértelmezett érték: 0 (veszteség)
 
@@ -323,35 +226,6 @@ class Game:
 
         return reward_amount
 
-    def hit(self):
-        if not self.is_round_active:
-            return
-        new_card = self.deck.pop(0)
-        self.set_player_hand(new_card)
-
-        self.sum(self.player['hand'], True)
-
-    def stand(self):
-        count = self.sum(self.dealer_hand, False)
-        if self.sum(self.player['hand'], True) <= 21:
-            while count < 17:
-                card = self.deck.pop(0)
-                self.dealer_hand.append(card)
-                count = self.sum(self.dealer_hand, False)
-
-        self.unmasked_const(count)
-        self.winner = self.winner_state()
-        
-        return self.dealer_unmasked
-
-    def unmasked_const(self, count):
-        self.dealer_unmasked[0] = self.dealer_hand
-        self.dealer_unmasked[1] = count
-        # self.dealer_unmasked[2] = base False or True / initialize_new_round
-        self.dealer_unmasked[3] = 11 if self.dealer_unmasked[2] == True else self.state(self.dealer_unmasked[0], count)
-
-        return self.dealer_unmasked
-
     def retake_bet_from_bet_list(self):
         if len(self.bet_list) != 0:
             bet = self.bet_list.pop()
@@ -364,9 +238,10 @@ class Game:
         bet = self.bet
         ins_cost = math.ceil(self.bet / 2)
 
-        if self.natural_21 == 3:
+        if self.dealer_unmasked['natural_21'] == 3:
             self.set_bet_to_null()
             self.is_round_active = False
+            self.player['hand_state'] = self.hand_state(self.player['sum'], True)
 
         return bet if self.natural_21 == 3 else -ins_cost
 
@@ -386,13 +261,12 @@ class Game:
         new_hand2 = [self.player['hand'].pop()]
 
         new_id_B = self._generate_sequential_id()
-        print("395: ", new_id_B)
         new_hand = self.deal_card(new_hand1, True, hand_id=old_id)
         hand_to_list = self.deal_card(new_hand2, False, hand_id=new_id_B)
 
         self.player = new_hand
         self.players[hand_to_list['id']] = hand_to_list
-        print("403: ", self.players)
+
         self.set_split_req(1)
 
     def deal_card(self, hand, is_first, hand_id):
@@ -400,18 +274,15 @@ class Game:
             hand.append(self.deck.pop(0))
         player_sum = self.sum(hand, True)
         can_split = self.can_split(hand)
-        player_state = self.state(hand, player_sum)
-        nat_21 = self.natural_21_state(hand, self.dealer_hand) if is_first else 0
-        #split_natural_21 = 1 if nat_21 == 1 else 2 if nat_21 == 2 else 0
+        player_state = self.hand_state(player_sum, True) if is_first else 10
         player = {
             "id": hand_id,
             "hand": hand,
             "sum": player_sum,
-            "state": player_state,
+            "hand_state": player_state,
             "can_split": can_split,
             "stated": self.stated,
             "bet": self.bet,
-            "nat_21": nat_21
         }
 
         return player
@@ -442,7 +313,6 @@ class Game:
                 self.player['sum'] = player_sum
                 self.player['state'] = self.state(hand, player_sum)
                 self.player['can_split'] = can_split
-                self.player['nat_21'] = self.natural_21_state(hand, self.dealer_hand)
             self.set_split_req(-1)
 
         return self.player
@@ -457,27 +327,148 @@ class Game:
 
         return self.player
 
+    # helpers
+    def create_deck(self):
+        single_deck = [f"{suit}{rank}" for suit in self.suits for rank in self.ranks]
+        self.deck = single_deck * 2
+        random.shuffle(self.deck)
+
+        return self.deck
+
+    def _generate_sequential_id(self) -> str:
+        self.hand_counter += 1
+        formatted_count = f"{self.hand_counter:03d}"
+
+        return f"H-{formatted_count}"
+
+    def clear_up(self):
+        self.player = {
+            "id": NONE,
+            "hand": [],
+            "sum": 0,
+            "hand_state": HandState.NONE,
+            "can_split": False,
+            "stated": False,
+            "bet": 0,
+        }
+        self.dealer_masked: Dict[str, Any] = {
+            "hand": [],
+            "sum": 0,
+            "can_insure": False,
+            "nat_21": WinnerState.NONE,
+        }
+        self.dealer_unmasked: Dict[str, Any] = {
+            "hand": [],
+            "sum": 0,
+            "hand_state": HandState.NONE,
+            "natural_21": WinnerState.NONE,
+        }
+        self.natural_21 = WinnerState.NONE
+        self.winner = WinnerState.NONE
+        self.hand_counter = 0
+        self.players = {}
+        self.split_req = 0
+        self.set_bet_list_to_null()
+        self.is_round_active = False
+
+    def restart_game(self):
+        self.__init__()
+
+    def hand_to_ranks(self, hand):
+        return "".join(c[-1] for c in hand)
+
+    def can_split(self, hand):
+        ranks = self.hand_to_ranks(hand)
+        tens = ["K", "Q", "J", "0"]
+        return len(ranks) == 2 and (
+            (ranks[0] == ranks[1]) or (ranks[0] in tens and ranks[1] in tens)
+        )
+
+    def load_state_from_data(self, data):
+        self.is_round_active = data.get("is_round_active", False)
+
+
+    # getters, setters
+    def set_player_hand(self, card):
+        self.player['hand'].append(card)
+
+    def set_player_sum(self, sum):
+        self.player['sum'] = sum
+
+    def set_dealer_sum(self, sum):
+        self.dealer_masked['sum'] = sum
+
+    def get_player_state(self):
+        return self.player['state']
+
+    def set_player_state(self, state):
+        self.player['state'] = state
+
+    def get_dealer_state(self):
+        return self.dealer_unmasked[2]
+
+    def set_dealer_state(self, state):
+        self.dealer_unmasked[2] = state
+
+    def get_players(self):
+        return self.players
+
+    def set_bet(self, amount):
+        self.bet += amount
+        self.player['bet'] = self.player['bet'] + amount
+
+    def set_bet_to_null(self):
+        self.bet = 0
+        self.player['bet'] = 0
+
+    def get_bet(self):
+        return self.bet
+
+    def get_bet_list(self):
+        return self.bet_list
+
+    def set_bet_list(self, bet):
+        self.bet_list.append(bet)
+
+    def set_bet_list_to_null(self):
+        self.bet_list = []
+
+    def get_split_req(self):
+        return self.split_req
+
+    def set_split_req(self, count):
+        self.split_req += count
+
+    def get_deck_len(self):
+        if len(self.deck) > 0:
+            return len(self.deck)
+        else:
+            return self.deck_len
+
+    def get_is_round_active(self):
+        return self.is_round_active
+
+
     def serialize(self):
         all_hands = list(self.players.values())
         def sort_key_combined(hand):
-            return (hand.get('stated', True), hand.get('id', ''))
+            return (hand.get('hand_stated', True), hand.get('id', ''))
         sorted_players_list = sorted(all_hands, key=sort_key_combined)
 
         return {
             "deck": self.deck,
             "player": self.player,
-            "dealer": self.dealer_masked,
+            "dealer_masked": self.dealer_masked,
             "dealer_unmasked": self.dealer_unmasked,
-            "dealer_hand": self.dealer_hand,
-            "nat_21": self.natural_21,
-            "splitReq": self.split_req,
-            "players": sorted_players_list,
-            "bet": self.bet,
-            "bet_list": self.bet_list,
+            "natural_21": self.natural_21,
             "winner": self.winner,
             "hand_counter": self.hand_counter,
-            "is_round_active": self.is_round_active,
+            "players": sorted_players_list,
+            "splitReq": self.split_req,
             "deckLen": self.get_deck_len(),
+            "bet": self.bet,
+            "bet_list": self.bet_list,
+            "is_round_active": self.is_round_active,
         }
 
     @classmethod
@@ -485,16 +476,15 @@ class Game:
         game = cls()
         game.deck = data["deck"]
         game.player = data["player"]
-        game.dealer_masked = data["dealer"]
+        game.dealer_masked = data["dealer_masked"]
         game.dealer_unmasked = data["dealer_unmasked"]
-        game.dealer_hand = data["dealer_hand"]
-        game.natural_21 = data["nat_21"]
-        game.split_req = data["splitReq"]
-        game.players = {hand['id']: hand for hand in data["players"]}
-        game.bet = data["bet"]
-        game.bet_list = data["bet_list"]
+        game.natural_21 = data["natural_21"]
         game.winner = data["winner"]
         game.hand_counter = data["hand_counter"]
-        game.is_round_active = data.get("is_round_active", False)
+        game.players = {hand['id']: hand for hand in data["players"]}
+        game.split_req = data["splitReq"]
         game.deck_len = data["deckLen"]
+        game.bet = data["bet"]
+        game.bet_list = data["bet_list"]
+        game.is_round_active = data.get("is_round_active", False)
         return game

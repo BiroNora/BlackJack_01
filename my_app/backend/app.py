@@ -524,14 +524,11 @@ def ins_request(user, game):
 @game_session_required
 @api_error_handler
 def rewards(user, game):
-    data = request.get_json()
-    is_splitted = data.get("is_splitted", False)
-
-    token_change = game.rewards(is_splitted)
+    token_change = game.rewards()
 
     user.tokens += token_change
     db.session.commit()
-
+    
     session["game"] = game.serialize()
 
     return (

@@ -19,18 +19,17 @@ export type GameState =
 export interface GameStateData {
   currentGameState: GameState;
   player: PlayerData;
-  dealer: DealerData;
+  dealer_masked: DealerMaskedData;
   dealer_unmasked: DealerUnmaskedData;
-  dealer_hand: string[];
-  deckLen: number;
-  nat_21: number;
-  tokens: number;
+  natural_21: number;
+  winner: number;
+  hand_counter: number;
+  players: PlayerData[];
   splitReq: number;
+  deckLen: number;
+  tokens: number;
   bet: number;
   bet_list: number[];
-  players: PlayerData[];
-  hand_counter: number;
-  winner: number;
   is_round_active: boolean;
 }
 
@@ -38,18 +37,25 @@ export interface PlayerData {
   id: string;
   hand: string[];
   sum: number;
-  state: number;
+  hand_state: number;
   can_split: boolean;
   stated: boolean;
   bet: number;
-  nat_21: number;
 }
 
-export type DealerData =
-[string[], number, boolean, number];
+export interface DealerMaskedData {
+  hand: string[];
+  sum: number;
+  can_insure: boolean;
+  nat_21: number;
+};
 
-export type DealerUnmaskedData =
-[string[], number, number, number];
+export interface DealerUnmaskedData {
+  hand: string[];
+  sum: number;
+  hand_state: number;
+  natural_21: number;
+};
 
 export type SessionInitResponse = {
   message: string;

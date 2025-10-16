@@ -100,8 +100,8 @@ export async function handleStand() {
   return data;
 }
 
-export async function handleReward(is_splitted: boolean) {
-  const data = await callApiEndpoint("/api/rewards", "POST", { is_splitted: is_splitted });
+export async function handleReward() {
+  const data = await callApiEndpoint("/api/rewards", "POST");
 
   return data;
 }
