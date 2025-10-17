@@ -292,7 +292,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const response = await splitHand()
       const resp = extractGameStateData(response);
       if (resp && resp.player) {
-        if (resp.natural_21 === 1 || resp.natural_21 === 2) {
+        if (resp.player.hand.length === 2 && resp.player.sum === 21) {
           transitionToState('SPLIT_NAT21_TRANSIT', resp);
         } else {
           transitionToState('SPLIT_TURN', resp);

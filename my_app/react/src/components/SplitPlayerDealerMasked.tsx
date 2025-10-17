@@ -8,9 +8,9 @@ interface TableProps {
 }
 
 const SplitPlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
-  const { player, dealer } = gameState;
+  const { player, dealer_masked } = gameState;
 
-  const dealerMasked = dealer[0][1][1];
+  const dealerMasked = dealer_masked.hand[1][1];
   const dealerMaskedScore = maskedScore(dealerMasked);
 
   const formatCard = (card: string): JSX.Element | string => {
@@ -69,7 +69,7 @@ const SplitPlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
   };
 
   const playerHand = loop(player.hand);
-  const dealerHand = loop(dealer[0]);
+  const dealerHand = loop(dealer_masked.hand);
 
   const formattedPlayerHand = formatHand(playerHand);
   const formattedDealerHand = formatHand(dealerHand);

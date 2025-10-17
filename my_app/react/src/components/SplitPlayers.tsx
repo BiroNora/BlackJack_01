@@ -61,7 +61,7 @@ const SplitPlayers: React.FC<TableProps> = ({ gameState }) => {
 
   return (
     <div>
-      <ul id="players-list" className="players-list-responsive">
+      <ul id="players-list">
       {players
         .map((player) => {
           const hand = loop(player.hand);
@@ -70,8 +70,8 @@ const SplitPlayers: React.FC<TableProps> = ({ gameState }) => {
 
           return (
             <li key={player.id}>
-              Hand: <span className="merriweather5grey"> {formattedHand}</span>{" "}
-              &nbsp; Bet: <span className="merriweather5grey"> {bet}</span>
+              Hand: <span className="line_down merriweather5grey"> {formattedHand}</span>{" "}
+              &nbsp; Bet: <span className="line_down merriweather5grey"> {bet}</span>
             </li>
           );
         })}

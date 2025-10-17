@@ -528,7 +528,7 @@ def rewards(user, game):
 
     user.tokens += token_change
     db.session.commit()
-    
+
     session["game"] = game.serialize()
 
     return (
@@ -675,7 +675,6 @@ def split_request(user, game):
     user.last_activity = datetime.now(timezone.utc)
 
     bet_amount = game.get_bet()
-    print("bet_amount: ", bet_amount)
 
     if user.tokens < bet_amount:
         # Error válasz, ha nincs elég token.
