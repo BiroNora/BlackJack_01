@@ -20,6 +20,7 @@ class Game:
             "can_split": False,
             "stated": False,
             "bet": 0,
+            "aces": False,
         }
         self.dealer_masked: Dict[str, Any] = {
             "hand": [],
@@ -57,8 +58,8 @@ class Game:
         card4 = self.deck.pop(0)
         # card2 = "♦10"
         # card4 = "♠A"
-        card1 = "♦10"
-        card3 = "♠10"
+        card1 = "♦A"
+        card3 = "♠A"
         player_hand = [card1, card3]
         dealer_hand = [card2, card4]
         dealer_masked = [" ✪ ", card4]
@@ -86,6 +87,8 @@ class Game:
         bet = self.get_bet()
         self.is_round_active = True
 
+        aces = True if card1[-1] == "A" and card3[-1] == "A" else False
+
         self.player = {
             "id": self._generate_sequential_id(),
             "hand": player_hand,
@@ -94,6 +97,7 @@ class Game:
             "can_split": can_split,
             "stated": self.stated,
             "bet": bet,
+            "aces": aces,
         }
         self.dealer_masked: Dict[str, Any] = {
             "hand": dealer_masked,
@@ -263,17 +267,18 @@ class Game:
         card_to_split = self.player["hand"].pop(0)
         new_hand1 = [card_to_split]
         new_hand2 = [self.player["hand"].pop()]
+        aces = self.player["aces"]
 
         new_id_B = self._generate_sequential_id()
-        new_hand = self.deal_card(new_hand1, True, hand_id=old_id)
-        hand_to_list = self.deal_card(new_hand2, False, hand_id=new_id_B)
+        new_hand = self.deal_card(new_hand1, True, hand_id=old_id, aces=aces)
+        hand_to_list = self.deal_card(new_hand2, False, hand_id=new_id_B, aces=aces)
 
         self.player = new_hand
         self.players[hand_to_list["id"]] = hand_to_list
 
         self.set_split_req(1)
 
-    def deal_card(self, hand, is_first, hand_id):
+    def deal_card(self, hand, is_first, hand_id, aces):
         if self.deck and is_first:
             hand.append(self.deck.pop(0))
 
@@ -288,6 +293,7 @@ class Game:
             "can_split": can_split,
             "stated": self.stated,
             "bet": self.bet,
+            "aces": aces,
         }
 
         return player
@@ -379,6 +385,7 @@ class Game:
             "can_split": False,
             "stated": False,
             "bet": 0,
+            "aces": False,
         }
         self.dealer_masked: Dict[str, Any] = {
             "hand": [],

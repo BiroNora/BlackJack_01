@@ -41,6 +41,7 @@ const initialGameState: GameStateData = {
     can_split: false,
     stated: false,
     bet: 0,
+    aces: false,
   },
   dealer_masked: {
     hand: [],
@@ -536,6 +537,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                 can_split: false,
                 stated: false,
                 bet: 0,
+                aces: false,
               },
               dealer_masked: {
                 hand: [],
@@ -713,6 +715,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                         can_split: false,
                         stated: false,
                         bet: 0,
+                        aces: false,
                       },
                       dealer_masked: {
                         hand: [],
