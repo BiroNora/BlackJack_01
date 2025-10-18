@@ -13,10 +13,6 @@ from game import Game
 
 MINIMUM_BET = 1
 
-TWENTY_ONE = 8
-BUST = 9
-UNDER_21 = 10
-
 
 app = Flask(__name__, static_folder="../react/dist", template_folder="../react/dist")
 app.config["SECRET_KEY"] = os.environ.get(

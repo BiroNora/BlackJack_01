@@ -41,7 +41,6 @@ const initialGameState: GameStateData = {
     can_split: false,
     stated: false,
     bet: 0,
-    aces: false,
   },
   dealer_masked: {
     hand: [],
@@ -55,6 +54,7 @@ const initialGameState: GameStateData = {
     hand_state: 0,
     natural_21: 0,
   },
+  aces: false,
   natural_21: 0,
   winner: 0,
   hand_counter: 0,
@@ -217,7 +217,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       await handleStand();
       const rewards = await handleReward();
       const resp = extractGameStateData(rewards);
-      console.log("+++ --- resp: ", resp)
       transitionToState('MAIN_STAND', resp);
     } catch {
       transitionToState('ERROR');
@@ -293,7 +292,10 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const response = await splitHand()
       const resp = extractGameStateData(response);
       if (resp && resp.player) {
-        if (resp.player.hand.length === 2 && resp.player.sum === 21) {
+        if (resp.aces === true) {
+          transitionToState('SPLIT_ACE_TRANSIT', resp);
+        }
+        else if (resp.player.hand.length === 2 && resp.player.sum === 21) {
           transitionToState('SPLIT_NAT21_TRANSIT', resp);
         } else {
           transitionToState('SPLIT_TURN', resp);
@@ -537,7 +539,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                 can_split: false,
                 stated: false,
                 bet: 0,
-                aces: false,
               },
               dealer_masked: {
                 hand: [],
@@ -551,6 +552,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                 hand_state: 0,
                 natural_21: 0,
               },
+              aces: false,
               natural_21: 0,
               winner: 0,
               hand_counter: 0,
@@ -655,6 +657,41 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       SplitNat21Transit();
     }
 
+    else if (gameState.currentGameState === 'SPLIT_ACE_TRANSIT') {
+
+      const SplitAce21Transit = async () => {
+        if (!isMountedRef.current) return;
+
+        try {
+          if (!isMountedRef.current) return;
+          const data = await addToPlayersListByStand();
+          const response = extractGameStateData(data);
+          const currSplitReq = response?.splitReq || 0;
+          console.log("ACE addToPlayersListByStand() response: ", response)
+
+          if (currSplitReq > 0) {
+            const splitResponse = await addSplitPlayerToGame();
+            const ans = extractGameStateData(splitResponse);
+            timeoutIdRef.current = window.setTimeout(() => {
+            if (isMountedRef.current) {
+              transitionToState('SPLIT_ACE_TRANSIT', ans);
+            }
+          }, 2000);
+          } else {
+            timeoutIdRef.current = window.setTimeout(() => {
+                // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+                if (isMountedRef.current) {
+                  transitionToState('SPLIT_FINISH', response);
+                }
+              }, 2000);
+          }
+        } catch {
+          transitionToState('ERROR');
+        }
+      };
+      SplitAce21Transit();
+    }
+
     else if (gameState.currentGameState === 'SPLIT_FINISH') {
       setHasHitTurn(false);
 
@@ -715,7 +752,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                         can_split: false,
                         stated: false,
                         bet: 0,
-                        aces: false,
                       },
                       dealer_masked: {
                         hand: [],
@@ -729,6 +765,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                         hand_state: 0,
                         natural_21: 0,
                       },
+                      aces: false,
                       natural_21: 0,
                       winner: 0,
                       hand_counter: 0,

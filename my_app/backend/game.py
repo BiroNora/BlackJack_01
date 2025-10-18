@@ -20,7 +20,6 @@ class Game:
             "can_split": False,
             "stated": False,
             "bet": 0,
-            "aces": False,
         }
         self.dealer_masked: Dict[str, Any] = {
             "hand": [],
@@ -35,6 +34,7 @@ class Game:
             "natural_21": WinnerState.NONE,
         }
         self.natural_21 = WinnerState.NONE
+        self.aces = False
         self.winner = WinnerState.NONE
         self.hand_counter: int = 0  # helper for the players dict
         self.players_index = {}  # helper for the players dict
@@ -87,7 +87,7 @@ class Game:
         bet = self.get_bet()
         self.is_round_active = True
 
-        aces = True if card1[-1] == "A" and card3[-1] == "A" else False
+        self.aces = True if card1[-1] == "A" and card3[-1] == "A" else False
 
         self.player = {
             "id": self._generate_sequential_id(),
@@ -97,7 +97,6 @@ class Game:
             "can_split": can_split,
             "stated": self.stated,
             "bet": bet,
-            "aces": aces,
         }
         self.dealer_masked: Dict[str, Any] = {
             "hand": dealer_masked,
@@ -267,23 +266,22 @@ class Game:
         card_to_split = self.player["hand"].pop(0)
         new_hand1 = [card_to_split]
         new_hand2 = [self.player["hand"].pop()]
-        aces = self.player["aces"]
 
         new_id_B = self._generate_sequential_id()
-        new_hand = self.deal_card(new_hand1, True, hand_id=old_id, aces=aces)
-        hand_to_list = self.deal_card(new_hand2, False, hand_id=new_id_B, aces=aces)
+        new_hand = self.deal_card(new_hand1, True, hand_id=old_id)
+        hand_to_list = self.deal_card(new_hand2, False, hand_id=new_id_B)
 
         self.player = new_hand
         self.players[hand_to_list["id"]] = hand_to_list
 
         self.set_split_req(1)
 
-    def deal_card(self, hand, is_first, hand_id, aces):
+    def deal_card(self, hand, is_first, hand_id):
         if self.deck and is_first:
             hand.append(self.deck.pop(0))
 
         player_sum = self.sum(hand, True)
-        can_split = self.can_split(hand)
+        can_split = False if self.aces else self.can_split(hand)
         player_state = self.hand_state(player_sum, True) if is_first else 10
         player = {
             "id": hand_id,
@@ -293,7 +291,6 @@ class Game:
             "can_split": can_split,
             "stated": self.stated,
             "bet": self.bet,
-            "aces": aces,
         }
 
         return player
@@ -385,7 +382,6 @@ class Game:
             "can_split": False,
             "stated": False,
             "bet": 0,
-            "aces": False,
         }
         self.dealer_masked: Dict[str, Any] = {
             "hand": [],
@@ -399,6 +395,7 @@ class Game:
             "hand_state": HandState.NONE,
             "natural_21": WinnerState.NONE,
         }
+        self.aces = False
         self.natural_21 = WinnerState.NONE
         self.winner = WinnerState.NONE
         self.hand_counter = 0
@@ -496,6 +493,7 @@ class Game:
             "player": self.player,
             "dealer_masked": self.dealer_masked,
             "dealer_unmasked": self.dealer_unmasked,
+            "aces": self.aces,
             "natural_21": self.natural_21,
             "winner": self.winner,
             "hand_counter": self.hand_counter,
@@ -514,6 +512,7 @@ class Game:
         game.player = data["player"]
         game.dealer_masked = data["dealer_masked"]
         game.dealer_unmasked = data["dealer_unmasked"]
+        game.aces = data["aces"]
         game.natural_21 = data["natural_21"]
         game.winner = data["winner"]
         game.hand_counter = data["hand_counter"]

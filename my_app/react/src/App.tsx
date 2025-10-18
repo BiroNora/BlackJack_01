@@ -268,6 +268,22 @@ function App() {
                   </div>
                 </div>
               );
+            case "SPLIT_ACE_TRANSIT":
+              return (
+                <div>
+                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
+                  <div className="player-dealer-area-wrapper">
+                    <SplitPlayerDealerMasked gameState={gameState} />
+                  </div>
+                  <div className="game-action-area-wrapper">
+                    <SplitPlayDisabledButtons gameState={gameState} />
+                  </div>
+                  <BetBank gameState={gameState} />
+                  <div className="players-area-wrapper">
+                    <SplitPlayers gameState={gameState} />
+                  </div>
+                </div>
+              );
             case "OUT_OF_TOKENS":
               return (
                 <div>

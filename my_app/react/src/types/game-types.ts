@@ -11,6 +11,7 @@ export type GameState =
   | 'SPLIT_NAT21_TRANSIT'
   | 'SPLIT_FINISH'
   | 'SPLIT_FINISH_TRANSIT'
+  | 'SPLIT_ACE_TRANSIT'
   | 'OUT_OF_TOKENS'
   | 'RESTART_GAME'
   | 'ERROR'
@@ -21,6 +22,7 @@ export interface GameStateData {
   player: PlayerData;
   dealer_masked: DealerMaskedData;
   dealer_unmasked: DealerUnmaskedData;
+  aces: boolean;
   natural_21: number;
   winner: number;
   hand_counter: number;
@@ -41,7 +43,6 @@ export interface PlayerData {
   can_split: boolean;
   stated: boolean;
   bet: number;
-  aces: boolean;
 }
 
 export interface DealerMaskedData {
