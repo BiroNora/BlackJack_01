@@ -40,18 +40,6 @@ export async function initializeSessionAPI() {
   }
 }
 
-export async function getTokensAPI(): Promise<unknown | null> {
-  const data = await callApiEndpoint("/api/get_init_tokens_from_db", "GET");
-
-  return data;
-}
-
-export async function getDeckLenAPI() {
-  const data = await callApiEndpoint("/api/get_deck_len", "GET");
-
-  return data;
-}
-
 export async function getTokens() {
   const data = await callApiEndpoint("/api/get_tokens_from_db", "GET");
 

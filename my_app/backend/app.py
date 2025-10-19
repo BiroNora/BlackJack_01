@@ -82,7 +82,7 @@ else:
         )
 
         # =========================================================================
-        # REDIS PING TESZT ÉS KONFIGURÁCIÓ
+        # REDIS PING TEST AND CONFIG
         # =========================================================================
         if flask_session_client.ping():
             # Csak sikeres ping esetén állítjuk be a Redis session-t
@@ -379,28 +379,30 @@ def initialize_session():
         raise Exception("Server configuration error: Redis client missing.")
 
     redis_key = f"game:{user.id}"
-    redis_data = redis_client.get(redis_key)
+    redis_data_raw = redis_client.get(redis_key)
     game_instance = None
+    redis_data = None 
 
     if redis_data:
         # Próba betöltésre
         try:
+            redis_data = json.loads(redis_data_raw)
             game_instance = Game.deserialize(redis_data)
         except Exception as e:
             # Hiba esetén új játék indítása
             print(
                 f"Hiba a Game deszerializálásakor ({user.id}): {e}. Új játék indítása."
             )
-            game_instance = Game(player_tokens=user.tokens, user_id=user.id)
+            game_instance = Game()
     else:
         # Nincs játékállás a Redisben: új játék indítása
-        game_instance = Game(player_tokens=user.tokens, user_id=user.id)
+        game_instance = Game()
 
     # Elmentjük a Game objektumot a Redisbe
     redis_client.set(redis_key, game_instance.serialize())
 
     # Szerializáljuk a Kliens számára szükséges publikus adatokat
-    game_state_for_client = game_instance.serialize_for_client()
+    game_state_for_client = game_instance.serialize_for_client_init()
 
     # ----------------------------------------------------------------------
     # 4. Visszatérési érték (Összes adat egy válaszban)

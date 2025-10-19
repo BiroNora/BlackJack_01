@@ -480,6 +480,9 @@ class Game:
     def get_is_round_active(self):
         return self.is_round_active
 
+    def serialize_for_client_init(self):
+        return {"deckLen": self.get_deck_len()}
+
     def serialize(self):
         all_hands = list(self.players.values())
 

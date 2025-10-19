@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   initializeSessionAPI,
-  getTokensAPI,
-  getDeckLenAPI,
   setBet,
   takeBackDeal,
   getShuffling,
@@ -21,11 +19,9 @@ import {
   forceRestart,
 } from '../api/api-calls';
 import type {
-  DeckLenResponse,
   GameState,
   GameStateData,
   GameStateMachineHookResult,
-  TokensResponse,
 } from '../types/game-types';
 import { extractGameStateData } from '../utilities/utils';
 
@@ -402,20 +398,25 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     if (gameState.currentGameState === 'LOADING') {
       const initializeApplicationOnLoad = async () => {
         try {
+          // 1. Min. töltési idő beállítása
           const minLoadingTimePromise = new Promise(resolve => setTimeout(resolve, 500));
 
-          await Promise.all([
-            initializeSessionAPI(),
+          // 2. Single API hívás, ami mindent visszaad (session, tokenek, game_state)
+          const initializationPromise = initializeSessionAPI();
+
+          // Várjuk meg a leglassabb elemet (API vagy min. töltési idő)
+          const [initData] = await Promise.all([
+            initializationPromise,
             minLoadingTimePromise
           ]);
 
-          const tokensResponse = await getTokensAPI() as TokensResponse;
-          const deckLenResponse = await getDeckLenAPI() as DeckLenResponse;
+          // Az összes szükséges adatot EGYETLEN válaszból nyerjük ki
+          const userTokens = initData.tokens;
+          // A deck hossza most a game_state objektumban van!
+          const deckLength = initData.game_state.deckLen;
 
-          const userTokens = tokensResponse.user_tokens;
-          const deckLength = deckLenResponse.deckLen;
-
-          setInitDeckLen(gameState.deckLen);
+          // Mivel a setInitDeckLen most már a deckLength-et várja
+          setInitDeckLen(deckLength);
 
           if (userTokens === 0) {
             transitionToState('OUT_OF_TOKENS');
@@ -426,7 +427,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             });
           }
         } catch (error) {
-          console.error("ERROR: ", error);
+          console.error("Initialization Error: ", error);
           transitionToState('ERROR', {
             tokens: 0,
             deckLen: 0,
@@ -673,17 +674,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             const splitResponse = await addSplitPlayerToGame();
             const ans = extractGameStateData(splitResponse);
             timeoutIdRef.current = window.setTimeout(() => {
-            if (isMountedRef.current) {
-              transitionToState('SPLIT_ACE_TRANSIT', ans);
-            }
-          }, 2000);
+              if (isMountedRef.current) {
+                transitionToState('SPLIT_ACE_TRANSIT', ans);
+              }
+            }, 2000);
           } else {
             timeoutIdRef.current = window.setTimeout(() => {
-                // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-                if (isMountedRef.current) {
-                  transitionToState('SPLIT_FINISH', response);
-                }
-              }, 2000);
+              // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+              if (isMountedRef.current) {
+                transitionToState('SPLIT_FINISH', response);
+              }
+            }, 2000);
           }
         } catch {
           transitionToState('ERROR');
