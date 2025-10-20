@@ -40,12 +40,6 @@ export async function initializeSessionAPI() {
   }
 }
 
-export async function getTokens() {
-  const data = await callApiEndpoint("/api/get_tokens_from_db", "GET");
-
-  return data;
-}
-
 export async function setBet(betAmount: number) {
   const data = await callApiEndpoint("/api/bet", "POST", { bet: betAmount });
 

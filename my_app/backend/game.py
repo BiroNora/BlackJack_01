@@ -490,6 +490,15 @@ class Game:
             "deckLen": self.get_deck_len(),
         }
 
+    def serialize_initial_state(self):
+        return {
+            "player": self.player,
+            "dealer_masked": self.dealer_masked,
+            "deckLen": self.get_deck_len(),
+            "bet": self.bet,
+            "is_round_active": self.is_round_active,
+        }
+
     def serialize(self):
         all_hands = list(self.players.values())
 

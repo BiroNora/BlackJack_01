@@ -4,7 +4,7 @@ import os
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 from sqlalchemy import select
-from flask import Flask, json, jsonify, render_template, request, session
+from flask import Flask, current_app, json, jsonify, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta, timezone
 import uuid
@@ -182,73 +182,68 @@ def login_required(f):
     return decorated_function
 
 
-# === Játék session ellenőrző dekorátor ===
-def load_game_state(f):
+def with_game_state(f):
     """
-    Betölti a Game State-et a Redis kliensből a user_id alapján.
-    A Game objektumot átadja a végpont függvénynek.
+    Betölti a 'game' állapotát a Redisből, átadja a függvénynek, majd menti.
+    FIGYELEM: Feltételezi, hogy a Game.deserialize() Python szótárat vár.
     """
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        user_id = session.get("user_id")
+        # user lekérése a @login_required-től
+        user = kwargs.get("user")
 
-        # 1. Autentikáció előzetes ellenőrzése
-        if not user_id:
-            return (
-                jsonify({"error": "Unauthorized", "game_state_hint": "NO_SESSION"}),
-                401,
+        if not user:
+            # Ez a hiba akkor fut le, ha a @login_required hiányzik vagy nem futott le.
+            raise Exception(
+                "A @with_game_state dekorátort a @login_required után kell használni."
             )
 
-        # 2. Redis Kliens beszerzése
-        redis_client = app.config.get("REDIS_CLIENT")
+        redis_client = current_app.config.get("REDIS_CLIENT")
         if not redis_client:
-            # Ezt a hibát már a konfigurációban kezelted, de jó, ha itt is ellenőrizzük
-            return (
-                jsonify({"error": "Server configuration error: Redis client missing."}),
-                500,
-            )
+            raise Exception("Server configuration error: Redis client missing.")
 
-        # 3. Játékállapot lekérése a Redisből
-        redis_key = f"game:{user_id}"
-        redis_data = redis_client.get(redis_key)
+        redis_key = f"game:{user.id}"
+        redis_data_raw = redis_client.get(redis_key)
 
-        if not redis_data:
-            # Nincs aktív játékállás a Redisben
-            return (
-                jsonify(
-                    {
-                        "error": "ERROR: No game active for user.",
-                        "game_state_hint": "NO_GAME_ACTIVE",
-                    }
-                ),
-                400,
-            )
+        game = Game()  # Új játék alapértelmezettként
 
-        # 4. Deszerializálás és továbbadás
-        try:
-            game = Game.deserialize(redis_data)
-        except Exception:
-            # Szerveroldali hiba, ha az adat korrupt
-            return (
-                jsonify(
-                    {"error": "Corrupted game data.", "game_state_hint": "CORRUPT_DATA"}
-                ),
-                500,
-            )
+        # --- Játékállapot BETÖLTÉSE (LOAD) ---
+        if redis_data_raw:
+            try:
+                # EZ AZ A LOGIKA, AMI AZ ÖN FÜGGVÉNYEIBEN IS MŰKÖDÖTT:
+                # 1. Byte/string dekódolása és JSON betöltése Python szótárrá
+                if isinstance(redis_data_raw, bytes):
+                    redis_data_str = redis_data_raw.decode("utf-8")
+                else:
+                    redis_data_str = redis_data_raw
 
-        # Továbbadjuk a "game" objektumot
-        return f(game=game, *args, **kwargs)
+                redis_data = json.loads(redis_data_str)
+
+                # 2. Szótár átadása a Game.deserialize-nek
+                game = Game.deserialize(redis_data)
+
+            except Exception as e:
+                # Deszerializációs hiba esetén új játék indítása
+                print(
+                    f"Hiba a Game deszerializálásakor ({user.id}): {e}. Új játék indítása."
+                )
+                game = Game()
+
+        # 1. Eredeti függvény futtatása, átadva a betöltött 'game' objektumot
+        result = f(*args, game=game, **kwargs)
+
+        # 2. Játékállapot MENTÉSE (SAVE) a Redisbe
+        # Feltételezzük, hogy a game.serialize() JSON stringet ad vissza.
+        # A set() automatikusan kezeli a string/bytes konverziót.
+        redis_client.set(redis_key, game.serialize())
+
+        return result
 
     return decorated_function
 
 
 def api_error_handler(f):
-    """
-    Dekorátor a Flask API végpontok hibakezelésének központosítására.
-    Elkapja a ValueError-t (400 Bad Request) és az általános Exception-t (500 Internal Server Error).
-    """
-
     @wraps(f)
     def decorated_function(*args, **kwargs):
         try:
@@ -334,7 +329,7 @@ def index():
     return render_template("index.html")
 
 
-# 0 0
+# 0
 @app.route("/api/initialize_session", methods=["POST"])
 @api_error_handler
 def initialize_session():
@@ -429,45 +424,11 @@ def initialize_session():
 
 
 # 1
-@app.route("/api/get_init_tokens_from_db", methods=["GET"])
-@login_required
-@api_error_handler
-def get_init_tokens_from_db(user):
-
-    initial_user_tokens = user.tokens
-    game = Game()
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {"user_tokens": initial_user_tokens, "message": "Tokens initialization."}
-        ),
-        200,
-    )
-
-
-# 2
-@app.route("/api/get_deck_len", methods=["GET"])
-@login_required  # Ellenőrzi, hogy a felhasználó be van-e jelentkezve
-@load_game_state  # Ellenőrzi, hogy van-e aktív játék session
-@api_error_handler
-def get_deck_len(user, game):
-    deck_len = game.get_deck_len()
-    session["game"] = game.serialize()
-
-    return jsonify({"deckLen": deck_len, "message": "message"}), 200
-
-
-# 3 1
 @app.route("/api/bet", methods=["POST"])
 @login_required
+@with_game_state
 @api_error_handler
-def bet(user):
-    redis_client = app.config.get("REDIS_CLIENT")
-    if not redis_client:
-        raise Exception("Server configuration error: Redis client missing.")
-
+def bet(user, game):
     data = request.get_json()
     bet_amount = data.get("bet", 0)
 
@@ -504,27 +465,14 @@ def bet(user):
             400,
         )
 
-    # 2. Game State betöltése a Redisből
-    redis_key = f"game:{user.id}"
-    redis_data_raw = redis_client.get(redis_key)
-    game = Game()
-
-    if redis_data_raw:
-        try:
-            # JSON string konvertálása Python dict-té
-            redis_data = json.loads(redis_data_raw)
-            game = Game.deserialize(redis_data)
-        except Exception as e:
-            # Deszerializációs hiba esetén új játék indítása
-            print(f"Hiba a Game deszerializálásakor bet híváskor ({user.id}): {e}. Új játék indítása.")
-            game = Game()
-
-    # 3. Tranzakció végrehajtása (DB és Game state frissítés)
     user.tokens -= bet_amount
+    db.session.commit()
+
     game.set_bet(bet_amount)
     game.set_bet_list(bet_amount)
-    db.session.commit()
-    redis_client.set(redis_key, game.serialize())
+    # A game state-et a VÉGÉN a @with_game_state automatikusan menti a Redisbe!
+    # Nincs szükség: db.session.commit() és redis_client.set(redis_key, game.serialize())
+
     game_state_for_client = game.serialize_for_client_bets()
 
     return (
@@ -535,52 +483,32 @@ def bet(user):
                 "current_tokens": user.tokens,
                 "game_state": game_state_for_client,
                 "game_state_hint": "BET_SUCCESSFULLY_PLACED",
-
             }
         ),
         200,
     )
 
 
-# 4 2
+# 2
 @app.route("/api/retake_bet", methods=["POST"])
 @login_required
+@with_game_state
 @api_error_handler
-def retake_bet(user):
-    redis_client = app.config.get("REDIS_CLIENT")
-    if not redis_client:
-        raise Exception("Server configuration error: Redis client missing.")
-
-    # 2. Game State Betöltése
-    redis_key = f"game:{user.id}"
-    redis_data_raw = redis_client.get(redis_key)
-    game = None # Inicializálás a hatókör miatt
-
-    if not redis_data_raw:
-        return jsonify({"error": "No active game state found in Redis.", "game_state_hint": "NO_GAME_STATE"}), 400
-
-    try:
-        # JSON string konvertálása Python dict-té
-        redis_data = json.loads(redis_data_raw)
-        game = Game.deserialize(redis_data)
-    except Exception as e:
-        print(f"Hiba a Game deszerializálásakor retake_bet híváskor ({user.id}): {e}.")
-        return jsonify({"error": "Game state corruption error.", "game_state_hint": "CORRUPTED_GAME_STATE"}), 500
-
-    # 3. Érvényesítés és Tét Visszavétele
+def retake_bet(user, game):
     current_bet_list = game.get_bet_list()
     if not current_bet_list:
-        return jsonify({"error": "No bet to retake.", "game_state_hint": "BET_LIST_EMPTY"}), 400
+        return (
+            jsonify(
+                {"error": "No bet to retake.", "game_state_hint": "BET_LIST_EMPTY"}
+            ),
+            400,
+        )
 
-    # Tét visszavétele és a bet_list frissítése a Game osztályban
     amount_to_return = game.retake_bet_from_bet_list()
 
-    # 4. Tranzakció Végrehajtása (DB és Redis)
     user.tokens += amount_to_return
     db.session.commit()
 
-    # Mentés a Redisbe
-    redis_client.set(redis_key, game.serialize())
     game_state_for_client = game.serialize_for_client_bets()
 
     return (
@@ -597,22 +525,47 @@ def retake_bet(user):
     )
 
 
-# 5
-@app.route("/api/get_tokens_from_db", methods=["GET"])
+# 3
+@app.route("/api/create_deck", methods=["POST"])
 @login_required
-@load_game_state
+@with_game_state
 @api_error_handler
-def get_tokens_from_db(user, game):
-    user_tokens = user.tokens
+def create_deck(user, game):
+    game.create_deck()
+
+    game_state_for_client = game.serialize_for_client_bets()
 
     return (
         jsonify(
             {
                 "status": "success",
-                "message": "Tokens retrieved.",
-                "current_tokens": user_tokens,
-                "game_state": game.serialize(),
-                "game_state_hint": "TOKENS_RETRIEVED",
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "DECK_CREATED",
+            }
+        ),
+        200,
+    )
+
+
+# 4
+@app.route("/api/start_game", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def start_game(user, game):
+    game.initialize_new_round()
+
+    game_state_for_client = game.serialize_initial_state()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "New round initialized.",
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "NEW_ROUND_INITIALIZED",
             }
         ),
         200,
@@ -622,7 +575,6 @@ def get_tokens_from_db(user, game):
 # 6
 @app.route("/api/get_game_data", methods=["GET"])
 @login_required
-@load_game_state
 @api_error_handler
 def get_game_data(user, game):
 
@@ -640,60 +592,12 @@ def get_game_data(user, game):
     )
 
 
-# 7
-@app.route("/api/start_game", methods=["POST"])
-@login_required
-@load_game_state
-@api_error_handler
-def start_game(user, game):
-    game.initialize_new_round()
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "New round initialized.",
-                "current_tokens": user.tokens,
-                "game_state": game.serialize(),
-                "game_state_hint": "NEW_ROUND_INITIALIZED",
-            }
-        ),
-        200,
-    )
-
-
-# 8
-@app.route("/api/create_deck", methods=["POST"])
-@login_required
-@load_game_state
-@api_error_handler
-def create_deck(user, game):
-    game.create_deck()
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Deck created.",
-                "current_tokens": user.tokens,
-                "game_state": game.serialize(),
-                "game_state_hint": "DECK_CREATED",
-            }
-        ),
-        200,
-    )
-
-
 # 9
 @app.route("/api/ins_request", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
 def ins_request(user, game):
+
     bet = game.get_bet()
     insurance_amount = math.ceil(bet / 2)
 
@@ -737,7 +641,6 @@ def ins_request(user, game):
 # 10
 @app.route("/api/rewards", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
 def rewards(user, game):
     token_change = game.rewards()
@@ -764,7 +667,6 @@ def rewards(user, game):
 # 11
 @app.route("/api/hit", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
 def hit(user, game):
     game.hit()
@@ -788,7 +690,6 @@ def hit(user, game):
 # 12
 @app.route("/api/stand", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
 def stand(user, game):
     game.stand()
@@ -813,7 +714,6 @@ def stand(user, game):
 # 13
 @app.route("/api/round_end", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
 def round_end(user, game):
     game.round_end()
@@ -840,7 +740,6 @@ def round_end(user, game):
 # 14
 @app.route("/api/double_request", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
 def double_request(user, game):
     user.last_activity = datetime.now(timezone.utc)
@@ -885,7 +784,6 @@ def double_request(user, game):
 # 15
 @app.route("/api/split_request", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
 def split_request(user, game):
     user.last_activity = datetime.now(timezone.utc)
@@ -955,7 +853,6 @@ def split_request(user, game):
 # 16
 @app.route("/api/add_to_players_list_by_stand", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
 def add_to_players_list_by_stand(user, game):
     user.last_activity = datetime.now(timezone.utc)
@@ -981,7 +878,6 @@ def add_to_players_list_by_stand(user, game):
 # 17
 @app.route("/api/add_split_player_to_game", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
 def add_split_player_to_game(user, game):
     user.last_activity = datetime.now(timezone.utc)
@@ -1019,7 +915,6 @@ def add_split_player_to_game(user, game):
 # 18
 @app.route("/api/add_player_from_players", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
 def add_player_from_players(user, game):
     user.last_activity = datetime.now(timezone.utc)
@@ -1057,7 +952,6 @@ def add_player_from_players(user, game):
 # 19
 @app.route("/api/set_restart", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
 def set_restart(user, game):
     game.restart_game()
