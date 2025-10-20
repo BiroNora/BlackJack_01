@@ -490,7 +490,7 @@ class Game:
             "deckLen": self.get_deck_len(),
         }
 
-    def serialize_initial_state(self):
+    def serialize_initial_and_hit_state(self):
         return {
             "player": self.player,
             "dealer_masked": self.dealer_masked,
@@ -514,6 +514,33 @@ class Game:
             state["dealer_masked"] = self.dealer_masked
 
         return state
+
+    def serialize_stand_state(self):
+        return {
+            "player": self.player,
+            "dealer_unmasked": self.dealer_unmasked,
+            "deckLen": self.get_deck_len(),
+            "bet": self.bet,
+            "is_round_active": self.is_round_active,
+        }
+
+    def serialize_double_state(self):
+        return {
+            "player": self.player,
+            "deckLen": self.get_deck_len(),
+            "is_round_active": self.is_round_active,
+        }
+
+    def serialize_reward_state(self):
+        return {
+            "player": self.player,
+            "dealer_unmasked": self.dealer_unmasked,
+            "deckLen": self.get_deck_len(),
+            "bet": self.bet,
+            "winner": self.winner,
+            "is_round_active": self.is_round_active,
+        }
+
 
     def serialize(self):
         all_hands = list(self.players.values())

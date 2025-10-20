@@ -556,7 +556,7 @@ def create_deck(user, game):
 def start_game(user, game):
     game.initialize_new_round()
 
-    game_state_for_client = game.serialize_initial_state()
+    game_state_for_client = game.serialize_initial_and_hit_state()
 
     return (
         jsonify(
@@ -582,7 +582,7 @@ def ins_request(user, game):
     insurance_amount = math.ceil(bet / 2)
 
     if user.tokens < insurance_amount:
-        game_state_for_client = game.serialize_initial_state()
+        game_state_for_client = game.serialize_for_insurance()
         return (
             jsonify(
                 {
@@ -618,6 +618,125 @@ def ins_request(user, game):
 
 
 # 6
+@app.route("/api/hit", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def hit(user, game):
+    game.hit()
+
+    game_state_for_client = game.serialize_initial_and_hit_state()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "tokens": user.tokens,
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "HIT_RECIEVED",
+            }
+        ),
+        200,
+    )
+
+
+# 7
+@app.route("/api/stand", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def stand(user, game):
+    game.stand()
+
+    game_state_for_client = game.serialize_stand_state()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "STAND_RECIEVED",
+                "tokens": user.tokens,
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "PLAYER_STAND_ROUND_ENDED",
+            }
+        ),
+        200,
+    )
+
+
+# 8
+@app.route("/api/double_request", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def double_request(user, game):
+    user.last_activity = datetime.now(timezone.utc)
+
+    bet_amount_to_double = game.get_bet()
+
+    if user.tokens < bet_amount_to_double:
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "error": "Insufficient tokens.",
+                    "game_state_hint": "INSUFFICIENT_FUNDS_FOR_DOUBLE",
+                    "required": bet_amount_to_double,
+                    "available": user.tokens,
+                }
+            ),
+            402,
+        )
+    amount_deducted = game.double_request()
+    user.tokens -= amount_deducted
+    db.session.commit()
+
+    game_state_for_client = game.serialize_double_state()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "Double placed successfully.",
+                "double_amount": amount_deducted,
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+            }
+        ),
+        200,
+    )
+
+
+# 9
+@app.route("/api/rewards", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def rewards(user, game):
+    token_change = game.rewards()
+
+    user.tokens += token_change
+    db.session.commit()
+
+    game_state_for_client = game.serialize_reward_state()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "Rewards processed and tokens updated.",
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "REWARDS_PROCESSED",
+            }
+        ),
+        200,
+    )
+
+
+# 6
 @app.route("/api/get_game_data", methods=["GET"])
 @login_required
 @api_error_handler
@@ -631,79 +750,6 @@ def get_game_data(user, game):
                 "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "GAME_DATA_RETRIEVED",
-            }
-        ),
-        200,
-    )
-
-
-# 10
-@app.route("/api/rewards", methods=["POST"])
-@login_required
-@api_error_handler
-def rewards(user, game):
-    token_change = game.rewards()
-
-    user.tokens += token_change
-    db.session.commit()
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Rewards processed and tokens updated.",
-                "current_tokens": user.tokens,
-                "game_state": game.serialize(),
-                "game_state_hint": "REWARDS_PROCESSED",
-            }
-        ),
-        200,
-    )
-
-
-# 11
-@app.route("/api/hit", methods=["POST"])
-@login_required
-@api_error_handler
-def hit(user, game):
-    game.hit()
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "tokens": user.tokens,
-                "current_tokens": user.tokens,
-                "game_state": game.serialize(),
-                "game_state_hint": "HIT_RECIEVED",
-            }
-        ),
-        200,
-    )
-
-
-# 12
-@app.route("/api/stand", methods=["POST"])
-@login_required
-@api_error_handler
-def stand(user, game):
-    game.stand()
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "STAND_RECIEVED",
-                "tokens": user.tokens,
-                "current_tokens": user.tokens,
-                "game_state": game.serialize(),
-                "game_state_hint": "PLAYER_STAND_ROUND_ENDED",
             }
         ),
         200,
@@ -730,50 +776,6 @@ def round_end(user, game):
                 "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": status_hint_for_client,
-            }
-        ),
-        200,
-    )
-
-
-# 14
-@app.route("/api/double_request", methods=["POST"])
-@login_required
-@api_error_handler
-def double_request(user, game):
-    user.last_activity = datetime.now(timezone.utc)
-
-    bet_amount_to_double = game.get_bet()
-
-    if user.tokens < bet_amount_to_double:
-        # Error válasz, ha nincs elég token.
-        # A 402-es státuszkód (Payment Required) is használható ilyen esetekben.
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "error": "Insufficient tokens.",
-                    "game_state_hint": "INSUFFICIENT_FUNDS_FOR_DOUBLE",
-                    "required": bet_amount_to_double,
-                    "available": user.tokens,
-                }
-            ),
-            402,
-        )
-    amount_deducted = game.double_request()
-    user.tokens -= amount_deducted
-    db.session.commit()
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Double placed successfully.",
-                "double_amount": amount_deducted,
-                "current_tokens": user.tokens,
-                "game_state": game.serialize(),
             }
         ),
         200,
