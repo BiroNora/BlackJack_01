@@ -572,6 +572,51 @@ def start_game(user, game):
     )
 
 
+# 5
+@app.route("/api/ins_request", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def ins_request(user, game):
+    bet = game.get_bet()
+    insurance_amount = math.ceil(bet / 2)
+
+    if user.tokens < insurance_amount:
+        game_state_for_client = game.serialize_initial_state()
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "error": "Insufficient tokens.",
+                    "game_state_hint": "INSUFFICIENT_FUNDS",
+                    "required": insurance_amount,
+                    "available": user.tokens,
+                    "game_state": game_state_for_client,
+                }
+            ),
+            402,
+        )
+    ins = game.insurance_request()
+    user.tokens += ins
+    db.session.commit()
+
+    game_state_for_client = game.serialize_for_insurance()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "Insurance placed successfully.",
+                "insurance_amount": insurance_amount,
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "INSURANCE_PROCESSED",
+            }
+        ),
+        200,
+    )
+
+
 # 6
 @app.route("/api/get_game_data", methods=["GET"])
 @login_required
@@ -586,52 +631,6 @@ def get_game_data(user, game):
                 "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": "GAME_DATA_RETRIEVED",
-            }
-        ),
-        200,
-    )
-
-
-# 9
-@app.route("/api/ins_request", methods=["POST"])
-@login_required
-@api_error_handler
-def ins_request(user, game):
-
-    bet = game.get_bet()
-    insurance_amount = math.ceil(bet / 2)
-
-    if user.tokens < insurance_amount:
-        # Error válasz, ha nincs elég token.
-        # A 402-es státuszkód (Payment Required) is használható ilyen esetekben.
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "error": "Insufficient tokens.",
-                    "game_state_hint": "INSUFFICIENT_FUNDS",
-                    "required": insurance_amount,
-                    "available": user.tokens,
-                    "game_state": game.serialize(),
-                }
-            ),
-            402,
-        )
-    ins = game.insurance_request()
-    user.tokens += ins
-    db.session.commit()  # Elmentjük a módosítást az adatbázisba!
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Insurance placed successfully.",
-                "insurance_amount": insurance_amount,
-                "current_tokens": user.tokens,
-                "game_state": game.serialize(),
-                "game_state_hint": "INSURANCE_PROCESSED",
             }
         ),
         200,

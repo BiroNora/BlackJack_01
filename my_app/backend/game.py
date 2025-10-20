@@ -499,6 +499,22 @@ class Game:
             "is_round_active": self.is_round_active,
         }
 
+    def serialize_for_insurance(self):
+        state = {
+            "player": self.player,
+            "natural_21": self.natural_21,
+            "deckLen": self.get_deck_len(),
+            "bet": self.bet,
+            "is_round_active": self.is_round_active,
+        }
+
+        if self.natural_21 == 3:
+            state["dealer_unmasked"] = self.dealer_unmasked
+        else:
+            state["dealer_masked"] = self.dealer_masked
+
+        return state
+
     def serialize(self):
         all_hands = list(self.players.values())
 

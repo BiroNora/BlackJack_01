@@ -262,7 +262,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const data = await handleInsurance();
       const resp = extractGameStateData(data);
       const insWon = resp?.natural_21;
-
+      console.log("handleInsurance: ", resp)
       if (insWon === 3) {
         transitionToState('MAIN_STAND', resp);
       } else {
