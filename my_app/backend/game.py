@@ -483,6 +483,13 @@ class Game:
     def serialize_for_client_init(self):
         return {"deckLen": self.get_deck_len()}
 
+    def serialize_for_client_bets(self):
+        return {
+            "bet": self.bet,
+            "bet_list": self.bet_list,
+            "deckLen": self.get_deck_len(),
+        }
+
     def serialize(self):
         all_hands = list(self.players.values())
 

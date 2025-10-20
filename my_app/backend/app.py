@@ -334,7 +334,7 @@ def index():
     return render_template("index.html")
 
 
-# 0
+# 0 0
 @app.route("/api/initialize_session", methods=["POST"])
 @api_error_handler
 def initialize_session():
@@ -348,7 +348,9 @@ def initialize_session():
     user_id_in_session = session.get("user_id")
     user = None
 
+    # ----------------------------------------------------------------------
     # 1. DB: Felhasználó ellenőrzése, azonosítása vagy új létrehozása
+    # ----------------------------------------------------------------------
     if user_id_in_session:
         user = db.session.get(User, user_id_in_session)
         if not user:
@@ -363,7 +365,9 @@ def initialize_session():
         db.session.add(user)
         db.session.commit()
 
+    # ----------------------------------------------------------------------
     # 2. DB & Session: Frissítés és beállítás
+    # ----------------------------------------------------------------------
     user.last_activity = datetime.now(timezone.utc)
     db.session.commit()
     session["user_id"] = user.id
@@ -381,7 +385,7 @@ def initialize_session():
     redis_key = f"game:{user.id}"
     redis_data_raw = redis_client.get(redis_key)
     game_instance = None
-    redis_data = None 
+    redis_data = None
 
     if redis_data:
         # Próba betöltésre
@@ -455,12 +459,15 @@ def get_deck_len(user, game):
     return jsonify({"deckLen": deck_len, "message": "message"}), 200
 
 
-# 3
+# 3 1
 @app.route("/api/bet", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
-def bet(user, game):
+def bet(user):
+    redis_client = app.config.get("REDIS_CLIENT")
+    if not redis_client:
+        raise Exception("Server configuration error: Redis client missing.")
+
     data = request.get_json()
     bet_amount = data.get("bet", 0)
 
@@ -468,9 +475,6 @@ def bet(user, game):
         return (
             jsonify(
                 {
-                    "user_tokens": user.tokens,
-                    "bet": game.bet,
-                    "betList": game.bet_list,
                     "error": "Invalid bet amount.",
                     "game_state_hint": "INVALID_BET_AMOUNT_TYPE",
                 }
@@ -482,9 +486,6 @@ def bet(user, game):
         return (
             jsonify(
                 {
-                    "user_tokens": user.tokens,
-                    "bet": game.bet,
-                    "betList": game.bet_list,
                     "error": f"Bet must be at least {MINIMUM_BET} minimum.",
                     "game_state_hint": "BET_BELOW_MINIMUM",
                 }
@@ -496,9 +497,6 @@ def bet(user, game):
         return (
             jsonify(
                 {
-                    "user_tokens": user.tokens,
-                    "bet": game.bet,
-                    "betList": game.bet_list,
                     "error": "Not enough tokens.",
                     "game_state_hint": "NOT_ENOUGH_TOKENS_FOR_BET",
                 }
@@ -506,12 +504,28 @@ def bet(user, game):
             400,
         )
 
+    # 2. Game State betöltése a Redisből
+    redis_key = f"game:{user.id}"
+    redis_data_raw = redis_client.get(redis_key)
+    game = Game()
+
+    if redis_data_raw:
+        try:
+            # JSON string konvertálása Python dict-té
+            redis_data = json.loads(redis_data_raw)
+            game = Game.deserialize(redis_data)
+        except Exception as e:
+            # Deszerializációs hiba esetén új játék indítása
+            print(f"Hiba a Game deszerializálásakor bet híváskor ({user.id}): {e}. Új játék indítása.")
+            game = Game()
+
+    # 3. Tranzakció végrehajtása (DB és Game state frissítés)
     user.tokens -= bet_amount
     game.set_bet(bet_amount)
     game.set_bet_list(bet_amount)
     db.session.commit()
-
-    session["game"] = game.serialize()
+    redis_client.set(redis_key, game.serialize())
+    game_state_for_client = game.serialize_for_client_bets()
 
     return (
         jsonify(
@@ -519,43 +533,55 @@ def bet(user, game):
                 "status": "success",
                 "bet_placed": bet_amount,
                 "current_tokens": user.tokens,
-                "game_state": game.serialize(),
+                "game_state": game_state_for_client,
                 "game_state_hint": "BET_SUCCESSFULLY_PLACED",
+
             }
         ),
         200,
     )
 
 
-# 4
+# 4 2
 @app.route("/api/retake_bet", methods=["POST"])
 @login_required
-@load_game_state
 @api_error_handler
-def retake_bet(user, game):
-    current_betList = game.get_bet_list()
-    if len(current_betList) == 0:
-        return (
-            jsonify(
-                {
-                    "user_tokens": user.tokens,
-                    "bet": game.get_bet(),
-                    "betList": game.get_bet_list(),
-                    "error": "No bet to retake.",
-                    "game_state_hint": "BET_LIST_EMPTY",
-                }
-            ),
-            400,
-        )
+def retake_bet(user):
+    redis_client = app.config.get("REDIS_CLIENT")
+    if not redis_client:
+        raise Exception("Server configuration error: Redis client missing.")
 
+    # 2. Game State Betöltése
+    redis_key = f"game:{user.id}"
+    redis_data_raw = redis_client.get(redis_key)
+    game = None # Inicializálás a hatókör miatt
+
+    if not redis_data_raw:
+        return jsonify({"error": "No active game state found in Redis.", "game_state_hint": "NO_GAME_STATE"}), 400
+
+    try:
+        # JSON string konvertálása Python dict-té
+        redis_data = json.loads(redis_data_raw)
+        game = Game.deserialize(redis_data)
+    except Exception as e:
+        print(f"Hiba a Game deszerializálásakor retake_bet híváskor ({user.id}): {e}.")
+        return jsonify({"error": "Game state corruption error.", "game_state_hint": "CORRUPTED_GAME_STATE"}), 500
+
+    # 3. Érvényesítés és Tét Visszavétele
+    current_bet_list = game.get_bet_list()
+    if not current_bet_list:
+        return jsonify({"error": "No bet to retake.", "game_state_hint": "BET_LIST_EMPTY"}), 400
+
+    # Tét visszavétele és a bet_list frissítése a Game osztályban
     amount_to_return = game.retake_bet_from_bet_list()
 
+    # 4. Tranzakció Végrehajtása (DB és Redis)
     user.tokens += amount_to_return
-
-    session["game"] = game.serialize()
-    user.game_state_json = json.dumps(session["game"])
-
     db.session.commit()
+
+    # Mentés a Redisbe
+    redis_client.set(redis_key, game.serialize())
+    game_state_for_client = game.serialize_for_client_bets()
 
     return (
         jsonify(
@@ -563,7 +589,7 @@ def retake_bet(user, game):
                 "status": "success",
                 "bet_retaken": amount_to_return,
                 "current_tokens": user.tokens,
-                "game_state": game.serialize(),
+                "game_state": game_state_for_client,
                 "game_state_hint": "BET_SUCCESSFULLY_RETRAKEN",
             }
         ),

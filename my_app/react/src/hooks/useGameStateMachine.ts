@@ -141,7 +141,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       try {
         const data = await setBet(amount);
         const response = extractGameStateData(data);
-
+        console.log("BET response: ", response)
         if (response) {
           transitionToState('BETTING', response);
         }
@@ -159,7 +159,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       try {
         const data = await takeBackDeal();
         const response = extractGameStateData(data);
-
+        console.log("RE_BET response: ", response)
         if (response) {
           transitionToState('BETTING', response);
         }
