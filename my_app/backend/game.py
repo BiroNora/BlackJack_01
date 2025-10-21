@@ -58,8 +58,8 @@ class Game:
         card4 = self.deck.pop(0)
         # card2 = "♦10"
         # card4 = "♠A"
-        card1 = "♦A"
-        card3 = "♠A"
+        card1 = "♦10"
+        card3 = "♠10"
         player_hand = [card1, card3]
         dealer_hand = [card2, card4]
         dealer_masked = [" ✪ ", card4]
@@ -541,14 +541,31 @@ class Game:
             "is_round_active": self.is_round_active,
         }
 
+    @staticmethod
+    def _get_sort_key_combined(hand):
+        return (hand.get("hand_stated", True), hand.get("id", ""))
 
-    def serialize(self):
+    def _get_sorted_hands(self):
         all_hands = list(self.players.values())
 
-        def sort_key_combined(hand):
-            return (hand.get("hand_stated", True), hand.get("id", ""))
+        return sorted(all_hands, key=Game._get_sort_key_combined)
 
-        sorted_players_list = sorted(all_hands, key=sort_key_combined)
+    def serialize_split_hand(self):
+        sorted_players_list = self._get_sorted_hands()
+
+        return {
+            "player": self.player,
+            "dealer_masked": self.dealer_masked,
+            "aces": self.aces,
+            "players": sorted_players_list,
+            "splitReq": self.split_req,
+            "deckLen": self.get_deck_len(),
+            "bet": self.bet,
+            "is_round_active": self.is_round_active,
+        }
+
+    def serialize(self):
+        sorted_players_list = self._get_sorted_hands()
 
         return {
             "deck": self.deck,

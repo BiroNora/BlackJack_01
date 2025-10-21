@@ -766,6 +766,180 @@ def stand_and_rewards(user, game):
     )
 
 
+# 11
+@app.route("/api/split_request", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def split_request(user, game):
+    user.last_activity = datetime.now(timezone.utc)
+
+    bet_amount = game.get_bet()
+
+    if user.tokens < bet_amount:
+        # Error válasz, ha nincs elég token.
+        # A 402-es státuszkód (Payment Required) is használható ilyen esetekben.
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "error": "Insufficient tokens.",
+                    "game_state_hint": "INSUFFICIENT_FUNDS",
+                    "required": bet_amount,
+                    "available": user.tokens,
+                }
+            ),
+            402,
+        )
+    if not game.can_split(game.player["hand"]):
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "error": "Split not possible.",
+                    "game_state_hint": "SPLIT_NOT_POSSIBLE_RULES",
+                }
+            ),
+            400,
+        )
+    if len(game.players) > 3:
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "error": "Split not possible.",
+                    "game_state_hint": "MAX_SPLIT_HANDS_REACHED",
+                }
+            ),
+            400,
+        )
+
+    game.split_hand()
+    user.tokens -= bet_amount
+    db.session.commit()  # Elmentjük a módosítást az adatbázisba!
+
+    game_state_for_client = game.serialize_split_hand()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "Split hand placed successfully.",
+                "split_amount": bet_amount,
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "SPLIT_SUCCESS",
+            }
+        ),
+        200,
+    )
+
+
+# 12
+@app.route("/api/add_to_players_list_by_stand", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def add_to_players_list_by_stand(user, game):
+    user.last_activity = datetime.now(timezone.utc)
+
+    game.add_to_players_list_by_stand()
+
+    game_state_for_client = game.serialize_split_hand()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "Split hand placed successfully.",
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "NEXT_SPLIT_HAND_ACTIVATED",
+            }
+        ),
+        200,
+    )
+
+
+# 13
+@app.route("/api/add_split_player_to_game", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def add_split_player_to_game(user, game):
+    user.last_activity = datetime.now(timezone.utc)
+
+    if not game.players:
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "error": "Nincs több splitelt kéz, amit aktiválni lehetne.",
+                    "game_state_hint": "NO_MORE_SPLIT_HANDS",
+                }
+            ),
+            400,
+        )
+
+    game.add_split_player_to_game()
+
+    game_state_for_client = game.serialize_split_hand()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "Split hand placed successfully.",
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "NEXT_SPLIT_HAND_ACTIVATED",
+            }
+        ),
+        200,
+    )
+
+
+# 14
+@app.route("/api/add_player_from_players", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def add_player_from_players(user, game):
+    user.last_activity = datetime.now(timezone.utc)
+
+    if not game.players:
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "error": "No more split hands.",
+                    "game_state_hint": "NO_MORE_SPLIT_HANDS",
+                }
+            ),
+            400,
+        )
+
+    game.add_player_from_players()
+
+    game_state_for_client = game.serialize_split_hand()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "Split hand placed successfully.",
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "NEXT_SPLIT_HAND_ACTIVATED",
+            }
+        ),
+        200,
+    )
+
+
+# EDDIG
+
+
 # 6
 @app.route("/api/get_game_data", methods=["GET"])
 @login_required
@@ -806,174 +980,6 @@ def round_end(user, game):
                 "current_tokens": user.tokens,
                 "game_state": game.serialize(),
                 "game_state_hint": status_hint_for_client,
-            }
-        ),
-        200,
-    )
-
-
-# 15
-@app.route("/api/split_request", methods=["POST"])
-@login_required
-@api_error_handler
-def split_request(user, game):
-    user.last_activity = datetime.now(timezone.utc)
-
-    bet_amount = game.get_bet()
-
-    if user.tokens < bet_amount:
-        # Error válasz, ha nincs elég token.
-        # A 402-es státuszkód (Payment Required) is használható ilyen esetekben.
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "error": "Insufficient tokens.",
-                    "game_state_hint": "INSUFFICIENT_FUNDS",
-                    "required": bet_amount,
-                    "available": user.tokens,
-                }
-            ),
-            402,
-        )
-    if not game.can_split(game.player["hand"]):
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "error": "Split not possible.",
-                    "game_state_hint": "SPLIT_NOT_POSSIBLE_RULES",
-                }
-            ),
-            400,
-        )
-
-    if len(game.players) > 3:
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "error": "Split not possible.",
-                    "game_state_hint": "MAX_SPLIT_HANDS_REACHED",
-                }
-            ),
-            400,
-        )
-
-    game.split_hand()
-    user.tokens -= bet_amount
-    db.session.commit()  # Elmentjük a módosítást az adatbázisba!
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Split hand placed successfully.",
-                "split_amount": bet_amount,
-                "current_tokens": user.tokens,
-                "game_state": game.serialize(),
-                "game_state_hint": "SPLIT_SUCCESS",
-            }
-        ),
-        200,
-    )
-
-
-# 16
-@app.route("/api/add_to_players_list_by_stand", methods=["POST"])
-@login_required
-@api_error_handler
-def add_to_players_list_by_stand(user, game):
-    user.last_activity = datetime.now(timezone.utc)
-
-    game.add_to_players_list_by_stand()
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Split hand placed successfully.",
-                "current_tokens": user.tokens,
-                "game_state": game.serialize(),
-                "game_state_hint": "NEXT_SPLIT_HAND_ACTIVATED",
-            }
-        ),
-        200,
-    )
-
-
-# 17
-@app.route("/api/add_split_player_to_game", methods=["POST"])
-@login_required
-@api_error_handler
-def add_split_player_to_game(user, game):
-    user.last_activity = datetime.now(timezone.utc)
-
-    if not game.players:
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "error": "Nincs több splitelt kéz, amit aktiválni lehetne.",
-                    "game_state_hint": "NO_MORE_SPLIT_HANDS",
-                }
-            ),
-            400,
-        )
-
-    game.add_split_player_to_game()
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Split hand placed successfully.",
-                "current_tokens": user.tokens,
-                "game_state": game.serialize(),
-                "game_state_hint": "NEXT_SPLIT_HAND_ACTIVATED",
-            }
-        ),
-        200,
-    )
-
-
-# 18
-@app.route("/api/add_player_from_players", methods=["POST"])
-@login_required
-@api_error_handler
-def add_player_from_players(user, game):
-    user.last_activity = datetime.now(timezone.utc)
-
-    if not game.players:
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "error": "No more split hands.",
-                    "game_state_hint": "NO_MORE_SPLIT_HANDS",
-                }
-            ),
-            400,
-        )
-
-    game.add_player_from_players()
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Split hand placed successfully.",
-                "current_tokens": user.tokens,
-                "game_state": game.serialize(),
-                "game_state_hint": "NEXT_SPLIT_HAND_ACTIVATED",
             }
         ),
         200,
