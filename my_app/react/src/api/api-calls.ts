@@ -82,7 +82,7 @@ export async function handleStand() {
   return data;
 }
 
-export async function handleReward() {
+export async function handleRewards() {
   const data = await callApiEndpoint("/api/rewards", "POST");
 
   return data;
@@ -96,6 +96,12 @@ export async function handleInsurance() {
 
 export async function handleDouble() {
   const data = await callApiEndpoint("/api/double_request", "POST");
+
+  return data;
+}
+
+export async function handleStandAndRewards() {
+  const data = await callApiEndpoint("/api/stand_and_rewards", "POST");
 
   return data;
 }

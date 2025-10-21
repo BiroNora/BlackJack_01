@@ -146,6 +146,26 @@ function App() {
                   />
                 </div>
               );
+            case "MAIN_STAND_DOUBLE_TRANSIT":
+              return (
+                <div>
+                  <Cards gameState={gameState} initDeckLen={initDeckLen} />
+                  <div className="player-dealer-area-wrapper">
+                    <PlayerDealerMasked
+                      gameState={gameState}
+                      insMessage={showInsLost}
+                    />
+                  </div>
+                  <div className="game-action-area-wrapper">
+                    {/* <Winner gameState={gameState} /> */}
+                  </div>
+                  <BetBankDelayed
+                    finalGameState={gameState} // Ez a JUTALMAKKAL MÓDOSÍTOTT állapot
+                    initialBet={preRewardBet}
+                    initialTokens={preRewardTokens} // Ez a JUTALOM ELŐTTI token érték
+                  />
+                </div>
+              );
             case "SPLIT_TURN":
               return (
                 <div>

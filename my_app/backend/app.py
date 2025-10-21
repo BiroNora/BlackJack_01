@@ -689,9 +689,11 @@ def double_request(user, game):
             ),
             402,
         )
+
     amount_deducted = game.double_request()
     user.tokens -= amount_deducted
     db.session.commit()
+    game.hit()
 
     game_state_for_client = game.serialize_double_state()
 
@@ -715,6 +717,34 @@ def double_request(user, game):
 @with_game_state
 @api_error_handler
 def rewards(user, game):
+    token_change = game.rewards()
+
+    user.tokens += token_change
+    db.session.commit()
+
+    game_state_for_client = game.serialize_reward_state()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "Rewards processed and tokens updated.",
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "REWARDS_PROCESSED",
+            }
+        ),
+        200,
+    )
+
+
+# 10
+@app.route("/api/stand_and_rewards", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def stand_and_rewards(user, game):
+    game.stand()
     token_change = game.rewards()
 
     user.tokens += token_change

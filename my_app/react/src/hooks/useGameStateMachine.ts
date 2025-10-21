@@ -7,9 +7,10 @@ import {
   startGame,
   handleHit,
   handleStand,
-  handleReward,
+  handleRewards,
   handleInsurance,
   handleDouble,
+  handleStandAndRewards,
   splitHand,
   addToPlayersListByStand,
   addSplitPlayerToGame,
@@ -211,7 +212,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
     try {
       await handleStand();
-      const rewards = await handleReward();
+      const rewards = await handleRewards();
       const resp = extractGameStateData(rewards);
       transitionToState('MAIN_STAND', resp);
     } catch {
@@ -233,17 +234,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         setPreRewardBet(doubledState.player.bet);
         setPreRewardTokens(doubledState.tokens);
 
-        const hitResponse = await handleHit();
-        const hitState = extractGameStateData(hitResponse);
-
-        if (hitState) {
-          await handleStand();
-          const rewardsResponse = await handleReward();
-          const finalState = extractGameStateData(rewardsResponse);
-
-          if (finalState) {
-            transitionToState('MAIN_STAND', finalState);
-          }
+        if (doubledState) {
+          transitionToState('MAIN_STAND_DOUBLE_TRANSIT', doubledState);
         }
       }
     } catch {
@@ -360,7 +352,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         const data = await handleHit();
         const response = extractGameStateData(data);
         if (response) {
-          transitionToState('SPLIT_STAND_DOUBLE', response);
+          transitionToState('SPLIT_STAND_DOUBLE', doubledState);
         }
       } else {
         transitionToState('SPLIT_TURN', gameState);
@@ -486,7 +478,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           if (response && response.dealer_masked) {
             if (response.dealer_masked.nat_21 === 1 || response.dealer_masked.nat_21 === 2) {
               savePreActionState();
-              const rewards = await handleReward();
+              const rewards = await handleRewards();
               const resp = extractGameStateData(rewards);
               transitionToState('MAIN_STAND', resp);
             } else {
@@ -509,7 +501,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         try {
           if (hasOver21) {
             await handleStand();
-            const rewards = await handleReward();
+            const rewards = await handleRewards();
             const resp = extractGameStateData(rewards);
             transitionToState('MAIN_STAND', resp);
           }
@@ -569,6 +561,29 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           }
         }
       }, 4000);
+    }
+
+    else if (gameState.currentGameState === 'MAIN_STAND_DOUBLE_TRANSIT') {
+      const MainStandDoubleTransit = async () => {
+        if (!isMountedRef.current) return;
+
+        try {
+          const rewardsResponse = await handleStandAndRewards();
+          const finalState = extractGameStateData(rewardsResponse);
+
+          if (finalState) {
+            timeoutIdRef.current = window.setTimeout(() => {
+              // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+              if (isMountedRef.current) {
+                transitionToState('MAIN_STAND', finalState);
+              }
+            }, 1000);
+          }
+        } catch {
+          transitionToState('ERROR');
+        }
+      };
+      MainStandDoubleTransit();
     }
 
     else if (gameState.currentGameState === 'SPLIT_STAND' || gameState.currentGameState === 'SPLIT_STAND_DOUBLE') {
@@ -705,14 +720,14 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           console.log(stand?.player)
           console.log(stand?.winner)
 
-          const rewardData = await handleReward();
-          const reward = extractGameStateData(rewardData);
+          const rewardData = await handleRewards();
+          const rewards = extractGameStateData(rewardData);
           console.log("REWARD")
-          console.log(reward?.player)
-          console.log(reward?.winner)
+          console.log(rewards?.player)
+          console.log(rewards?.winner)
 
-          if (reward && reward?.players && stand) {
-            const combinedState = { ...stand, ...reward };
+          if (rewards && rewards?.players && stand) {
+            const combinedState = { ...stand, ...rewards };
             transitionToState('SPLIT_FINISH_TRANSIT', combinedState);
           } else {
             transitionToState('ERROR')
