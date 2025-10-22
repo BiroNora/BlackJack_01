@@ -112,6 +112,12 @@ export async function splitHand() {
   return data;
 }
 
+export async function splitHit() {
+  const data = await callApiEndpoint("/api/split_hit", "POST");
+
+  return data;
+}
+
 export async function addSplitPlayerToGame() {
   const data = await callApiEndpoint("/api/add_split_player_to_game", "POST");
 
@@ -126,6 +132,12 @@ export async function addToPlayersListByStand() {
 
 export async function updatePlayerFromPlayers() {
   const data = await callApiEndpoint("/api/add_player_from_players", "POST");
+
+  return data;
+}
+
+export async function handleDoubleStandAndRewards() {
+  const data = await callApiEndpoint("/api/double_stand_and_rewards", "POST");
 
   return data;
 }

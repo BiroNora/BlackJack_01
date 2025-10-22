@@ -15,9 +15,10 @@ import {
   addToPlayersListByStand,
   addSplitPlayerToGame,
   updatePlayerFromPlayers,
-  getGameData,
   setRestart,
   forceRestart,
+  handleDoubleStandAndRewards,
+  splitHit,
 } from '../api/api-calls';
 import type {
   GameState,
@@ -301,7 +302,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     setHasHitTurn(true);
 
     try {
-      const data = await handleHit();
+      const data = await splitHit();
       const response = extractGameStateData(data);
       const newHitCounter = hitCounter === null ? 1 : hitCounter + 1;
       incrementHitCounter();
@@ -349,9 +350,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const doubledState = extractGameStateData(doubleResponse);
 
       if (doubledState && doubledState.player && doubledState.tokens) {
-        const data = await handleHit();
-        const response = extractGameStateData(data);
-        if (response) {
+        if (doubledState) {
           transitionToState('SPLIT_STAND_DOUBLE', doubledState);
         }
       } else {
@@ -714,21 +713,14 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const SplitFinish = async () => {
         try {
           savePreActionState();
-          const standData = await handleStand();
-          const stand = extractGameStateData(standData);
-          console.log("STAND")
-          console.log(stand?.player)
-          console.log(stand?.winner)
-
-          const rewardData = await handleRewards();
+          const rewardData = await handleDoubleStandAndRewards();
           const rewards = extractGameStateData(rewardData);
           console.log("REWARD")
-          console.log(rewards?.player)
+          console.log(rewards)
           console.log(rewards?.winner)
 
-          if (rewards && rewards?.players && stand) {
-            const combinedState = { ...stand, ...rewards };
-            transitionToState('SPLIT_FINISH_TRANSIT', combinedState);
+          if (rewards) {
+            transitionToState('SPLIT_FINISH_OUTCOME', rewards);
           } else {
             transitionToState('ERROR')
           }
@@ -740,17 +732,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       SplitFinish();
     }
 
-    else if (gameState.currentGameState === 'SPLIT_FINISH_TRANSIT') {
+    else if (gameState.currentGameState === 'SPLIT_FINISH_OUTCOME') {
       const SplitFinishTransit = async () => {
         if (!isMountedRef.current) return;
 
         try {
           if (!isMountedRef.current) return;
-          const gameData = await getGameData();
-          const data = extractGameStateData(gameData);
-          if (data && data.players) {
-            if (data.players.length === 0) {
-              if (data.tokens === 0) {
+          //const gameData = await getGameData();
+          //const data = extractGameStateData(gameData);
+          if (gameState.players) {
+            if (gameState.players.length === 0) {
+              if (gameState.tokens === 0) {
                 transitionToState('OUT_OF_TOKENS');
               } else {
                 setHasHitTurn(false);
@@ -808,7 +800,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             }
           }
         } catch (e) {
-          console.error("Hiba a SPLIT_FINISH_TRANSIT fázisban:", e);
+          console.error("Hiba a SPLIT_FINISH_OUTCOME fázisban:", e);
           transitionToState('ERROR')
         }
       };

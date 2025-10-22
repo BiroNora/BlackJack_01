@@ -265,7 +265,7 @@ function App() {
                   </div>
                 </div>
               );
-            case "SPLIT_FINISH_TRANSIT":
+            case "SPLIT_FINISH_OUTCOME":
               return (
                 <div>
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />

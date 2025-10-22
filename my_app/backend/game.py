@@ -308,19 +308,16 @@ class Game:
         if not self.players:
             return None
 
-        try:
-            true_stated_ids = (
-                hand_id
-                for hand_id, hand_data in self.players.items()
-                if hand_data.get("stated") == False
-            )
+        player_ids = [
+            hand_id
+            for hand_id, hand_data in self.players.items()
+            if hand_data.get("stated") is False
+        ]
 
-            smallest_true_id = min(true_stated_ids)
+        if player_ids:
+            return min(player_ids)
 
-            return smallest_true_id
-
-        except ValueError:
-            return None
+        return None
 
     def add_split_player_to_game(self):
         if not self.players:
@@ -328,7 +325,17 @@ class Game:
 
         if self.players:
             hand_id = self.find_smallest_true_stated_id()
+
+            if hand_id is None:
+                return None
+
             self.player = self.players.pop(hand_id)
+
+            if hand_id in self.players:
+                self.player = self.players.pop(hand_id)
+            else:
+                if not self.player:
+                    return None
 
             if self.deck:
                 card = self.deck.pop(0)
@@ -541,6 +548,17 @@ class Game:
             "is_round_active": self.is_round_active,
         }
 
+    def serialize_double_reward_state(self):
+        return {
+            "player": self.player,
+            "dealer_masked": self.dealer_masked,
+            "dealer_unmasked": self.dealer_unmasked,
+            "deckLen": self.get_deck_len(),
+            "bet": self.bet,
+            "winner": self.winner,
+            "is_round_active": self.is_round_active,
+        }
+
     @staticmethod
     def _get_sort_key_combined(hand):
         return (hand.get("hand_stated", True), hand.get("id", ""))
@@ -558,6 +576,20 @@ class Game:
             "dealer_masked": self.dealer_masked,
             "aces": self.aces,
             "players": sorted_players_list,
+            "splitReq": self.split_req,
+            "deckLen": self.get_deck_len(),
+            "bet": self.bet,
+            "is_round_active": self.is_round_active,
+        }
+
+    def serialize_double_reward_state(self):
+        sorted_players_list = self._get_sorted_hands()
+
+        return {
+            "player": self.player,
+            "dealer_unmasked": self.dealer_unmasked,
+            "players": sorted_players_list,
+            "winner": self.winner,
             "splitReq": self.split_req,
             "deckLen": self.get_deck_len(),
             "bet": self.bet,

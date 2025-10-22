@@ -937,14 +937,113 @@ def add_player_from_players(user, game):
     )
 
 
+# 15
+@app.route("/api/split_hit", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def split_hit(user, game):
+    game.hit()
+
+    game_state_for_client = game.serialize_split_hand()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "tokens": user.tokens,
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "HIT_RECIEVED",
+            }
+        ),
+        200,
+    )
+
+
+# 16
+@app.route("/api/double_request", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def split_double_request(user, game):
+    user.last_activity = datetime.now(timezone.utc)
+
+    bet_amount_to_double = game.get_bet()
+
+    if user.tokens < bet_amount_to_double:
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "error": "Insufficient tokens.",
+                    "game_state_hint": "INSUFFICIENT_FUNDS_FOR_DOUBLE",
+                    "required": bet_amount_to_double,
+                    "available": user.tokens,
+                }
+            ),
+            402,
+        )
+
+    amount_deducted = game.double_request()
+    user.tokens -= amount_deducted
+    db.session.commit()
+    game.hit()
+
+    game_state_for_client = game.serialize_split_hand()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "Double placed successfully.",
+                "double_amount": amount_deducted,
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+            }
+        ),
+        200,
+    )
+
+# 17
+@app.route("/api/double_stand_and_rewards", methods=["POST"])
+@login_required
+@with_game_state
+@api_error_handler
+def double_stand_and_rewards(user, game):
+    game.stand()
+    token_change = game.rewards()
+
+    user.tokens += token_change
+    db.session.commit()
+
+    game_state_for_client = game.serialize_double_reward_state()
+
+    return (
+        jsonify(
+            {
+                "status": "success",
+                "message": "Rewards processed and tokens updated.",
+                "current_tokens": user.tokens,
+                "game_state": game_state_for_client,
+                "game_state_hint": "REWARDS_PROCESSED",
+            }
+        ),
+        200,
+    )
+
+
+
 # EDDIG
 
 
 # 6
 @app.route("/api/get_game_data", methods=["GET"])
 @login_required
+@with_game_state
 @api_error_handler
 def get_game_data(user, game):
+    game_state_for_client = game.serialize_double_reward_state()
 
     return (
         jsonify(
@@ -952,7 +1051,7 @@ def get_game_data(user, game):
                 "status": "success",
                 "message": "Game data retrieved.",
                 "current_tokens": user.tokens,
-                "game_state": game.serialize(),
+                "game_state": game_state_for_client,
                 "game_state_hint": "GAME_DATA_RETRIEVED",
             }
         ),
