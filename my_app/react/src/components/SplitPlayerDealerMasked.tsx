@@ -40,7 +40,6 @@ const SplitPlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
 
   const formatHand = (cardStrings: string[]): JSX.Element[] => {
     const formattedElements = cardStrings.map((cardString, index) => {
-      // Elválasztó elem, ha nem az első lap (fontos a 'key' prop!)
       const separator =
         index > 0 ? (
           <span
@@ -56,7 +55,6 @@ const SplitPlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
       return (
         <React.Fragment key={cardString + index}>
           {separator} {formatCard(cardString)}{" "}
-          {/* formatCard már JSX elemet ad vissza */}
         </React.Fragment>
       );
     });
@@ -77,20 +75,23 @@ const SplitPlayerDealerMasked: React.FC<TableProps> = ({ gameState }) => {
   return (
     <div className="player-dealer-area">
       <div id="dealer-hand" className="play">
-        <div className="hand"> &nbsp;&nbsp;&nbsp;{formattedDealerHand}</div>
+        <div className="hand hand-area-wrapper">
+          {" "}
+          &nbsp;&nbsp;&nbsp;&nbsp;{formattedDealerHand} {" "}
+        </div>
         <div className="score-area-wrapper"></div>
-        <div>
+        <div className="band-area-wrapper">
           <span className="label-text">Dealer:</span>
           <span className="label-text1"> {dealerMaskedScore}</span>
         </div>
       </div>
       <div id="player-hand" className="play">
-        <div>
+        <div className="band-area-wrapper">
           <span className="label-text">Player:</span>
           <span className="label-text1"> {player.sum}</span>
         </div>
         <div className="score-area-wrapper"></div>
-        <div className="hand">{formattedPlayerHand}</div>
+        <div className="hand hand-area-wrapper">{formattedPlayerHand}</div>
       </div>
     </div>
   );

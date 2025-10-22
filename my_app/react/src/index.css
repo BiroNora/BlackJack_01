@@ -79,7 +79,7 @@
 /* --- Extra Large Breakpoint (xl): 1280px-től felfelé --- */
 @media (min-width: 1280px) {
   #root {
-    padding-top: 2.5rem;
+    padding-top: 1.8rem;
     padding-left: 5.5rem;
     padding-right: 5.5rem;
     max-width: 1280px; /* Max szélesség az xl breakpointig */
@@ -89,7 +89,7 @@
 /* --- Double Extra Large Breakpoint (2xl): 1536px-től felfelé --- */
 @media (min-width: 1536px) {
   #root {
-    padding-top: 2.5rem;
+    padding-top: 1.8rem;
     padding-left: 5.5rem;
     padding-right: 5.5rem;
     max-width: 1536px; /* Max szélesség a 2xl breakpointig */
@@ -196,7 +196,7 @@ button:disabled {
 
 .player-dealer-area-wrapper {
   display: flex;
-  align-items: center; /* Függőlegesen középre igazítja az elemeket */
+  align-items: flex-start; /* Függőlegesen középre igazítja az elemeket */
   justify-content: center;
   width: 100%;
   padding-top: var(--extra-vertical-padding02);
@@ -226,6 +226,14 @@ button:disabled {
   padding-top: var(--extra-vertical-padding02);
   padding-bottom: var(--extra-vertical-padding05);
   box-sizing: border-box;
+}
+
+.hand-area-wrapper {
+  min-height: 2.5rem;
+}
+
+.band-area-wrapper {
+  min-height: 2.0rem;
 }
 
 .score-area-wrapper {

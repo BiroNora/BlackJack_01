@@ -8,6 +8,9 @@ interface TableProps {
 }
 
 const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
+  if (!gameState || !gameState.player || !gameState.dealer_unmasked) {
+    return null;
+  }
   const { player, dealer_unmasked } = gameState;
 
   const formatCard = (card: string): JSX.Element | string => {
@@ -33,61 +36,69 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
 
   const formatHand = (cardStrings: string[]): JSX.Element[] => {
     const formattedElements = cardStrings.map((cardString, index) => {
-      // Elválasztó elem, ha nem az első lap (fontos a 'key' prop!)
       const separator =
         index > 0 ? (
-          <span key={`hand-sep-${index}`} className="equal-text1 merriweather5grey">
+          <span
+            key={`hand-sep-${index}`}
+            className="equal-text1 merriweather5grey"
+          >
             +
           </span>
         ) : null;
 
-      // React.Fragment használata a szeparátor és a kártya csoportosítására (fontos a 'key' prop!)
       return (
         <React.Fragment key={cardString + index}>
           {separator} {formatCard(cardString)}{" "}
-          {/* formatCard már JSX elemet ad vissza */}
         </React.Fragment>
       );
     });
 
-    return formattedElements; // JSX elemek tömbje
+    return formattedElements;
   };
 
   const loop = (data: string[]): string[] => {
     return data.map((card) => String(card).trim());
   };
 
-
   const p_state = states[player.hand_state];
-  const d_state = states[dealer_unmasked.hand_state];
-  
+  const d_state = !dealer_unmasked.hand_state ? (
+    <span className="opacity-0"> &nbsp;&nbsp; </span>
+  ) : (
+    states[dealer_unmasked.hand_state]
+  );
+
   const playerHand = loop(player.hand);
   const dealerHand = loop(dealer_unmasked.hand);
 
   const formattedPlayerHand = formatHand(playerHand);
-  const formattedDealerHand = formatHand(dealerHand);
+  const formattedDealerHand =
+    dealerHand.length === 0 ? (
+      <span className="opacity-0"> &nbsp;&nbsp; </span>
+    ) : (
+      formatHand(dealerHand)
+    );
 
   return (
     <div className="player-dealer-area">
       <div id="dealer-hand" className="play">
-        <div className="hand"> {formattedDealerHand} </div>
+        <div className="hand hand-area-wrapper">{formattedDealerHand}</div>
         <div className="score-area-wrapper">
           <span className="score-mood merriweather5grey2">{d_state}</span>
         </div>
-        <div>
-          <span className="label-text">Dealer:{" "}</span><span className="label-text1">{dealer_unmasked.sum}</span>
+        <div className="band-area-wrapper">
+          <span className="label-text">Dealer: </span>
+          <span className="label-text1">{dealer_unmasked.sum}</span>
         </div>
       </div>
       <div id="player-hand" className="play">
-        <div>
-          <span className="label-text">Player:{" "}</span><span className="label-text1">{player.sum}</span>
+        <div className="band-area-wrapper">
+          <span className="label-text">Player: </span>
+          <span className="label-text1">{player.sum}</span>
         </div>
         <div className="score-area-wrapper">
           <span className="score-mood merriweather5grey">{p_state}</span>
         </div>
-        <div className="hand">
-          {formattedPlayerHand}
-        </div>
+        <div className="hand hand-area-wrapper">{formattedPlayerHand}</div>
       </div>
     </div>
   );
