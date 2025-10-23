@@ -78,6 +78,12 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
       formatHand(dealerHand)
     );
 
+  const sum = dealer_unmasked.sum === 0 ? (
+      <span className="opacity-0"> &nbsp; </span>
+    ) : (
+      dealer_unmasked.sum
+    );
+
   return (
     <div className="player-dealer-area">
       <div id="dealer-hand" className="play">
@@ -87,7 +93,7 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
         </div>
         <div className="band-area-wrapper">
           <span className="label-text">Dealer: </span>
-          <span className="label-text1">{dealer_unmasked.sum}</span>
+          <span className="label-text1">{sum}</span>
         </div>
       </div>
       <div id="player-hand" className="play">

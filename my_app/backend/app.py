@@ -766,6 +766,7 @@ def stand_and_rewards(user, game):
     )
 
 
+# SPLIT part
 # 11
 @app.route("/api/split_request", methods=["POST"])
 @login_required
@@ -962,7 +963,7 @@ def split_hit(user, game):
 
 
 # 16
-@app.route("/api/double_request", methods=["POST"])
+@app.route("/api/split_double_request", methods=["POST"])
 @login_required
 @with_game_state
 @api_error_handler
@@ -1005,8 +1006,9 @@ def split_double_request(user, game):
         200,
     )
 
+
 # 17
-@app.route("/api/double_stand_and_rewards", methods=["POST"])
+@app.route("/api/split_double_stand_and_rewards", methods=["POST"])
 @login_required
 @with_game_state
 @api_error_handler
@@ -1017,7 +1019,7 @@ def double_stand_and_rewards(user, game):
     user.tokens += token_change
     db.session.commit()
 
-    game_state_for_client = game.serialize_double_reward_state()
+    game_state_for_client = game.serialize_split_double_stand_and_rewards()
 
     return (
         jsonify(
@@ -1033,61 +1035,10 @@ def double_stand_and_rewards(user, game):
     )
 
 
-
-# EDDIG
-
-
-# 6
-@app.route("/api/get_game_data", methods=["GET"])
-@login_required
-@with_game_state
-@api_error_handler
-def get_game_data(user, game):
-    game_state_for_client = game.serialize_double_reward_state()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "Game data retrieved.",
-                "current_tokens": user.tokens,
-                "game_state": game_state_for_client,
-                "game_state_hint": "GAME_DATA_RETRIEVED",
-            }
-        ),
-        200,
-    )
-
-
-# 13
-@app.route("/api/round_end", methods=["POST"])
-@login_required
-@api_error_handler
-def round_end(user, game):
-    game.round_end()
-
-    message_for_client = "Round ended and game state reset, ready for a new round."
-    status_hint_for_client = "ROUND_ENDED_GAME_RESET"
-
-    session["game"] = game.serialize()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": message_for_client,
-                "current_tokens": user.tokens,
-                "game_state": game.serialize(),
-                "game_state_hint": status_hint_for_client,
-            }
-        ),
-        200,
-    )
-
-
-# 19
+# 18
 @app.route("/api/set_restart", methods=["POST"])
 @login_required
+@with_game_state
 @api_error_handler
 def set_restart(user, game):
     game.restart_game()
@@ -1095,14 +1046,14 @@ def set_restart(user, game):
     user.tokens = 1000
     db.session.commit()
 
-    session["game"] = game.serialize()
+    game_state_for_client = game.serialize_for_client_bets()
 
     return (
         jsonify(
             {
                 "status": "success",
                 "current_tokens": user.tokens,
-                "game_state": game.serialize(),
+                "game_state": game_state_for_client,
                 "game_state_hint": "HIT_RESTART",
             }
         ),
@@ -1110,7 +1061,7 @@ def set_restart(user, game):
     )
 
 
-# 20
+# 19
 @app.route("/api/force_restart", methods=["POST"])
 @api_error_handler
 def force_restart_by_client_id():
@@ -1138,20 +1089,23 @@ def force_restart_by_client_id():
     session["user_id"] = user.id
     session.permanent = True
 
+    redis_client = current_app.config.get("REDIS_CLIENT")
+    redis_key = f"game:{user.id}"
+
     # A játék egy új, alapértelmezett állapotból indul,
     # mivel a régi játékállapot (pl. a bet) elveszett a sessionnel együtt.
     game = Game()
     game.restart_game()
 
-    # A frissített játékállapot mentése a sessionbe.
-    session["game"] = game.serialize()
+    # Mentés a Redisbe, felülírva az esetlegesen hibás előző állapotot
+    redis_client.set(redis_key, game.serialize())
 
     return (
         jsonify(
             {
                 "status": "success",
                 "current_tokens": user.tokens,
-                "game_state": game.serialize(),
+                "game_state": game.serialize_for_client_bets(),
                 "game_state_hint": "HIT_RESTART",
             }
         ),
@@ -1159,7 +1113,7 @@ def force_restart_by_client_id():
     )
 
 
-# 21
+# 20
 @app.route("/error_page", methods=["GET"])
 def error_page():
     return render_template("error.html")

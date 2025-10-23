@@ -1,3 +1,4 @@
+import copy
 import math
 import random
 
@@ -33,12 +34,21 @@ class Game:
             "hand_state": HandState.NONE,
             "natural_21": WinnerState.NONE,
         }
+        self.split_player: Dict[str, Any] = {
+            "id": NONE,
+            "hand": [],
+            "sum": 0,
+            "hand_state": HandState.NONE,
+            "can_split": False,
+            "stated": False,
+            "bet": 0,
+        }
         self.natural_21 = WinnerState.NONE
         self.aces = False
         self.winner = WinnerState.NONE
         self.hand_counter: int = 0  # helper for the players dict
-        self.players_index = {}  # helper for the players dict
         self.players: Dict[str, Dict[str, Any]] = {}
+        self.players_index = {}  # helper for the players dict
         self.stated = False
         self.split_req: int = 0
         self.suits = ["♥", "♦", "♣", "♠"]
@@ -273,6 +283,10 @@ class Game:
 
         self.player = new_hand
         self.players[hand_to_list["id"]] = hand_to_list
+        old_id = self.player["id"]
+
+        self.players_index[old_id] = self.stated
+        self.players_index[new_id_B] = self.stated
 
         self.set_split_req(1)
 
@@ -303,50 +317,58 @@ class Game:
         if is_active:
             self.player["stated"] = True
             self.players[self.player["id"]] = self.player
+            ID = self.player["id"]
+            self.players_index[ID] = True
 
-    def find_smallest_true_stated_id(self):
-        if not self.players:
+    def find_smallest_false_stated_id(self):
+        if not self.players_index:
             return None
 
-        player_ids = [
+        unplayed_id_generator = (
             hand_id
-            for hand_id, hand_data in self.players.items()
-            if hand_data.get("stated") is False
-        ]
+            for hand_id, is_stated in sorted(self.players_index.items())
+            if is_stated is False
+        )
 
-        if player_ids:
-            return min(player_ids)
-
-        return None
+        # next() adja vissza a legelső (legkisebb) False állapotú ID-t
+        return next(unplayed_id_generator, None)
 
     def add_split_player_to_game(self):
         if not self.players:
             return None
 
-        if self.players:
-            hand_id = self.find_smallest_true_stated_id()
+        hand_id = self.find_smallest_false_stated_id()
 
-            if hand_id is None:
-                return None
+        if hand_id is None:
+            return None
 
+        # ESET 1: VISSZATÖLTÉS (Cache Védelme a Strict Mode miatt)
+        if self.split_player and self.split_player.get("id") == hand_id:
+            self.player = copy.deepcopy(self.split_player)
+
+        # ESET 2: Gyors kiút (A lap már be van töltve)
+        elif self.player and self.player.get("id") == hand_id:
+            pass
+
+        # ESET 3: ELSŐ FUTÁS (Lap kiemelése, mentés, és set_split_req)
+        elif hand_id in self.players:
             self.player = self.players.pop(hand_id)
+            self.split_player = copy.deepcopy(self.player)
+            self.set_split_req(-1)
+        else:
+            return None
 
-            if hand_id in self.players:
-                self.player = self.players.pop(hand_id)
-            else:
-                if not self.player:
-                    return None
-
+        if len(self.player.get("hand", [])) < 2:
             if self.deck:
                 card = self.deck.pop(0)
-                self.set_player_hand(card)
-                hand = self.player["hand"]
-                player_sum = self.sum(hand, True)
-                can_split = self.can_split(hand)
-                self.player["sum"] = player_sum
-                self.player["hand_state"] = self.hand_state(player_sum, True)
-                self.player["can_split"] = can_split
-            self.set_split_req(-1)
+                self.player["hand"].append(card)
+
+        hand = self.player["hand"]
+        player_sum = self.sum(hand, True)
+        can_split = self.can_split(hand)
+        self.player["sum"] = player_sum
+        self.player["hand_state"] = self.hand_state(player_sum, True)
+        self.player["can_split"] = can_split
 
         return self.player
 
@@ -381,7 +403,7 @@ class Game:
         return (stated_status, hand_id)
 
     def clear_up(self):
-        self.player = {
+        self.player: Dict[str, Any] = {
             "id": NONE,
             "hand": [],
             "sum": 0,
@@ -402,11 +424,21 @@ class Game:
             "hand_state": HandState.NONE,
             "natural_21": WinnerState.NONE,
         }
+        self.split_player: Dict[str, Any] = {
+            "id": NONE,
+            "hand": [],
+            "sum": 0,
+            "hand_state": HandState.NONE,
+            "can_split": False,
+            "stated": False,
+            "bet": 0,
+        }
         self.aces = False
         self.natural_21 = WinnerState.NONE
         self.winner = WinnerState.NONE
         self.hand_counter = 0
         self.players = {}
+        self.players_index = {}
         self.split_req = 0
         self.set_bet_list_to_null()
         self.is_round_active = False
@@ -548,17 +580,6 @@ class Game:
             "is_round_active": self.is_round_active,
         }
 
-    def serialize_double_reward_state(self):
-        return {
-            "player": self.player,
-            "dealer_masked": self.dealer_masked,
-            "dealer_unmasked": self.dealer_unmasked,
-            "deckLen": self.get_deck_len(),
-            "bet": self.bet,
-            "winner": self.winner,
-            "is_round_active": self.is_round_active,
-        }
-
     @staticmethod
     def _get_sort_key_combined(hand):
         return (hand.get("hand_stated", True), hand.get("id", ""))
@@ -574,21 +595,25 @@ class Game:
         return {
             "player": self.player,
             "dealer_masked": self.dealer_masked,
+            "split_player": self.split_player,
             "aces": self.aces,
             "players": sorted_players_list,
+            "players_index": self.players_index,
             "splitReq": self.split_req,
             "deckLen": self.get_deck_len(),
             "bet": self.bet,
             "is_round_active": self.is_round_active,
         }
 
-    def serialize_double_reward_state(self):
+    def serialize_split_double_stand_and_rewards(self):
         sorted_players_list = self._get_sorted_hands()
 
         return {
             "player": self.player,
             "dealer_unmasked": self.dealer_unmasked,
+            "split_player": self.split_player,
             "players": sorted_players_list,
+            "players_index": self.players_index,
             "winner": self.winner,
             "splitReq": self.split_req,
             "deckLen": self.get_deck_len(),
@@ -604,11 +629,13 @@ class Game:
             "player": self.player,
             "dealer_masked": self.dealer_masked,
             "dealer_unmasked": self.dealer_unmasked,
+            "split_player": self.split_player,
             "aces": self.aces,
             "natural_21": self.natural_21,
             "winner": self.winner,
             "hand_counter": self.hand_counter,
             "players": sorted_players_list,
+            "players_index": self.players_index,
             "splitReq": self.split_req,
             "deckLen": self.get_deck_len(),
             "bet": self.bet,
@@ -623,11 +650,13 @@ class Game:
         game.player = data["player"]
         game.dealer_masked = data["dealer_masked"]
         game.dealer_unmasked = data["dealer_unmasked"]
+        game.split_player = data["split_player"]
         game.aces = data["aces"]
         game.natural_21 = data["natural_21"]
         game.winner = data["winner"]
         game.hand_counter = data["hand_counter"]
         game.players = {hand["id"]: hand for hand in data["players"]}
+        game.players_index = data.get("players_index", {})
         game.split_req = data["splitReq"]
         game.deck_len = data["deckLen"]
         game.bet = data["bet"]

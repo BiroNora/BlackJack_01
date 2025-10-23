@@ -4,10 +4,10 @@ import { generateUUID } from "../utilities/utils";
 export async function initializeSessionAPI() {
   try {
     // 1. Lekérjük/generáljuk a kliens egyedi azonosítóját (client_id) a böngésző localStorage-jából.
-    let clientUuid = localStorage.getItem('blackjack_client_uuid');
+    let clientUuid = localStorage.getItem("blackjack_client_uuid");
     if (!clientUuid) {
       clientUuid = generateUUID(); // Generálunk egy újat, ha még nincs
-      localStorage.setItem('blackjack_client_uuid', clientUuid); // Elmentjük a böngészőbe
+      localStorage.setItem("blackjack_client_uuid", clientUuid); // Elmentjük a böngészőbe
     }
 
     // 2. Meghívjuk a szerveren lévő /api/initialize_session API-t,
@@ -15,11 +15,11 @@ export async function initializeSessionAPI() {
     const response = await fetch("/api/initialize_session", {
       method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        client_id: clientUuid
-      })
+        client_id: clientUuid,
+      }),
     });
 
     if (!response.ok) {
@@ -30,7 +30,7 @@ export async function initializeSessionAPI() {
 
     // Frissítjük a localStorage-t, ha a szerver esetleg új client_id-t küld vissza
     if (data.client_id && data.client_id !== clientUuid) {
-      localStorage.setItem('blackjack_client_uuid', data.client_id);
+      localStorage.setItem("blackjack_client_uuid", data.client_id);
     }
 
     return data; // Visszaadjuk a szerver válaszát (tartalmazza a message-t, user_id-t, client_id-t)
@@ -60,12 +60,6 @@ export async function getShuffling() {
 
 export async function startGame() {
   const data = await callApiEndpoint("/api/start_game", "POST");
-
-  return data;
-}
-
-export async function getGameData() {
-  const data = await callApiEndpoint("/api/get_game_data", "GET");
 
   return data;
 }
@@ -125,7 +119,10 @@ export async function addSplitPlayerToGame() {
 }
 
 export async function addToPlayersListByStand() {
-  const data = await callApiEndpoint("/api/add_to_players_list_by_stand", "POST");
+  const data = await callApiEndpoint(
+    "/api/add_to_players_list_by_stand",
+    "POST"
+  );
 
   return data;
 }
@@ -136,8 +133,17 @@ export async function updatePlayerFromPlayers() {
   return data;
 }
 
-export async function handleDoubleStandAndRewards() {
-  const data = await callApiEndpoint("/api/double_stand_and_rewards", "POST");
+export async function handleSplitDouble() {
+  const data = await callApiEndpoint("/api/split_double_request", "POST");
+
+  return data;
+}
+
+export async function handleSplitStandAndRewards() {
+  const data = await callApiEndpoint(
+    "/api/split_double_stand_and_rewards",
+    "POST"
+  );
 
   return data;
 }
@@ -149,26 +155,21 @@ export async function setRestart() {
 }
 
 export async function forceRestart() {
-  const clientUuid = localStorage.getItem('blackjack_client_uuid');
+  const clientUuid = localStorage.getItem("blackjack_client_uuid");
   if (!clientUuid) {
     throw new Error("No id.");
   }
 
   const data = await callApiEndpoint("/api/force_restart", "POST", {
-    client_id: clientUuid
+    client_id: clientUuid,
   });
 
   return data;
 }
 
-export async function roundToEnd() {
-  const data = await callApiEndpoint("/api/round_end", "POST");
-
-  return data;
-}
-
 export interface HttpError extends Error {
-  response?: { // A response property most opcionális
+  response?: {
+    // A response property most opcionális
     status: number;
     statusText: string;
     error?: string;
@@ -178,14 +179,15 @@ export interface HttpError extends Error {
 
 export async function callApiEndpoint<T>(
   endpoint: string,
-  method: string = 'GET', // Alapértelmezett legyen GET, ha nincs megadva
+  method: string = "GET", // Alapértelmezett legyen GET, ha nincs megadva
   body?: unknown
-): Promise<T> { // <--- Visszatérési típus: Promise<T>
+): Promise<T> {
+  // <--- Visszatérési típus: Promise<T>
   try {
     const options: RequestInit = {
       method: method,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: body ? JSON.stringify(body) : undefined,
     };
@@ -203,10 +205,11 @@ export async function callApiEndpoint<T>(
       }
 
       const status = response.status;
-      const statusText = response.statusText || 'Ismeretlen hiba';
-      const errorMessage = errorData.message || `HTTP hiba! Státusz: ${status} ${statusText}.`;
+      const statusText = response.statusText || "Ismeretlen hiba";
+      const errorMessage =
+        errorData.message || `HTTP hiba! Státusz: ${status} ${statusText}.`;
 
-      if (!(status === 400 && errorData.error === 'No more split hands.')) {
+      if (!(status === 400 && errorData.error === "No more split hands.")) {
         // Logolunk piros hibát, ha NEM a "No more split hands." hiba
         console.error(
           `API hiba a(z) '${endpoint}' végponton (státusz: ${status}):`,
@@ -221,7 +224,7 @@ export async function callApiEndpoint<T>(
       errorToThrow.response = {
         status: status,
         statusText: statusText,
-        data: errorData
+        data: errorData,
       };
       throw errorToThrow;
     }
@@ -237,12 +240,17 @@ export async function callApiEndpoint<T>(
     // Csak akkor logolunk pirosat, ha valamilyen ismeretlen hiba történik.
     // Ha a `HttpError` a "No more split hands." esete, akkor itt sem logolunk.
 
-    const isSpecificSplitHandError = error instanceof Error && 'response' in error &&
+    const isSpecificSplitHandError =
+      error instanceof Error &&
+      "response" in error &&
       (error as HttpError).response?.status === 400 &&
-      (error as HttpError).response?.data?.error === 'No more split hands.';
+      (error as HttpError).response?.data?.error === "No more split hands.";
 
     if (!isSpecificSplitHandError) {
-      console.error(`Hálózati vagy feldolgozási hiba a(z) '${endpoint}' végponton:`, error);
+      console.error(
+        `Hálózati vagy feldolgozási hiba a(z) '${endpoint}' végponton:`,
+        error
+      );
     }
     // Mindig továbbdobja a hibát a hívó félnek!
     throw error;

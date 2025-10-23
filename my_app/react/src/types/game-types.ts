@@ -1,33 +1,35 @@
 export type GameState =
-  | 'LOADING'
-  | 'SHUFFLING'
-  | 'BETTING'
-  | 'INIT_GAME'
-  | 'MAIN_TURN'
-  | 'MAIN_STAND'
-  | 'MAIN_STAND_DOUBLE_TRANSIT'
-  | 'SPLIT_TURN'
-  | 'SPLIT_STAND'
-  | 'SPLIT_STAND_DOUBLE'
-  | 'SPLIT_NAT21_TRANSIT'
-  | 'SPLIT_FINISH'
-  | 'SPLIT_FINISH_OUTCOME'
-  | 'SPLIT_ACE_TRANSIT'
-  | 'OUT_OF_TOKENS'
-  | 'RESTART_GAME'
-  | 'ERROR'
-  | 'RELOADING';
+  | "LOADING"
+  | "SHUFFLING"
+  | "BETTING"
+  | "INIT_GAME"
+  | "MAIN_TURN"
+  | "MAIN_STAND"
+  | "MAIN_STAND_DOUBLE_TRANSIT"
+  | "SPLIT_TURN"
+  | "SPLIT_STAND"
+  | "SPLIT_STAND_DOUBLE"
+  | "SPLIT_NAT21_TRANSIT"
+  | "SPLIT_FINISH"
+  | "SPLIT_FINISH_OUTCOME"
+  | "SPLIT_ACE_TRANSIT"
+  | "OUT_OF_TOKENS"
+  | "RESTART_GAME"
+  | "ERROR"
+  | "RELOADING";
 
 export interface GameStateData {
   currentGameState: GameState;
   player: PlayerData;
   dealer_masked: DealerMaskedData;
   dealer_unmasked: DealerUnmaskedData;
+  split_player: PlayerData;
   aces: boolean;
   natural_21: number;
   winner: number;
   hand_counter: number;
-  players: PlayerData[];
+  players: Record<string, PlayerData>;
+  players_index: Record<string, boolean>;
   splitReq: number;
   deckLen: number;
   tokens: number;
@@ -51,20 +53,20 @@ export interface DealerMaskedData {
   sum: number;
   can_insure: boolean;
   nat_21: number;
-};
+}
 
 export interface DealerUnmaskedData {
   hand: string[];
   sum: number;
   hand_state: number;
   natural_21: number;
-};
+}
 
 export type SessionInitResponse = {
   message: string;
   user_id: string;
   client_id: string;
-}
+};
 
 export type TokensResponse = {
   user_tokens: number;
@@ -86,7 +88,10 @@ export type ErrorResponse = {
 export type GameStateMachineHookResult = {
   gameState: GameStateData;
   currentGameState: GameState;
-  transitionToState: (newState: GameState, newData?: Partial<GameStateData>) => void;
+  transitionToState: (
+    newState: GameState,
+    newData?: Partial<GameStateData>
+  ) => void;
   handlePlaceBet: (amount: number) => Promise<void>;
   //handleDeal: () => Promise<void>; // Hozzáadva a visszatérési típushoz
   handleRetakeBet: () => Promise<void>;
