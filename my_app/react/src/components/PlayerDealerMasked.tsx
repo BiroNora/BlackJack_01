@@ -79,26 +79,25 @@ const PlayerDealerMasked: React.FC<TableProps> = ({
   return (
     <div className="player-dealer-area">
       <div id="dealer-hand" className="play">
-        <div className="hand hand-area-wrapper">
-          {" "}
-          &nbsp;&nbsp;&nbsp;&nbsp;{formattedDealerHand} {" "}
-        </div>
+        <div className="hand hand-area-wrapper">{formattedDealerHand}</div>
         <div className="score-area-wrapper">
           <span className="score-mood merriweather5grey2">{}</span>
         </div>
         <div className="band-area-wrapper">
-          <span className="label-text">Dealer:</span>
-          <span className="label-text1"> {dealerMaskedScore}</span>
+          <span className="label-text">Dealer: </span>
+          <span className="label-text1">{dealerMaskedScore}</span>
         </div>
       </div>
       <div id="player-hand" className="play">
         <div className="band-area-wrapper">
-          <span className="label-text">Player:</span>
+          <span className="label-text">Player: </span>
           <span className="label-text1"> {player.sum}</span>
         </div>
         <div className="score-area-wrapper">
-          {insMessage && (
+          {insMessage ? (
             <span className="score-mood merriweather9red">Insurance lost</span>
+          ) : (
+            <span className="score-mood merriweather5grey2">{}</span>
           )}
         </div>
         <div className="hand hand-area-wrapper">{formattedPlayerHand}</div>

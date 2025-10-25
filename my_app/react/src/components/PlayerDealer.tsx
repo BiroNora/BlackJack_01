@@ -42,7 +42,8 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
             key={`hand-sep-${index}`}
             className="equal-text1 merriweather5grey"
           >
-            +
+            {" "}
+            +{" "}
           </span>
         ) : null;
 
@@ -78,7 +79,8 @@ const PlayerDealer: React.FC<TableProps> = ({ gameState }) => {
       formatHand(dealerHand)
     );
 
-  const sum = dealer_unmasked.sum === 0 ? (
+  const sum =
+    dealer_unmasked.sum === 0 ? (
       <span className="opacity-0"> &nbsp; </span>
     ) : (
       dealer_unmasked.sum

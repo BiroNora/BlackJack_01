@@ -18,7 +18,6 @@
   font-weight: bold; /* Vastagabb betűtípus a címkéknek */
   white-space: nowrap; /* Megakadályozza a szövegtörést a címkénél */
   color: #403d3d; /* Sötétebb szín a jobb olvashatóságért */
-
 }
 
 .play .label-text1 {
@@ -35,7 +34,7 @@
   padding-top: var(--extra-vertical-padding05);
   padding-bottom: var(--extra-vertical-padding05);
   flex-wrap: wrap; /* Hosszú kártyasor esetén törje a sort */
-  font-size: clamp(1.4rem, 1.2vw, 2.0rem);
+  font-size: clamp(1.4rem, 1.2vw, 2rem);
   font-weight: 500;
   gap: 0.1rem;
 }
@@ -69,6 +68,10 @@
   font-size: clamp(0.9rem, 1.3vw, 1.375rem);
 }
 
+.opacity-0 {
+  opacity: 0;
+}
+
 .line_down {
   position: relative; /* Ahhoz kell, hogy a 'top' működjön */
   top: 0.1em;
@@ -97,9 +100,9 @@
 @media (min-width: 1024px) {
   #players-list {
     flex-direction: row; /* Vízszintes elrendezés a lista elemeknek */
-    flex-wrap: wrap;     /* Ha nem férnek el, új sorba törnek */
+    flex-wrap: wrap; /* Ha nem férnek el, új sorba törnek */
     justify-content: center; /* Középre igazítja az elemeket */
-    gap: 1.55rem;         /* Nagyobb térköz az elemek között horizontálisan */
+    gap: 1.55rem; /* Nagyobb térköz az elemek között horizontálisan */
   }
 
   #players-list li {

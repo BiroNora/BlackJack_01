@@ -34,24 +34,26 @@
   box-sizing: border-box;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 @media (min-width: 300px) {
   #root {
     padding-top: 4rem;
-    padding-left: 2.0rem;
-    padding-right: 2.0rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 }
 
 /* --- Small Breakpoint (sm): 640px-től felfelé --- */
 @media (min-width: 640px) {
   #root {
-    padding-top: 4.0rem;
-    padding-left: 2.0rem;
-    padding-right: 2.0rem;
+    padding-top: 4rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
     max-width: 640px; /* Max szélesség a sm breakpointig */
   }
 }
@@ -59,9 +61,9 @@
 /* --- Medium Breakpoint (md): 768px-től felfelé --- */
 @media (min-width: 768px) {
   #root {
-    padding-top: 4.0rem;
-    padding-left: 4.0rem;
-    padding-right: 4.0rem;
+    padding-top: 4rem;
+    padding-left: 4rem;
+    padding-right: 4rem;
     max-width: 768px; /* Max szélesség az md breakpointig */
   }
 }
@@ -69,7 +71,7 @@
 /* --- Large Breakpoint (lg): 1024px-től felfelé --- */
 @media (min-width: 1024px) {
   #root {
-    padding-top: 4.0rem;
+    padding-top: 4rem;
     padding-left: 3.45rem;
     padding-right: 3.45rem;
     max-width: 1024px; /* Max szélesség az lg breakpointig */
@@ -108,7 +110,7 @@ body {
 }
 
 .title1 {
-  font-size: clamp(0.225rem, 3vw, 1.0rem);
+  font-size: clamp(0.225rem, 3vw, 1rem);
   line-height: 1;
   margin: 0;
   text-align: left;
@@ -213,7 +215,7 @@ button:disabled {
   width: 100%;
   padding-top: var(--extra-vertical-padding02);
   padding-bottom: var(--extra-vertical-padding05);
-  min-height: 4.0rem;
+  min-height: 4rem;
   box-sizing: border-box;
 }
 
@@ -233,7 +235,11 @@ button:disabled {
 }
 
 .band-area-wrapper {
-  min-height: 2.0rem;
+  display: flex;
+  width: 6rem;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 2rem;
 }
 
 .score-area-wrapper {
@@ -244,7 +250,7 @@ button:disabled {
   display: flex;
   font-size: var(--root-font-size);
   font-weight: 700;
-  font-size: clamp(1.4rem, 1.2vw, 2.0rem);
+  font-size: clamp(1.4rem, 1.2vw, 2rem);
   position: relative;
 }
 
