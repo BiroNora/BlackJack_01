@@ -6,11 +6,11 @@
 }
 
 .betting-screen-container {
-  padding-top: var(--extra-vertical-padding05);
+  padding-top: var(--extra-vertical-padding1);
 }
 
 .deal-bank {
-  padding-top: var(--extra-vertical-padding02);
+  padding-top: var(--extra-vertical-padding05);
 }
 
 .bank {

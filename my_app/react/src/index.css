@@ -46,6 +46,10 @@
     padding-left: 2rem;
     padding-right: 2rem;
   }
+
+  .game-action-area-wrapper {
+    min-height: 4.6rem;
+  }
 }
 
 /* --- Small Breakpoint (sm): 640px-től felfelé --- */
@@ -85,6 +89,10 @@
     padding-left: 5.5rem;
     padding-right: 5.5rem;
     max-width: 1280px; /* Max szélesség az xl breakpointig */
+  }
+
+  .game-action-area-wrapper {
+    min-height: 4.0rem;
   }
 }
 
@@ -166,23 +174,23 @@ button:disabled {
 .button-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 0.5rem;
   opacity: 0;
   transition: opacity 1s ease-out;
-  padding-top: var(--extra-vertical-padding05);
+  padding-top: var(--extra-vertical-padding1);
 }
 
 .button-container.show-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 0.5rem;
   opacity: 1;
 }
 
 .button-container1 {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 0.5rem;
   opacity: 0.7;
   transition: opacity 1s ease-out;
   justify-content: center;
@@ -191,9 +199,23 @@ button:disabled {
 .button-container1.show-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 0.5rem;
   opacity: 1;
   justify-content: center;
+}
+
+/* Általános stílus a Start gomb engedélyezett állapotához, ha a hover és focus nem kell, hogy eltérjen: */
+#start-button {
+  padding: 0.2em 0.6em;
+  font-size: clamp(1.2rem, 1.3vw, 1.4rem);
+}
+
+/* Hover és Focus stílusok a tiszta átláthatóság érdekében */
+#start-button:hover,
+#start-button:focus,
+#start-button:disabled {
+  padding: 0.2em 0.6em;
+  font-size: clamp(1.2rem, 1.3vw, 1.4rem);
 }
 
 .player-dealer-area-wrapper {
@@ -214,8 +236,6 @@ button:disabled {
   justify-content: center;
   width: 100%;
   padding-top: var(--extra-vertical-padding02);
-  padding-bottom: var(--extra-vertical-padding05);
-  min-height: 4rem;
   box-sizing: border-box;
 }
 
@@ -226,7 +246,6 @@ button:disabled {
   justify-content: flex-start;
   width: 100%;
   padding-top: var(--extra-vertical-padding02);
-  padding-bottom: var(--extra-vertical-padding05);
   box-sizing: border-box;
 }
 
