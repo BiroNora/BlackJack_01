@@ -642,31 +642,6 @@ def hit(user, game):
 
 
 # 7
-@app.route("/api/stand", methods=["POST"])
-@login_required
-@with_game_state
-@api_error_handler
-def stand(user, game):
-    game.stand()
-
-    game_state_for_client = game.serialize_stand_state()
-
-    return (
-        jsonify(
-            {
-                "status": "success",
-                "message": "STAND_RECIEVED",
-                "tokens": user.tokens,
-                "current_tokens": user.tokens,
-                "game_state": game_state_for_client,
-                "game_state_hint": "PLAYER_STAND_ROUND_ENDED",
-            }
-        ),
-        200,
-    )
-
-
-# 8
 @app.route("/api/double_request", methods=["POST"])
 @login_required
 @with_game_state
@@ -711,7 +686,7 @@ def double_request(user, game):
     )
 
 
-# 9
+# 8
 @app.route("/api/rewards", methods=["POST"])
 @login_required
 @with_game_state
@@ -738,7 +713,7 @@ def rewards(user, game):
     )
 
 
-# 10
+# 9
 @app.route("/api/stand_and_rewards", methods=["POST"])
 @login_required
 @with_game_state
@@ -767,7 +742,7 @@ def stand_and_rewards(user, game):
 
 
 # SPLIT part
-# 11
+# 10
 @app.route("/api/split_request", methods=["POST"])
 @login_required
 @with_game_state
@@ -836,7 +811,7 @@ def split_request(user, game):
     )
 
 
-# 12
+# 11
 @app.route("/api/add_to_players_list_by_stand", methods=["POST"])
 @login_required
 @with_game_state
@@ -862,7 +837,7 @@ def add_to_players_list_by_stand(user, game):
     )
 
 
-# 13
+# 14
 @app.route("/api/add_split_player_to_game", methods=["POST"])
 @login_required
 @with_game_state
@@ -900,7 +875,7 @@ def add_split_player_to_game(user, game):
     )
 
 
-# 14
+# 15
 @app.route("/api/add_player_from_players", methods=["POST"])
 @login_required
 @with_game_state
@@ -938,7 +913,7 @@ def add_player_from_players(user, game):
     )
 
 
-# 15
+# 16
 @app.route("/api/split_hit", methods=["POST"])
 @login_required
 @with_game_state
@@ -962,7 +937,7 @@ def split_hit(user, game):
     )
 
 
-# 16
+# 17
 @app.route("/api/split_double_request", methods=["POST"])
 @login_required
 @with_game_state
@@ -1007,7 +982,7 @@ def split_double_request(user, game):
     )
 
 
-# 17
+# 18
 @app.route("/api/split_double_stand_and_rewards", methods=["POST"])
 @login_required
 @with_game_state
@@ -1035,7 +1010,7 @@ def double_stand_and_rewards(user, game):
     )
 
 
-# 18
+# 19
 @app.route("/api/set_restart", methods=["POST"])
 @login_required
 @with_game_state
@@ -1061,7 +1036,7 @@ def set_restart(user, game):
     )
 
 
-# 19
+# 20
 @app.route("/api/force_restart", methods=["POST"])
 @api_error_handler
 def force_restart_by_client_id():
@@ -1113,7 +1088,7 @@ def force_restart_by_client_id():
     )
 
 
-# 20
+# 21
 @app.route("/error_page", methods=["GET"])
 def error_page():
     return render_template("error.html")

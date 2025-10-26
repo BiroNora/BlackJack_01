@@ -5,7 +5,7 @@ export type GameState =
   | "INIT_GAME"
   | "MAIN_TURN"
   | "MAIN_STAND"
-  | "MAIN_STAND_DOUBLE_TRANSIT"
+  | "MAIN_STAND_REWARDS_TRANSIT"
   | "SPLIT_TURN"
   | "SPLIT_STAND"
   | "SPLIT_STAND_DOUBLE"

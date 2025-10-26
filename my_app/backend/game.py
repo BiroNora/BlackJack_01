@@ -63,11 +63,11 @@ class Game:
     def initialize_new_round(self):
         self.clear_up()
         # card1 = self.deck.pop(0)
-        card2 = self.deck.pop(0)
+        # card2 = self.deck.pop(0)
         # card3 = self.deck.pop(0)
-        card4 = self.deck.pop(0)
-        # card2 = "♦10"
-        # card4 = "♠A"
+        # card4 = self.deck.pop(0)
+        card2 = "♦9"
+        card4 = "♠A"
         card1 = "♦10"
         card3 = "♠10"
         player_hand = [card1, card3]
@@ -554,15 +554,6 @@ class Game:
 
         return state
 
-    def serialize_stand_state(self):
-        return {
-            "player": self.player,
-            "dealer_unmasked": self.dealer_unmasked,
-            "deckLen": self.get_deck_len(),
-            "bet": self.bet,
-            "is_round_active": self.is_round_active,
-        }
-
     def serialize_double_state(self):
         return {
             "player": self.player,
@@ -595,10 +586,8 @@ class Game:
         return {
             "player": self.player,
             "dealer_masked": self.dealer_masked,
-            "split_player": self.split_player,
             "aces": self.aces,
             "players": sorted_players_list,
-            "players_index": self.players_index,
             "splitReq": self.split_req,
             "deckLen": self.get_deck_len(),
             "bet": self.bet,
@@ -611,9 +600,7 @@ class Game:
         return {
             "player": self.player,
             "dealer_unmasked": self.dealer_unmasked,
-            "split_player": self.split_player,
             "players": sorted_players_list,
-            "players_index": self.players_index,
             "winner": self.winner,
             "splitReq": self.split_req,
             "deckLen": self.get_deck_len(),

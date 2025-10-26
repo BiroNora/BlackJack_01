@@ -6,7 +6,6 @@ import {
   getShuffling,
   startGame,
   handleHit,
-  handleStand,
   handleRewards,
   handleInsurance,
   handleDouble,
@@ -201,7 +200,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       }
     },
     [gameState, transitionToState]
-  ); // Függőség: transitionToState
+  );
 
   const handleHitRequest = useCallback(async () => {
     setIsWFSR(true);
@@ -232,16 +231,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     savePreActionState();
 
     try {
-      await handleStand();
-      const rewards = await handleRewards();
-      const resp = extractGameStateData(rewards);
-      transitionToState("MAIN_STAND", resp);
+      transitionToState("MAIN_STAND_REWARDS_TRANSIT", gameState);
     } catch {
       transitionToState("ERROR");
     } finally {
       setIsWFSR(false);
     }
-  }, [transitionToState, savePreActionState]);
+  }, [savePreActionState, transitionToState, gameState]);
 
   const handleDoubleRequest = useCallback(async () => {
     setIsWFSR(true);
@@ -256,7 +252,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         setPreRewardTokens(doubledState.tokens);
 
         if (doubledState) {
-          transitionToState("MAIN_STAND_DOUBLE_TRANSIT", doubledState);
+          transitionToState("MAIN_STAND_REWARDS_TRANSIT", doubledState);
         }
       }
     } catch {
@@ -348,7 +344,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   }, [hitCounter, incrementHitCounter, transitionToState]);
 
   const handleSplitStandRequest = useCallback(async () => {
-    setIsWFSR(true); // reset in case state
+    setIsWFSR(true);
 
     if (hasHitTurn === false) {
       transitionToState("SPLIT_STAND_DOUBLE", gameState);
@@ -516,10 +512,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         try {
           if (hasOver21) {
-            await handleStand();
-            const rewards = await handleRewards();
-            const resp = extractGameStateData(rewards);
-            transitionToState("MAIN_STAND", resp);
+            transitionToState("MAIN_STAND_REWARDS_TRANSIT", gameState);
           }
         } catch {
           transitionToState("ERROR");
@@ -585,7 +578,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           }
         }
       }, 4000);
-    } else if (gameState.currentGameState === "MAIN_STAND_DOUBLE_TRANSIT") {
+    } else if (gameState.currentGameState === "MAIN_STAND_REWARDS_TRANSIT") {
       const MainStandDoubleTransit = async () => {
         if (!isMountedRef.current) return;
 
@@ -599,7 +592,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               if (isMountedRef.current) {
                 transitionToState("MAIN_STAND", finalState);
               }
-            }, 1000);
+            }, 200);
           }
         } catch {
           transitionToState("ERROR");

@@ -146,7 +146,7 @@ function App() {
                   />
                 </div>
               );
-            case "MAIN_STAND_DOUBLE_TRANSIT":
+            case "MAIN_STAND_REWARDS_TRANSIT":
               return (
                 <div>
                   <Cards gameState={gameState} initDeckLen={initDeckLen} />
