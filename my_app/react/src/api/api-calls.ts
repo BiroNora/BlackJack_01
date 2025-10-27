@@ -135,7 +135,7 @@ export async function handleSplitDouble() {
 
 export async function handleSplitStandAndRewards() {
   const data = await callApiEndpoint(
-    "/api/split_double_stand_and_rewards",
+    "/api/split_stand_and_rewards",
     "POST"
   );
 

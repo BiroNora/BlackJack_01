@@ -51,21 +51,10 @@ const initialGameState: GameStateData = {
     hand_state: 0,
     natural_21: 0,
   },
-  split_player: {
-    id: "NONE",
-    hand: [],
-    sum: 0,
-    hand_state: 0,
-    can_split: false,
-    stated: false,
-    bet: 0,
-  },
   aces: false,
   natural_21: 0,
   winner: 0,
-  hand_counter: 0,
   players: {},
-  players_index: {},
   splitReq: 0,
   deckLen: 104,
   tokens: 0,
@@ -530,49 +519,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             transitionToState("OUT_OF_TOKENS");
           } else {
             const nextRoundGameState: Partial<GameStateData> = {
+              ...initialGameState,
               currentGameState: "BETTING",
-              player: {
-                id: "NONE",
-                hand: [],
-                sum: 0,
-                hand_state: 0,
-                can_split: false,
-                stated: false,
-                bet: 0,
-              },
-              dealer_masked: {
-                hand: [],
-                sum: 0,
-                can_insure: false,
-                nat_21: 0,
-              },
-              dealer_unmasked: {
-                hand: [],
-                sum: 0,
-                hand_state: 0,
-                natural_21: 0,
-              },
-              split_player: {
-                id: "NONE",
-                hand: [],
-                sum: 0,
-                hand_state: 0,
-                can_split: false,
-                stated: false,
-                bet: 0,
-              },
-              aces: false,
-              natural_21: 0,
-              winner: 0,
-              hand_counter: 0,
-              players: {},
-              players_index: {},
-              splitReq: 0,
-              deckLen: gameState.deckLen, // A deckLen értéke is átkerül
+              deckLen: gameState.deckLen,
               tokens: gameState.tokens,
               bet: 0,
-              bet_list: [],
-              is_round_active: false,
             };
             transitionToState("BETTING", nextRoundGameState);
           }
@@ -621,10 +572,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           if (currSplitReq > 0) {
             const splitResponse = await addSplitPlayerToGame();
             const ans = extractGameStateData(splitResponse);
-            console.log(
-              "addSplitPlayerToGame player indexes: ",
-              ans?.players_index
-            );
             if (ans && ans.player) {
               if (ans.player.hand.length === 2 && ans.player.sum === 21) {
                 if (gameState.currentGameState === "SPLIT_STAND_DOUBLE") {
@@ -761,49 +708,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                   // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
                   if (isMountedRef.current) {
                     transitionToState("BETTING", {
+                      ...initialGameState,
                       currentGameState: "BETTING",
-                      player: {
-                        id: "NONE",
-                        hand: [],
-                        sum: 0,
-                        hand_state: 0,
-                        can_split: false,
-                        stated: false,
-                        bet: 0,
-                      },
-                      dealer_masked: {
-                        hand: [],
-                        sum: 0,
-                        can_insure: false,
-                        nat_21: 0,
-                      },
-                      dealer_unmasked: {
-                        hand: [],
-                        sum: 0,
-                        hand_state: 0,
-                        natural_21: 0,
-                      },
-                      split_player: {
-                        id: "NONE",
-                        hand: [],
-                        sum: 0,
-                        hand_state: 0,
-                        can_split: false,
-                        stated: false,
-                        bet: 0,
-                      },
-                      aces: false,
-                      natural_21: 0,
-                      winner: 0,
-                      hand_counter: 0,
-                      players: {},
-                      players_index: {},
-                      splitReq: 0,
                       deckLen: gameState.deckLen,
                       tokens: gameState.tokens,
                       bet: 0,
-                      bet_list: [],
-                      is_round_active: false,
                     });
                   }
                 }, 4000);

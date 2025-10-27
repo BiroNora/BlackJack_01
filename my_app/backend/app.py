@@ -983,7 +983,7 @@ def split_double_request(user, game):
 
 
 # 18
-@app.route("/api/split_double_stand_and_rewards", methods=["POST"])
+@app.route("/api/split_stand_and_rewards", methods=["POST"])
 @login_required
 @with_game_state
 @api_error_handler
@@ -994,7 +994,7 @@ def double_stand_and_rewards(user, game):
     user.tokens += token_change
     db.session.commit()
 
-    game_state_for_client = game.serialize_split_double_stand_and_rewards()
+    game_state_for_client = game.serialize_split_stand_and_rewards()
 
     return (
         jsonify(

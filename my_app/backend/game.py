@@ -67,7 +67,7 @@ class Game:
         # card3 = self.deck.pop(0)
         # card4 = self.deck.pop(0)
         card2 = "♦9"
-        card4 = "♠A"
+        card4 = "♠2"
         card1 = "♦10"
         card3 = "♠10"
         player_hand = [card1, card3]
@@ -593,8 +593,8 @@ class Game:
             "bet": self.bet,
             "is_round_active": self.is_round_active,
         }
-
-    def serialize_split_double_stand_and_rewards(self):
+    
+    def serialize_split_stand_and_rewards(self):
         sorted_players_list = self._get_sorted_hands()
 
         return {

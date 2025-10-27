@@ -23,13 +23,10 @@ export interface GameStateData {
   player: PlayerData;
   dealer_masked: DealerMaskedData;
   dealer_unmasked: DealerUnmaskedData;
-  split_player: PlayerData;
   aces: boolean;
   natural_21: number;
   winner: number;
-  hand_counter: number;
   players: Record<string, PlayerData>;
-  players_index: Record<string, boolean>;
   splitReq: number;
   deckLen: number;
   tokens: number;

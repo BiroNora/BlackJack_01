@@ -1,4 +1,4 @@
-import type { DealerData, DealerUnmaskedData, GameStateData, PlayerData } from "../types/game-types";
+import type { DealerMaskedData, DealerUnmaskedData, GameStateData, PlayerData } from "../types/game-types";
 
 export function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -51,16 +51,17 @@ export function extractGameStateData1(apiResponse: unknown): Partial<GameStateDa
   try {
     const processedData: Partial<GameStateData> = {
       player: rawGameState.player as PlayerData,
-      dealer: rawGameState.dealer as DealerData,
+      dealer_masked: rawGameState.dealer_masked as DealerMaskedData,
       dealer_unmasked: rawGameState.dealer_unmasked as DealerUnmaskedData,
-      nat_21: rawGameState.nat_21 as number,
+      aces: rawGameState.aces,
+      natural_21: rawGameState.natural_21 as number,
+      winner: rawGameState.winner as number,
+      players: rawGameState.players as Record<string, PlayerData>,
+      splitReq: rawGameState.splitReq as number,
       deckLen: rawGameState.deckLen as number,
       tokens: token,
-      splitReq: rawGameState.splitReq as number,
       bet: rawGameState.bet as number,
       bet_list: rawGameState.bet_list as number[],
-      players: rawGameState.players as PlayerData[],
-      winner: rawGameState.winner as number,
       is_round_active: rawGameState.is_round_active as boolean,
     };
     return processedData;
