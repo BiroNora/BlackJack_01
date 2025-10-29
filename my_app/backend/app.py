@@ -92,7 +92,7 @@ else:
                 upstash_redis_client  # Mentjük a Game State klienst
             )
 
-            print(f"!!! Redis ping sikeres: {flask_session_client.ping()} !!!")
+            # print(f"!!! Redis ping sikeres: {flask_session_client.ping()} !!!")
         else:
             print(
                 "!!! Redis ping nem sikeres. Marad a Flask-Session alapértelmezett session. !!!"
@@ -821,7 +821,7 @@ def add_to_players_list_by_stand(user, game):
 
     game.add_to_players_list_by_stand()
 
-    game_state_for_client = game.serialize_split_hand()
+    game_state_for_client = game.serialize_add_to_players_list_by_stand()
 
     return (
         jsonify(
@@ -897,7 +897,7 @@ def add_player_from_players(user, game):
 
     game.add_player_from_players()
 
-    game_state_for_client = game.serialize_split_hand()
+    game_state_for_client = game.serialize_add_player_from_players()
 
     return (
         jsonify(

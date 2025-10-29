@@ -47,7 +47,6 @@ function App() {
     initDeckLen,
     isWFSR,
   } = useGameStateMachine();
-  //console.log("App.tsx render - currentGameState:", gameState.currentGameState);
 
   function PageWrapper({ children }: React.PropsWithChildren<object>) {
     return (

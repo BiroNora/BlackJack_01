@@ -13,7 +13,7 @@ import {
   splitHand,
   addToPlayersListByStand,
   addSplitPlayerToGame,
-  updatePlayerFromPlayers,
+  addPlayerFromPlayers,
   handleSplitDouble,
   handleSplitStandAndRewards,
   setRestart,
@@ -96,10 +96,10 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           ...newData,
           currentGameState: newState,
         };
-        console.log(
+        /* console.log(
           `>>> Állapotváltás: ${prev.currentGameState} -> ${newState}`,
           updatedState
-        );
+        ); */
         return updatedState;
       });
     },
@@ -146,7 +146,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         try {
           const data = await setBet(amount);
           const response = extractGameStateData(data);
-          console.log("BET response: ", response);
           if (response) {
             transitionToState("BETTING", response);
           }
@@ -166,7 +165,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       try {
         const data = await takeBackDeal();
         const response = extractGameStateData(data);
-        console.log("RE_BET response: ", response);
         if (response) {
           transitionToState("BETTING", response);
         }
@@ -260,7 +258,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       const data = await handleInsurance();
       const resp = extractGameStateData(data);
       const insWon = resp?.natural_21;
-      console.log("handleInsurance: ", resp);
       if (insWon === 3) {
         transitionToState("MAIN_STAND", resp);
       } else {
@@ -474,7 +471,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         try {
           const data = await startGame();
           const response = extractGameStateData(data);
-          console.log(response);
+
           if (response && response.dealer_masked) {
             if (
               response.dealer_masked.nat_21 === 1 ||
@@ -567,7 +564,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           const data = await addToPlayersListByStand();
           const response = extractGameStateData(data);
           const currSplitReq = response?.splitReq || 0;
-          console.log("addToPlayersListByStand() response: ", response);
 
           if (currSplitReq > 0) {
             const splitResponse = await addSplitPlayerToGame();
@@ -645,7 +641,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           const data = await addToPlayersListByStand();
           const response = extractGameStateData(data);
           const currSplitReq = response?.splitReq || 0;
-          console.log("ACE addToPlayersListByStand() response: ", response);
 
           if (currSplitReq > 0) {
             const splitResponse = await addSplitPlayerToGame();
@@ -676,9 +671,6 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           savePreActionState();
           const rewardData = await handleSplitStandAndRewards();
           const rewards = extractGameStateData(rewardData);
-          console.log("REWARD");
-          console.log(rewards);
-          console.log(rewards?.winner);
 
           if (rewards) {
             transitionToState("SPLIT_FINISH_OUTCOME", rewards);
@@ -718,7 +710,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                 }, 4000);
               }
             } else {
-              const updateData = await updatePlayerFromPlayers();
+              const updateData = await addPlayerFromPlayers();
               const response = extractGameStateData(updateData);
               timeoutIdRef.current = window.setTimeout(() => {
                 // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!

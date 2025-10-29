@@ -121,7 +121,7 @@ export async function addToPlayersListByStand() {
   return data;
 }
 
-export async function updatePlayerFromPlayers() {
+export async function addPlayerFromPlayers() {
   const data = await callApiEndpoint("/api/add_player_from_players", "POST");
 
   return data;

@@ -51,6 +51,7 @@ class Game:
         self.players_index = {}  # helper for the players dict
         self.stated = False
         self.split_req: int = 0
+        self.unmasked_sum_sent = False
         self.suits = ["♥", "♦", "♣", "♠"]
         # self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
         self.ranks = ["A", "K", "Q", "J", "9"]
@@ -440,6 +441,7 @@ class Game:
         self.players = {}
         self.players_index = {}
         self.split_req = 0
+        self.unmasked_sum_sent = False
         self.set_bet_list_to_null()
         self.is_round_active = False
 
@@ -593,7 +595,46 @@ class Game:
             "bet": self.bet,
             "is_round_active": self.is_round_active,
         }
-    
+
+    def serialize_add_to_players_list_by_stand(self):
+        sorted_players_list = self._get_sorted_hands()
+
+        state = {
+            "player": self.player,
+            "aces": self.aces,
+            "players": sorted_players_list,
+            "splitReq": self.split_req,
+            "deckLen": self.get_deck_len(),
+            "bet": self.bet,
+            "is_round_active": self.is_round_active,
+        }
+
+        if self.split_req > 0:
+            state["dealer_masked"] = self.dealer_masked
+        else:
+            dealer_data_to_serialize = self.dealer_unmasked.copy()
+            if not self.unmasked_sum_sent:
+                dealer_data_to_serialize["sum"] = 0
+                self.unmasked_sum_sent = True
+
+            state["dealer_unmasked"] = dealer_data_to_serialize
+
+        return state
+
+    def serialize_add_player_from_players(self):
+        sorted_players_list = self._get_sorted_hands()
+
+        return {
+            "player": self.player,
+            "dealer_unmasked": self.dealer_unmasked,
+            "aces": self.aces,
+            "players": sorted_players_list,
+            "splitReq": self.split_req,
+            "deckLen": self.get_deck_len(),
+            "bet": self.bet,
+            "is_round_active": self.is_round_active,
+        }
+
     def serialize_split_stand_and_rewards(self):
         sorted_players_list = self._get_sorted_hands()
 
@@ -624,6 +665,7 @@ class Game:
             "players": sorted_players_list,
             "players_index": self.players_index,
             "splitReq": self.split_req,
+            "unmasked_sum_sent": self.unmasked_sum_sent,
             "deckLen": self.get_deck_len(),
             "bet": self.bet,
             "bet_list": self.bet_list,
@@ -645,6 +687,7 @@ class Game:
         game.players = {hand["id"]: hand for hand in data["players"]}
         game.players_index = data.get("players_index", {})
         game.split_req = data["splitReq"]
+        game.unmasked_sum_sent = data["unmasked_sum_sent"]
         game.deck_len = data["deckLen"]
         game.bet = data["bet"]
         game.bet_list = data["bet_list"]
