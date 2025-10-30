@@ -9,6 +9,8 @@ interface TableProps {
 const SplitPlayers: React.FC<TableProps> = ({ gameState }) => {
   const { players } = gameState;
 
+  const playersArray = Object.values(players);
+
   const loop = (data: string[]): string[] => {
     return data.map((card) => String(card).trim());
   };
@@ -62,7 +64,7 @@ const SplitPlayers: React.FC<TableProps> = ({ gameState }) => {
   return (
     <div>
       <ul id="players-list">
-      {players
+      {playersArray
         .map((player) => {
           const hand = loop(player.hand);
           const formattedHand = formatHand(hand);
