@@ -14,8 +14,8 @@ from flask_session import Session
 from upstash_redis import Redis as UpstashRedisClient  # Upstash kliens átnevezve
 from redis import Redis as FlaskSessionRedisClient  # Hivatalos kliens importálva
 
-# from my_app.backend.game import Game
-from game import Game
+from my_app.backend.game import Game
+# from game import Game
 
 load_dotenv()
 
