@@ -389,7 +389,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         try {
           // 1. Min. töltési idő beállítása
           const minLoadingTimePromise = new Promise((resolve) =>
-            setTimeout(resolve, 500)
+            setTimeout(resolve, 7000)
           );
 
           // 2. Single API hívás, ami mindent visszaad (session, tokenek, game_state)
@@ -451,7 +451,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               if (isMountedRef.current) {
                 transitionToState("INIT_GAME", response);
               }
-            }, 500);
+            }, 5000);
           }
         } catch (e) {
           // EZ A BLOKK FUT LE, HA A GETSHUFFLING() VAGY AZ EXTRACTGAMESTATEDATA() HIBÁVAL VÉGZŐDIK!
