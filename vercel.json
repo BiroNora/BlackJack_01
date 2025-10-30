@@ -8,7 +8,7 @@
       "src": "my_app/react/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "my_app/react/dist"
+        "distDir": "dist"
       }
     }
   ],
@@ -19,7 +19,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "my_app/react/build/$1"
+      "dest": "my_app/react/$1"
     }
   ]
 }
