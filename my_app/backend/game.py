@@ -53,8 +53,7 @@ class Game:
         self.split_req: int = 0
         self.unmasked_sum_sent = False
         self.suits = ["♥", "♦", "♣", "♠"]
-        # self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-        self.ranks = ["A", "K", "Q", "J", "9"]
+        self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
         self.deck = []
         self.deck_len = 104
         self.bet: int = 0
@@ -63,20 +62,15 @@ class Game:
 
     def initialize_new_round(self):
         self.clear_up()
-        # card1 = self.deck.pop(0)
-        # card2 = self.deck.pop(0)
-        # card3 = self.deck.pop(0)
-        # card4 = self.deck.pop(0)
-        card2 = "♦9"
-        card4 = "♠2"
-        card1 = "♦10"
-        card3 = "♠10"
+
+        card1 = self.deck.pop(0)
+        card2 = self.deck.pop(0)
+        card3 = self.deck.pop(0)
+        card4 = self.deck.pop(0)
+
         player_hand = [card1, card3]
         dealer_hand = [card2, card4]
         dealer_masked = [" ✪ ", card4]
-        # dealer_masked = [" ✪ ", card4]
-        # dealer_hand = [card2, card4]
-        # dealer_masked = [" ✪ ", card4]
 
         player_sum = self.sum(player_hand, True)
         dealer_masked_sum = self.sum([card4], False)
