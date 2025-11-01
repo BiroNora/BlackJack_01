@@ -5,8 +5,8 @@ import random
 from collections import Counter
 from typing import Any, Dict
 
-from my_app.backend.hand_state import HandState
-from my_app.backend.winner_state import WinnerState
+from hand_state import HandState
+from winner_state import WinnerState
 
 NONE = 0
 
@@ -53,7 +53,8 @@ class Game:
         self.split_req: int = 0
         self.unmasked_sum_sent = False
         self.suits = ["♥", "♦", "♣", "♠"]
-        self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+        # self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+        self.ranks = ["A", "K", "Q", "J", "9"]
         self.deck = []
         self.deck_len = 104
         self.bet: int = 0
@@ -63,10 +64,14 @@ class Game:
     def initialize_new_round(self):
         self.clear_up()
 
-        card1 = self.deck.pop(0)
-        card2 = self.deck.pop(0)
-        card3 = self.deck.pop(0)
-        card4 = self.deck.pop(0)
+        # card1 = self.deck.pop(0)
+        # card2 = self.deck.pop(0)
+        # card3 = self.deck.pop(0)
+        # card4 = self.deck.pop(0)
+        card2 = "♦9"
+        card4 = "♠2"
+        card1 = "♦10"
+        card3 = "♠10"
 
         player_hand = [card1, card3]
         dealer_hand = [card2, card4]
@@ -87,6 +92,7 @@ class Game:
         can_split = self.can_split(player_hand)
         can_insure = card4[-1] == "A"
 
+        player_state = self.hand_state(player_sum, True) if player_sum == 21 else HandState.NONE
         dealer_unmasked_state = self.hand_state(dealer_unmasked_sum, False)
 
         bet = self.get_bet()
@@ -98,7 +104,7 @@ class Game:
             "id": self._generate_sequential_id(),
             "hand": player_hand,
             "sum": player_sum,
-            "hand_state": HandState.NONE,
+            "hand_state": player_state,
             "can_split": can_split,
             "stated": self.stated,
             "bet": bet,
@@ -369,7 +375,7 @@ class Game:
 
     def add_player_from_players(self):
         if not self.players:
-            return
+            return self.player
 
         first_id = list(self.players.keys())[0]
         self.player = self.players.pop(first_id)

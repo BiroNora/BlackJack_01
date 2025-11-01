@@ -19,11 +19,13 @@ import {
   setRestart,
   forceRestart,
   splitHit,
+  type HttpError,
 } from "../api/api-calls";
 import type {
   GameState,
   GameStateData,
   GameStateMachineHookResult,
+  SessionInitResponse,
 } from "../types/game-types";
 import { extractGameStateData } from "../utilities/utils";
 
@@ -96,15 +98,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           ...newData,
           currentGameState: newState,
         };
-        /* console.log(
+        console.log(
           `>>> Állapotváltás: ${prev.currentGameState} -> ${newState}`,
           updatedState
-        ); */
+        );
         return updatedState;
       });
-    },
-    []
-  );
+    }, []);
 
   const savePreActionState = useCallback(() => {
     if (gameState) {
@@ -139,14 +139,50 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     setIsWFSR(false);
   }, []);
 
+  /**
+ * Kezeli az aszinkron API hívásokat, és a hibák alapján meghatározza a viselkedést.
+ * @param apiCallFn Az aszinkron függvény, ami meghívja az API-t (pl. handleHit).
+ * @returns A sikeres API válasz.
+ */
+  const handleApiAction = useCallback(
+    async <T>(apiCallFn: () => Promise<T>): Promise<T | null> => {
+      try {
+        const data = await apiCallFn();
+        return data;
+
+      } catch (error) {
+        const httpError = error as HttpError;
+        const response = httpError.response;
+
+        if (response && typeof response.status === 'number') {
+          const status = response.status;
+
+          if (status >= 400 && status < 500) {
+            const errorMessage = httpError.message || "Érvénytelen kérés.";
+            console.warn(`Nem kritikus API hiba (4xx): ${errorMessage}`);
+            return null;
+          } else {
+            console.error("Kritikus hiba (5xx vagy hálózati):", error);
+            transitionToState("ERROR");
+            return null;
+          }
+        }
+
+        // Ha nincs response.status (pl. hálózati timeout vagy nem HttpError)
+        console.error("Hálózati vagy ismeretlen API hiba:", error);
+        transitionToState("ERROR");
+        return null;
+      }
+    }, [transitionToState]);
+
   const handlePlaceBet = useCallback(
     async (amount: number) => {
       if (gameState.tokens >= amount && amount > 0) {
         setIsWFSR(true);
         try {
-          const data = await setBet(amount);
-          const response = extractGameStateData(data);
-          if (response) {
+          const data = await handleApiAction(() => setBet(amount));
+          if (data) {
+            const response = extractGameStateData(data);
             transitionToState("BETTING", response);
           }
         } catch {
@@ -155,17 +191,15 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           setIsWFSR(false);
         }
       }
-    },
-    [gameState.tokens, transitionToState]
-  );
+    }, [gameState.tokens, handleApiAction, transitionToState]);
 
   const handleRetakeBet = useCallback(async () => {
     if (gameState.bet_list) {
       setIsWFSR(true);
       try {
-        const data = await takeBackDeal();
-        const response = extractGameStateData(data);
-        if (response) {
+        const data = await handleApiAction(takeBackDeal);
+        if (data) {
+          const response = extractGameStateData(data);
           transitionToState("BETTING", response);
         }
       } catch {
@@ -174,7 +208,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         setIsWFSR(false);
       }
     }
-  }, [gameState.bet_list, transitionToState]);
+  }, [gameState.bet_list, handleApiAction, transitionToState]);
 
   const handleStartGame = useCallback(
     (shouldShuffle: boolean) => {
@@ -185,9 +219,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           transitionToState("INIT_GAME", gameState);
         }
       }
-    },
-    [gameState, transitionToState]
-  );
+    }, [gameState, transitionToState]);
 
   const handleHitRequest = useCallback(async () => {
     setIsWFSR(true);
@@ -195,22 +227,24 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     savePreActionState();
 
     try {
-      const data = await handleHit();
-      const response = extractGameStateData(data);
-      if (response && response.player) {
-        const playerHandValue = response.player.sum;
-        if (playerHandValue >= 21) {
-          setHasOver21(true);
+      const data = await handleApiAction(handleHit);
+      if (data) {
+        const response = extractGameStateData(data);
+        if (response && response.player) {
+          const playerHandValue = response.player.sum;
+          if (playerHandValue >= 21) {
+            setHasOver21(true);
+          }
+          setHasHitTurn(true);
+          transitionToState("MAIN_TURN", response);
         }
-        setHasHitTurn(true);
-        transitionToState("MAIN_TURN", response);
       }
     } catch {
       transitionToState("ERROR");
     } finally {
       setIsWFSR(false);
     }
-  }, [transitionToState, savePreActionState]);
+  }, [savePreActionState, handleApiAction, transitionToState]);
 
   const handleStandRequest = useCallback(async () => {
     setIsWFSR(true);
@@ -231,15 +265,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     setShowInsLost(false);
 
     try {
-      const doubleResponse = await handleDouble();
-      const doubledState = extractGameStateData(doubleResponse);
-
-      if (doubledState && doubledState.player && doubledState.tokens) {
-        setPreRewardBet(doubledState.player.bet);
-        setPreRewardTokens(doubledState.tokens);
-
-        if (doubledState) {
-          transitionToState("MAIN_STAND_REWARDS_TRANSIT", doubledState);
+      const data = await handleApiAction(handleDouble);
+      if (data) {
+        const response = extractGameStateData(data);
+        if (response && response.player && response.tokens) {
+          setPreRewardBet(response.player.bet);
+          setPreRewardTokens(response.tokens);
+          transitionToState("MAIN_STAND_REWARDS_TRANSIT", response);
         }
       }
     } catch {
@@ -247,7 +279,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     } finally {
       setIsWFSR(false);
     }
-  }, [transitionToState, setPreRewardBet, setPreRewardTokens]);
+  }, [handleApiAction, transitionToState]);
 
   const handleInsRequest = useCallback(async () => {
     setIsWFSR(true);
@@ -255,21 +287,23 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     savePreActionState();
 
     try {
-      const data = await handleInsurance();
-      const resp = extractGameStateData(data);
-      const insWon = resp?.natural_21;
-      if (insWon === 3) {
-        transitionToState("MAIN_STAND", resp);
-      } else {
-        setShowInsLost(true);
-        transitionToState("MAIN_TURN", resp);
+      const data = await handleApiAction(handleInsurance);
+      if (data) {
+        const response = extractGameStateData(data);
+        const insWon = response?.natural_21;
+        if (insWon === 3) {
+          transitionToState("MAIN_STAND", response);
+        } else {
+          setShowInsLost(true);
+          transitionToState("MAIN_TURN", response);
+        }
       }
     } catch {
       transitionToState("ERROR");
     } finally {
       setIsWFSR(false);
     }
-  }, [transitionToState, savePreActionState]);
+  }, [savePreActionState, handleApiAction, transitionToState]);
 
   // SPLIT part
   const handleSplitRequest = useCallback(async () => {
@@ -279,15 +313,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     savePreActionState();
 
     try {
-      const response = await splitHand();
-      const resp = extractGameStateData(response);
-      if (resp && resp.player) {
-        if (resp.aces === true) {
-          transitionToState("SPLIT_ACE_TRANSIT", resp);
-        } else if (resp.player.hand.length === 2 && resp.player.sum === 21) {
-          transitionToState("SPLIT_NAT21_TRANSIT", resp);
-        } else {
-          transitionToState("SPLIT_TURN", resp);
+      const data = await handleApiAction(splitHand);
+      if (data) {
+        const response = extractGameStateData(data);
+        if (response && response.player) {
+          if (response.aces === true) {
+            transitionToState("SPLIT_ACE_TRANSIT", response);
+          } else if (response.player.hand.length === 2 && response.player.sum === 21) {
+            transitionToState("SPLIT_NAT21_TRANSIT", response);
+          } else {
+            transitionToState("SPLIT_TURN", response);
+          }
         }
       }
     } catch {
@@ -295,31 +331,33 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     } finally {
       setIsWFSR(false);
     }
-  }, [savePreActionState, transitionToState]);
+  }, [handleApiAction, savePreActionState, transitionToState]);
 
   const handleSplitHitRequest = useCallback(async () => {
     setIsWFSR(true);
     setHasHitTurn(true);
 
     try {
-      const data = await splitHit();
-      const response = extractGameStateData(data);
-      const newHitCounter = hitCounter === null ? 1 : hitCounter + 1;
-      incrementHitCounter();
+      const data = await handleApiAction(splitHit);
+      if (data) {
+        const response = extractGameStateData(data);
+        const newHitCounter = hitCounter === null ? 1 : hitCounter + 1;
+        incrementHitCounter();
 
-      if (response && response.player) {
-        const playerHandValue = response.player.sum;
+        if (response && response.player) {
+          const playerHandValue = response.player.sum;
 
-        if (playerHandValue >= 21) {
-          if (newHitCounter === 1) {
-            setHasOver21(true);
-            transitionToState("SPLIT_STAND_DOUBLE", response);
+          if (playerHandValue >= 21) {
+            if (newHitCounter === 1) {
+              setHasOver21(true);
+              transitionToState("SPLIT_STAND_DOUBLE", response);
+            } else {
+              setHasOver21(true);
+              transitionToState("SPLIT_STAND", response);
+            }
           } else {
-            setHasOver21(true);
-            transitionToState("SPLIT_STAND", response);
+            transitionToState("SPLIT_TURN", response);
           }
-        } else {
-          transitionToState("SPLIT_TURN", response);
         }
       }
     } catch {
@@ -327,7 +365,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     } finally {
       setIsWFSR(false);
     }
-  }, [hitCounter, incrementHitCounter, transitionToState]);
+  }, [handleApiAction, hitCounter, incrementHitCounter, transitionToState]);
 
   const handleSplitStandRequest = useCallback(async () => {
     setIsWFSR(true);
@@ -344,22 +382,21 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     setHasHitTurn(true);
 
     try {
-      const doubleResponse = await handleSplitDouble();
-      const doubledState = extractGameStateData(doubleResponse);
-
-      if (doubledState && doubledState.player && doubledState.tokens) {
-        if (doubledState) {
-          transitionToState("SPLIT_STAND_DOUBLE", doubledState);
+      const data = await handleApiAction(handleSplitDouble);
+      if (data) {
+        const response = extractGameStateData(data);
+        if (response && response.player && response.tokens) {
+          transitionToState("SPLIT_STAND_DOUBLE", response);
+        } else {
+          transitionToState("SPLIT_TURN", gameState);
         }
-      } else {
-        transitionToState("SPLIT_TURN", gameState);
       }
     } catch {
       transitionToState("ERROR");
     } finally {
       setIsWFSR(false);
     }
-  }, [gameState, transitionToState]);
+  }, [gameState, handleApiAction, transitionToState]);
 
   // --- useEffect blokkok ---
 
@@ -389,11 +426,11 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         try {
           // 1. Min. töltési idő beállítása
           const minLoadingTimePromise = new Promise((resolve) =>
-            setTimeout(resolve, 7000)
+            setTimeout(resolve, 500)
           );
 
           // 2. Single API hívás, ami mindent visszaad (session, tokenek, game_state)
-          const initializationPromise = initializeSessionAPI();
+          const initializationPromise = handleApiAction(initializeSessionAPI);
 
           // Várjuk meg a leglassabb elemet (API vagy min. töltési idő)
           const [initData] = await Promise.all([
@@ -401,12 +438,18 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             minLoadingTimePromise,
           ]);
 
-          // Az összes szükséges adatot EGYETLEN válaszból nyerjük ki
-          const userTokens = initData.tokens;
-          // A deck hossza most a game_state objektumban van!
-          const deckLength = initData.game_state.deckLen;
+          if (!initData) {
+                // A handleApiAction már kezelte a 4xx hibát (pl. logolta).
+                // Ehelyett logikusan a LOGIN állapotba kell átváltani,
+                // ha az inicializáció sikertelen volt (pl. 401 Unauthorized).
+                // Vagy ha 5xx történt, a handleApiAction már ERROR-ba váltott.
+                return; // Megállítjuk a futást, maradunk a jelenlegi állapotban (vagy a handleApiAction már átvitt LOGIN/ERROR-ba)
+            }
 
-          // Mivel a setInitDeckLen most már a deckLength-et várja
+          const responseData = initData as SessionInitResponse;
+          const userTokens = responseData.tokens;
+          const deckLength = responseData.game_state.deckLen;
+
           setInitDeckLen(deckLength);
 
           if (userTokens === 0) {
@@ -425,11 +468,8 @@ export function useGameStateMachine(): GameStateMachineHookResult {
           });
         }
       };
-
       initializeApplicationOnLoad();
     }
-
-    // --- A SHUFFLING ÁLLAPOT KEZELÉSE ---
     else if (gameState.currentGameState === "SHUFFLING") {
       const shufflingAct = async () => {
         // Early exit if component unmounted while awaiting (optional but good practice)
@@ -451,7 +491,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
               if (isMountedRef.current) {
                 transitionToState("INIT_GAME", response);
               }
-            }, 5000);
+            }, 500);
           }
         } catch (e) {
           // EZ A BLOKK FUT LE, HA A GETSHUFFLING() VAGY AZ EXTRACTGAMESTATEDATA() HIBÁVAL VÉGZŐDIK!

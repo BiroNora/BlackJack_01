@@ -10,12 +10,14 @@ from datetime import datetime, timedelta, timezone
 import uuid
 import logging
 from flask_session import Session
+from sqlalchemy.exc import IntegrityError
+from psycopg2.errors import UniqueViolation
 
 from upstash_redis import Redis as UpstashRedisClient  # Upstash kliens átnevezve
 from redis import Redis as FlaskSessionRedisClient  # Hivatalos kliens importálva
 
-from my_app.backend.game import Game
-# from game import Game
+# from my_app.backend.game import Game
+from game import Game
 
 load_dotenv()
 
@@ -43,7 +45,8 @@ UPSTASH_REDIS_TOKEN = os.environ.get("UPSTASH_REDIS_TOKEN")
 
 # A Flask-Session csomag nem szereti a None-t, ezért alapértelmezettként
 # a "filesystem"-et használjuk. Ez a biztonságos fallback.
-app.config["SESSION_TYPE"] = "filesystem"
+# app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_TYPE"] = "redis"
 app.config["SESSION_REDIS"] = None
 
 # Helyi kliens a Redis-ben tárolt játékállapot számára (ha a Redis működik)
@@ -86,7 +89,7 @@ else:
         # =========================================================================
         if flask_session_client.ping():
             # Csak sikeres ping esetén állítjuk be a Redis session-t
-            app.config["SESSION_TYPE"] = "filesystem"
+            app.config["SESSION_TYPE"] = "redis"
             app.config["SESSION_REDIS"] = flask_session_client
             app.config["REDIS_CLIENT"] = (
                 upstash_redis_client  # Mentjük a Game State klienst
@@ -114,7 +117,7 @@ sess = Session(app)
 # =========================================================================
 # DATABASE_URL = os.environ.get('DATABASE_URL_SIMPLE', 'postgresql://player:pass@localhost:5433/blackjack_game')
 DATABASE_URL = os.environ.get(
-    "DATABASE_URL", "postgresql://player:pass@localhost:5433/blackjack_game"
+    "DATABASE_URL_SIMPLE", "postgresql://player:pass@localhost:5433/blackjack_game"
 )
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
@@ -356,10 +359,30 @@ def initialize_session():
         user = db.session.execute(stmt).scalar_one_or_none()
 
     if not user:
-        user = User(client_id=client_id_from_request)
-        db.session.add(user)
-        db.session.commit()
+        try:
+            user = User(client_id=client_id_from_request)
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError as e:
+            # Csak a UniqueViolation-t (ami IntegrityError-on keresztül érkezik) kezeljük
+            if isinstance(e.orig, UniqueViolation):
+                # Versenyhelyzet: A felhasználót épp most hozta létre egy másik kérés.
+                db.session.rollback()  # Visszaállítjuk a tranzakciót
+                print(
+                    f"Versenyhelyzet (UniqueViolation) a client_id={client_id_from_request} miatt. Újra megpróbáljuk lekérdezni."
+                )
 
+                # Visszakeressük a már létező felhasználót
+                stmt = select(User).filter_by(client_id=client_id_from_request)
+                user = db.session.execute(stmt).scalar_one_or_none()
+
+                if not user:
+                    # Ha még így sem találjuk, akkor kritikus hiba
+                    raise Exception(
+                        f"Kritikus hiba: Létrehozási hiba után sem találtuk a felhasználót: {client_id_from_request}"
+                    )
+            else:
+                raise e  # Egyéb integritási hiba továbbdobása
     # ----------------------------------------------------------------------
     # 2. DB & Session: Frissítés és beállítás
     # ----------------------------------------------------------------------
@@ -379,20 +402,22 @@ def initialize_session():
 
     redis_key = f"game:{user.id}"
     redis_data_raw = redis_client.get(redis_key)
-    game_instance = None
-    redis_data = None
+    game_instance = Game()
 
-    if redis_data:
-        # Próba betöltésre
+    if redis_data_raw:
         try:
-            redis_data = json.loads(redis_data_raw)
+            if isinstance(redis_data_raw, bytes):
+                redis_data_str = redis_data_raw.decode("utf-8")
+            else:
+                redis_data_str = redis_data_raw
+
+            redis_data = json.loads(redis_data_str)
             game_instance = Game.deserialize(redis_data)
         except Exception as e:
             # Hiba esetén új játék indítása
             print(
                 f"Hiba a Game deszerializálásakor ({user.id}): {e}. Új játék indítása."
             )
-            game_instance = Game()
     else:
         # Nincs játékállás a Redisben: új játék indítása
         game_instance = Game()

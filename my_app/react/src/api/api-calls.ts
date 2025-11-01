@@ -1,41 +1,31 @@
-import type { ErrorResponse } from "../types/game-types";
+import type { ErrorResponse, SessionInitResponse } from "../types/game-types";
 import { generateUUID } from "../utilities/utils";
 
-export async function initializeSessionAPI() {
+export async function initializeSessionAPI(): Promise<SessionInitResponse> {
+  // 1. Lekérjük/generáljuk a kliens egyedi azonosítóját (client_id) a böngésző localStorage-jából.
+  let clientUuid = localStorage.getItem("blackjack_client_uuid");
+  if (!clientUuid) {
+    clientUuid = generateUUID(); // Generálunk egy újat, ha még nincs
+    localStorage.setItem("blackjack_client_uuid", clientUuid); // Elmentjük a böngészőbe
+  }
+
+  // 2. Meghívjuk az API-t a központosított callApiEndpoint-on keresztül
   try {
-    // 1. Lekérjük/generáljuk a kliens egyedi azonosítóját (client_id) a böngésző localStorage-jából.
-    let clientUuid = localStorage.getItem("blackjack_client_uuid");
-    if (!clientUuid) {
-      clientUuid = generateUUID(); // Generálunk egy újat, ha még nincs
-      localStorage.setItem("blackjack_client_uuid", clientUuid); // Elmentjük a böngészőbe
-    }
+    const data = await callApiEndpoint<SessionInitResponse>(
+      "/api/initialize_session",
+      "POST",
+      { client_id: clientUuid }
+    );
 
-    // 2. Meghívjuk a szerveren lévő /api/initialize_session API-t,
-    //    ÉS ELKÜLDJÜK A CLIENT_ID-T A KÉRÉS TESTÉBEN JSON FORMÁTUMBAN.
-    const response = await fetch("/api/initialize_session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        client_id: clientUuid,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP hiba! státusz: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    // Frissítjük a localStorage-t, ha a szerver esetleg új client_id-t küld vissza
-    if (data.client_id && data.client_id !== clientUuid) {
+    if (data.client_id !== clientUuid) {
       localStorage.setItem("blackjack_client_uuid", data.client_id);
     }
 
-    return data; // Visszaadjuk a szerver válaszát (tartalmazza a message-t, user_id-t, client_id-t)
+    return data;
   } catch (error) {
-    console.error("Error: ", error);
+    // A catch blokk most már csak a (client_id generálásból eredő) szinkron hibákat
+    // kapja el, az API hibákat a callApiEndpoint dobja tovább.
+    console.error("Hiba az inicializálás során:", error);
     throw error;
   }
 }

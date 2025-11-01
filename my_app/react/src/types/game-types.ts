@@ -59,10 +59,19 @@ export interface DealerUnmaskedData {
   natural_21: number;
 }
 
+export type GameStateForClient = {
+    // A deckLen az egyetlen mező, amit a serialize_for_client_init(self) visszaküld.
+    deckLen: number;
+};
+
 export type SessionInitResponse = {
+  status: "success";
   message: string;
   user_id: string;
   client_id: string;
+  tokens: number;
+  game_state: GameStateForClient; // deckLen
+  game_state_hint: "USER_SESSION_INITIALIZED";
 };
 
 export type TokensResponse = {
