@@ -92,7 +92,9 @@ class Game:
         can_split = self.can_split(player_hand)
         can_insure = card4[-1] == "A"
 
-        player_state = self.hand_state(player_sum, True) if player_sum == 21 else HandState.NONE
+        player_state = (
+            self.hand_state(player_sum, True) if player_sum == 21 else HandState.NONE
+        )
         dealer_unmasked_state = self.hand_state(dealer_unmasked_sum, False)
 
         bet = self.get_bet()
