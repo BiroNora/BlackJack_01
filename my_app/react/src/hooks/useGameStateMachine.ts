@@ -179,16 +179,22 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     async (amount: number) => {
       if (gameState.tokens >= amount && amount > 0) {
         setIsWFSR(true);
+
         try {
           const data = await handleApiAction(() => setBet(amount));
           if (data) {
+            if (!isMountedRef.current) return;
             const response = extractGameStateData(data);
             transitionToState("BETTING", response);
           }
         } catch {
-          transitionToState("ERROR");
+          if (isMountedRef.current) {
+            transitionToState("ERROR");
+          }
         } finally {
-          setIsWFSR(false);
+          if (isMountedRef.current) {
+            setIsWFSR(false);
+          }
         }
       }
     }, [gameState.tokens, handleApiAction, transitionToState]);
@@ -196,16 +202,22 @@ export function useGameStateMachine(): GameStateMachineHookResult {
   const handleRetakeBet = useCallback(async () => {
     if (gameState.bet_list) {
       setIsWFSR(true);
+
       try {
         const data = await handleApiAction(takeBackDeal);
         if (data) {
+          if (!isMountedRef.current) return;
           const response = extractGameStateData(data);
           transitionToState("BETTING", response);
         }
       } catch {
-        transitionToState("ERROR");
+        if (isMountedRef.current) {
+          transitionToState("ERROR");
+        }
       } finally {
-        setIsWFSR(false);
+        if (isMountedRef.current) {
+          setIsWFSR(false);
+        }
       }
     }
   }, [gameState.bet_list, handleApiAction, transitionToState]);
@@ -229,6 +241,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     try {
       const data = await handleApiAction(handleHit);
       if (data) {
+        if (!isMountedRef.current) return;
         const response = extractGameStateData(data);
         if (response && response.player) {
           const playerHandValue = response.player.sum;
@@ -240,9 +253,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         }
       }
     } catch {
-      transitionToState("ERROR");
+      if (isMountedRef.current) {
+        transitionToState("ERROR");
+      }
     } finally {
-      setIsWFSR(false);
+      if (isMountedRef.current) {
+        setIsWFSR(false);
+      }
     }
   }, [savePreActionState, handleApiAction, transitionToState]);
 
@@ -267,6 +284,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     try {
       const data = await handleApiAction(handleDouble);
       if (data) {
+        if (!isMountedRef.current) return;
         const response = extractGameStateData(data);
         if (response && response.player && response.tokens) {
           setPreRewardBet(response.player.bet);
@@ -275,9 +293,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         }
       }
     } catch {
-      transitionToState("ERROR");
+      if (isMountedRef.current) {
+        transitionToState("ERROR");
+      }
     } finally {
-      setIsWFSR(false);
+      if (isMountedRef.current) {
+        setIsWFSR(false);
+      }
     }
   }, [handleApiAction, transitionToState]);
 
@@ -289,6 +311,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     try {
       const data = await handleApiAction(handleInsurance);
       if (data) {
+        if (!isMountedRef.current) return;
         const response = extractGameStateData(data);
         const insWon = response?.natural_21;
         if (insWon === 3) {
@@ -299,9 +322,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         }
       }
     } catch {
-      transitionToState("ERROR");
+      if (isMountedRef.current) {
+        transitionToState("ERROR");
+      }
     } finally {
-      setIsWFSR(false);
+      if (isMountedRef.current) {
+        setIsWFSR(false);
+      }
     }
   }, [savePreActionState, handleApiAction, transitionToState]);
 
@@ -315,6 +342,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     try {
       const data = await handleApiAction(splitHand);
       if (data) {
+        if (!isMountedRef.current) return;
         const response = extractGameStateData(data);
         if (response && response.player) {
           if (response.aces === true) {
@@ -327,9 +355,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         }
       }
     } catch {
-      transitionToState("ERROR");
+      if (isMountedRef.current) {
+        transitionToState("ERROR");
+      }
     } finally {
-      setIsWFSR(false);
+      if (isMountedRef.current) {
+        setIsWFSR(false);
+      }
     }
   }, [handleApiAction, savePreActionState, transitionToState]);
 
@@ -340,13 +372,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     try {
       const data = await handleApiAction(splitHit);
       if (data) {
+        if (!isMountedRef.current) return;
         const response = extractGameStateData(data);
         const newHitCounter = hitCounter === null ? 1 : hitCounter + 1;
         incrementHitCounter();
 
         if (response && response.player) {
           const playerHandValue = response.player.sum;
-
           if (playerHandValue >= 21) {
             if (newHitCounter === 1) {
               setHasOver21(true);
@@ -361,9 +393,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         }
       }
     } catch {
-      transitionToState("ERROR");
+      if (isMountedRef.current) {
+        transitionToState("ERROR");
+      }
     } finally {
-      setIsWFSR(false);
+      if (isMountedRef.current) {
+        setIsWFSR(false);
+      }
     }
   }, [handleApiAction, hitCounter, incrementHitCounter, transitionToState]);
 
@@ -384,6 +420,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     try {
       const data = await handleApiAction(handleSplitDouble);
       if (data) {
+        if (!isMountedRef.current) return;
         const response = extractGameStateData(data);
         if (response && response.player && response.tokens) {
           transitionToState("SPLIT_STAND_DOUBLE", response);
@@ -392,9 +429,13 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         }
       }
     } catch {
-      transitionToState("ERROR");
+      if (isMountedRef.current) {
+        transitionToState("ERROR");
+      }
     } finally {
-      setIsWFSR(false);
+      if (isMountedRef.current) {
+        setIsWFSR(false);
+      }
     }
   }, [gameState, handleApiAction, transitionToState]);
 
@@ -438,34 +479,44 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             minLoadingTimePromise,
           ]);
 
+          if (!isMountedRef.current) return;
+
           if (!initData) {
-                // A handleApiAction már kezelte a 4xx hibát (pl. logolta).
-                // Ehelyett logikusan a LOGIN állapotba kell átváltani,
-                // ha az inicializáció sikertelen volt (pl. 401 Unauthorized).
-                // Vagy ha 5xx történt, a handleApiAction már ERROR-ba váltott.
-                return; // Megállítjuk a futást, maradunk a jelenlegi állapotban (vagy a handleApiAction már átvitt LOGIN/ERROR-ba)
-            }
+            // A handleApiAction már kezelte a 4xx hibát (pl. logolta).
+            // Ehelyett logikusan a LOGIN állapotba kell átváltani,
+            // ha az inicializáció sikertelen volt (pl. 401 Unauthorized).
+            // Vagy ha 5xx történt, a handleApiAction már ERROR-ba váltott.
+            return; // Megállítjuk a futást, maradunk a jelenlegi állapotban (vagy a handleApiAction már átvitt LOGIN/ERROR-ba)
+          }
 
           const responseData = initData as SessionInitResponse;
           const userTokens = responseData.tokens;
           const deckLength = responseData.game_state.deckLen;
 
-          setInitDeckLen(deckLength);
+          if (!isMountedRef.current) {
+            setInitDeckLen(deckLength);
+          }
 
           if (userTokens === 0) {
-            transitionToState("OUT_OF_TOKENS");
+            if (isMountedRef.current) {
+              transitionToState("OUT_OF_TOKENS");
+            }
           } else {
-            transitionToState("BETTING", {
-              tokens: userTokens,
-              deckLen: deckLength,
-            });
+            if (isMountedRef.current) {
+              transitionToState("BETTING", {
+                tokens: userTokens,
+                deckLen: deckLength,
+              });
+            }
           }
         } catch (error) {
           console.error("Initialization Error: ", error);
-          transitionToState("ERROR", {
-            tokens: 0,
-            deckLen: 0,
-          });
+          if (isMountedRef.current) {
+            transitionToState("ERROR", {
+              tokens: 0,
+              deckLen: 0,
+            });
+          }
         }
       };
       initializeApplicationOnLoad();
@@ -473,28 +524,22 @@ export function useGameStateMachine(): GameStateMachineHookResult {
     else if (gameState.currentGameState === "SHUFFLING") {
       const shufflingAct = async () => {
         // Early exit if component unmounted while awaiting (optional but good practice)
-        if (!isMountedRef.current) {
-          return;
-        }
+        if (!isMountedRef.current) return;
 
         try {
-          const data = await getShuffling();
-          const response = extractGameStateData(data);
-
-          if (!isMountedRef.current) {
-            return;
-          }
-
-          if (response) {
-            timeoutIdRef.current = window.setTimeout(() => {
-              // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-              if (isMountedRef.current) {
-                transitionToState("INIT_GAME", response);
-              }
-            }, 500);
+          const data = await handleApiAction(getShuffling);
+          if (!isMountedRef.current) return;
+          if (data) {
+            const response = extractGameStateData(data);
+            if (response) {
+              timeoutIdRef.current = window.setTimeout(() => {
+                if (isMountedRef.current) {
+                  transitionToState("INIT_GAME", response);
+                }
+              }, 500);
+            }
           }
         } catch (e) {
-          // EZ A BLOKK FUT LE, HA A GETSHUFFLING() VAGY AZ EXTRACTGAMESTATEDATA() HIBÁVAL VÉGZŐDIK!
           console.error("SHUFFLING: Hiba a SHUFFLING fázisban:", e);
           if (isMountedRef.current) {
             transitionToState("ERROR");
@@ -509,26 +554,33 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         setInitDeckLen(gameState.deckLen);
 
         try {
-          const data = await startGame();
-          const response = extractGameStateData(data);
-
-          if (response && response.dealer_masked) {
-            if (
-              response.dealer_masked.nat_21 === 1 ||
-              response.dealer_masked.nat_21 === 2
-            ) {
-              savePreActionState();
-              const rewards = await handleRewards();
-              const resp = extractGameStateData(rewards);
-              transitionToState("MAIN_STAND", resp);
-            } else {
-              transitionToState("MAIN_TURN", response);
+          const data = await handleApiAction(startGame);
+          if (data) {
+            if (!isMountedRef.current) return;
+            const response = extractGameStateData(data);
+            if (response && response.dealer_masked) {
+              if (
+                response.dealer_masked.nat_21 === 1 ||
+                response.dealer_masked.nat_21 === 2
+              ) {
+                savePreActionState();
+                const rewards = await handleRewards();
+                if (!isMountedRef.current) return;
+                const resp = extractGameStateData(rewards);
+                transitionToState("MAIN_STAND", resp);
+              } else {
+                transitionToState("MAIN_TURN", response);
+              }
             }
           }
         } catch {
-          transitionToState("ERROR");
+          if (isMountedRef.current) {
+            transitionToState("ERROR");
+          }
         } finally {
-          setIsWFSR(false);
+          if (isMountedRef.current) {
+            setIsWFSR(false);
+          }
         }
       };
       InitGame();
@@ -571,19 +623,22 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         if (!isMountedRef.current) return;
 
         try {
-          const rewardsResponse = await handleStandAndRewards();
-          const finalState = extractGameStateData(rewardsResponse);
-
-          if (finalState) {
-            timeoutIdRef.current = window.setTimeout(() => {
-              // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-              if (isMountedRef.current) {
-                transitionToState("MAIN_STAND", finalState);
-              }
-            }, 200);
+          const data = await handleStandAndRewards();
+          if (data) {
+            if (!isMountedRef.current) return;
+            const response = extractGameStateData(data);
+            if (response) {
+              timeoutIdRef.current = window.setTimeout(() => {
+                if (isMountedRef.current) {
+                  transitionToState("MAIN_STAND", response);
+                }
+              }, 200);
+            }
           }
         } catch {
-          transitionToState("ERROR");
+          if (isMountedRef.current) {
+            transitionToState("ERROR");
+          }
         }
       };
       MainStandDoubleTransit();
@@ -600,58 +655,70 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         if (!isMountedRef.current) return;
 
         try {
-          if (!isMountedRef.current) return;
           const data = await addToPlayersListByStand();
-          const response = extractGameStateData(data);
-          const currSplitReq = response?.splitReq || 0;
+          if (data) {
+            if (!isMountedRef.current) return;
+            const response = extractGameStateData(data);
+            const currSplitReq = response?.splitReq || 0;
 
-          if (currSplitReq > 0) {
-            const splitResponse = await addSplitPlayerToGame();
-            const ans = extractGameStateData(splitResponse);
-            if (ans && ans.player) {
-              if (ans.player.hand.length === 2 && ans.player.sum === 21) {
-                if (gameState.currentGameState === "SPLIT_STAND_DOUBLE") {
-                  timeoutIdRef.current = window.setTimeout(() => {
-                    // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-                    if (isMountedRef.current) {
-                      transitionToState("SPLIT_NAT21_TRANSIT", ans);
+            if (currSplitReq > 0) {
+              const splitResponse = await addSplitPlayerToGame();
+              if (!isMountedRef.current) return;
+              if (splitResponse) {
+                const ans = extractGameStateData(splitResponse);
+                if (ans && ans.player) {
+                  if (ans.player.hand.length === 2 && ans.player.sum === 21) {
+                    if (gameState.currentGameState === "SPLIT_STAND_DOUBLE") {
+                      timeoutIdRef.current = window.setTimeout(() => {
+                        if (isMountedRef.current) {
+                          transitionToState("SPLIT_NAT21_TRANSIT", ans);
+                        }
+                      }, 2000);
+                    } else {
+                      if (isMountedRef.current) {
+                        transitionToState("SPLIT_NAT21_TRANSIT", ans);
+                      }
                     }
-                  }, 2000);
-                } else {
-                  transitionToState("SPLIT_NAT21_TRANSIT", ans);
-                }
-              } else {
-                if (hasSplitNat21) {
-                  // do not wait 2*2000 sec
-                  setHasSplitNat21(false);
-                  transitionToState("SPLIT_TURN", ans);
-                } else {
-                  timeoutIdRef.current = window.setTimeout(() => {
-                    // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-                    if (isMountedRef.current) {
-                      transitionToState("SPLIT_TURN", ans);
+                  } else {
+                    if (hasSplitNat21) {
+                      // do not wait 2*2000 sec
+                      setHasSplitNat21(false);
+                      if (isMountedRef.current) {
+                        transitionToState("SPLIT_TURN", ans);
+                      }
+                    } else {
+                      timeoutIdRef.current = window.setTimeout(() => {
+                        if (isMountedRef.current) {
+                          transitionToState("SPLIT_TURN", ans);
+                        }
+                      }, 2000);
                     }
-                  }, 2000);
+                  }
                 }
               }
-            }
-          } else {
-            if (hasSplitNat21) {
-              setHasSplitNat21(false);
-              transitionToState("SPLIT_FINISH", response);
             } else {
-              timeoutIdRef.current = window.setTimeout(() => {
-                // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
+              if (hasSplitNat21) {
+                setHasSplitNat21(false);
                 if (isMountedRef.current) {
                   transitionToState("SPLIT_FINISH", response);
                 }
-              }, 2000);
+              } else {
+                timeoutIdRef.current = window.setTimeout(() => {
+                  if (isMountedRef.current) {
+                    transitionToState("SPLIT_FINISH", response);
+                  }
+                }, 2000);
+              }
             }
           }
         } catch {
-          transitionToState("ERROR");
+          if (isMountedRef.current) {
+            transitionToState("ERROR");
+          }
         } finally {
-          setIsWFSR(false);
+          if (isMountedRef.current) {
+            setIsWFSR(false);
+          }
         }
       };
       SplitStand();
@@ -668,7 +735,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
             }
           }, 2000);
         } catch {
-          transitionToState("ERROR");
+          if (isMountedRef.current) {
+            transitionToState("ERROR");
+          }
         }
       };
       SplitNat21Transit();
@@ -677,29 +746,35 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         if (!isMountedRef.current) return;
 
         try {
-          if (!isMountedRef.current) return;
           const data = await addToPlayersListByStand();
-          const response = extractGameStateData(data);
-          const currSplitReq = response?.splitReq || 0;
+          if (data) {
+            if (!isMountedRef.current) return;
+            const response = extractGameStateData(data);
+            const currSplitReq = response?.splitReq || 0;
 
-          if (currSplitReq > 0) {
-            const splitResponse = await addSplitPlayerToGame();
-            const ans = extractGameStateData(splitResponse);
-            timeoutIdRef.current = window.setTimeout(() => {
-              if (isMountedRef.current) {
-                transitionToState("SPLIT_ACE_TRANSIT", ans);
+            if (currSplitReq > 0) {
+              const splitResponse = await addSplitPlayerToGame();
+              if (!isMountedRef.current) return;
+              if (splitResponse) {
+                const ans = extractGameStateData(splitResponse);
+                timeoutIdRef.current = window.setTimeout(() => {
+                  if (isMountedRef.current) {
+                    transitionToState("SPLIT_ACE_TRANSIT", ans);
+                  }
+                }, 2000);
               }
-            }, 2000);
-          } else {
-            timeoutIdRef.current = window.setTimeout(() => {
-              // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-              if (isMountedRef.current) {
-                transitionToState("SPLIT_FINISH", response);
-              }
-            }, 2000);
+            } else {
+              timeoutIdRef.current = window.setTimeout(() => {
+                if (isMountedRef.current) {
+                  transitionToState("SPLIT_FINISH", response);
+                }
+              }, 2000);
+            }
           }
         } catch {
-          transitionToState("ERROR");
+          if (isMountedRef.current) {
+            transitionToState("ERROR");
+          }
         }
       };
       SplitAce21Transit();
@@ -707,19 +782,30 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       setHasHitTurn(false);
 
       const SplitFinish = async () => {
+        if (!isMountedRef.current) return;
+
         try {
           savePreActionState();
-          const rewardData = await handleSplitStandAndRewards();
-          const rewards = extractGameStateData(rewardData);
+          const data = await handleSplitStandAndRewards();
+          if (data) {
+            if (!isMountedRef.current) return;
+            const response = extractGameStateData(data);
 
-          if (rewards) {
-            transitionToState("SPLIT_FINISH_OUTCOME", rewards);
-          } else {
-            transitionToState("ERROR");
+            if (response) {
+              if (isMountedRef.current) {
+                transitionToState("SPLIT_FINISH_OUTCOME", response);
+              }
+            } else {
+              if (isMountedRef.current) {
+                transitionToState("ERROR");
+              }
+            }
           }
         } catch (e) {
           console.error("Hiba a SPLIT_FINISH fázisban:", e);
-          transitionToState("ERROR");
+          if (isMountedRef.current) {
+            transitionToState("ERROR");
+          }
         }
       };
       SplitFinish();
@@ -728,16 +814,16 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         if (!isMountedRef.current) return;
 
         try {
-          if (!isMountedRef.current) return;
           if (gameState.players) {
             if (Object.keys(gameState.players).length === 0) {
               if (gameState.tokens === 0) {
-                transitionToState("OUT_OF_TOKENS");
+                if (isMountedRef.current) {
+                  transitionToState("OUT_OF_TOKENS");
+                }
               } else {
                 setHasHitTurn(false);
                 setHasOver21(false);
                 timeoutIdRef.current = window.setTimeout(() => {
-                  // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
                   if (isMountedRef.current) {
                     transitionToState("BETTING", {
                       ...initialGameState,
@@ -750,19 +836,23 @@ export function useGameStateMachine(): GameStateMachineHookResult {
                 }, 4000);
               }
             } else {
-              const updateData = await addPlayerFromPlayers();
-              const response = extractGameStateData(updateData);
-              timeoutIdRef.current = window.setTimeout(() => {
-                // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-                if (isMountedRef.current) {
-                  transitionToState("SPLIT_FINISH", response);
-                }
-              }, 4000);
+              const data = await addPlayerFromPlayers();
+              if (data) {
+                if (!isMountedRef.current) return;
+                const response = extractGameStateData(data);
+                timeoutIdRef.current = window.setTimeout(() => {
+                  if (isMountedRef.current) {
+                    transitionToState("SPLIT_FINISH", response);
+                  }
+                }, 4000);
+              }
             }
           }
         } catch (e) {
           console.error("Hiba a SPLIT_FINISH_OUTCOME fázisban:", e);
-          transitionToState("ERROR");
+          if (isMountedRef.current) {
+            transitionToState("ERROR");
+          }
         }
       };
       SplitFinishTransit();
@@ -771,18 +861,23 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         if (!isMountedRef.current) return;
 
         try {
-          if (!isMountedRef.current) return;
           const data = await setRestart();
-          const response = extractGameStateData(data);
-          if (response) {
-            timeoutIdRef.current = window.setTimeout(() => {
-              // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-              transitionToState("RESTART_GAME", response);
-            }, 5000);
+          if (data) {
+            if (!isMountedRef.current) return;
+            const response = extractGameStateData(data);
+            if (response) {
+              timeoutIdRef.current = window.setTimeout(() => {
+                if (isMountedRef.current) {
+                  transitionToState("RESTART_GAME", response);
+                }
+              }, 5000);
+            }
           }
         } catch (e) {
           console.error("Hiba a RESTART_GAME fázisban:", e);
-          transitionToState("ERROR");
+          if (isMountedRef.current) {
+            transitionToState("ERROR");
+          }
         }
       };
       HandleOutOfTokens();
@@ -791,15 +886,17 @@ export function useGameStateMachine(): GameStateMachineHookResult {
         if (!isMountedRef.current) return;
 
         try {
-          if (!isMountedRef.current) return;
           resetGameVariables();
           timeoutIdRef.current = window.setTimeout(() => {
-            // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-            transitionToState("RELOADING");
+            if (isMountedRef.current) {
+              transitionToState("RELOADING");
+            }
           }, 5000);
         } catch (e) {
           console.error("Hiba a RESTART_GAME fázisban:", e);
-          transitionToState("ERROR");
+          if (isMountedRef.current) {
+            transitionToState("ERROR");
+          }
         }
       };
       RestartGame();
@@ -809,18 +906,25 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         await new Promise((resolve) => setTimeout(resolve, 5000));
 
+        if (!isMountedRef.current) return;
+
         setIsWFSR(true);
 
         try {
           const data = await forceRestart();
-          const response = extractGameStateData(data);
-          if (response) {
-            transitionToState("RELOADING", response);
+          if (data) {
+            if (!isMountedRef.current) return;
+            const response = extractGameStateData(data);
+            if (response) {
+              transitionToState("RELOADING", response);
+            }
           }
         } catch (error) {
           console.error("Hiba a kényszerített újraindítás során:", error);
         } finally {
-          setIsWFSR(false);
+          if (isMountedRef.current) {
+            setIsWFSR(false);
+          }
         }
       };
       ForceRestart();
@@ -830,8 +934,9 @@ export function useGameStateMachine(): GameStateMachineHookResult {
 
         try {
           timeoutIdRef.current = window.setTimeout(() => {
-            // CSAK AKKOR VÁLTSUNK ÁLLAPOTOT, HA A KOMPONENS MÉG MOUNTOLVA VAN!
-            transitionToState("BETTING", gameState);
+            if (isMountedRef.current) {
+              transitionToState("BETTING", gameState);
+            }
           }, 5000);
         } catch (error) {
           console.error("Error: ", error);
@@ -839,18 +944,7 @@ export function useGameStateMachine(): GameStateMachineHookResult {
       };
       Reloading();
     }
-  }, [
-    gameState,
-    transitionToState,
-    savePreActionState,
-    isMountedRef,
-    timeoutIdRef,
-    resetHitCounter,
-    hasSplitNat21,
-    resetGameVariables,
-    setInitDeckLen,
-    hasOver21,
-  ]);
+  }, [gameState, transitionToState, savePreActionState, isMountedRef, timeoutIdRef, resetHitCounter, hasSplitNat21, resetGameVariables, setInitDeckLen, hasOver21, handleApiAction]);
 
   return {
     gameState,
