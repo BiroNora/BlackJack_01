@@ -1,14 +1,14 @@
-from functools import wraps
-import math
 import os
+import uuid
+import logging
+import math
+from functools import wraps
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 from sqlalchemy import select
 from flask import Flask, current_app, json, jsonify, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta, timezone
-import uuid
-import logging
 from flask_session import Session
 from sqlalchemy.exc import IntegrityError
 from psycopg2.errors import UniqueViolation
@@ -16,8 +16,7 @@ from psycopg2.errors import UniqueViolation
 from upstash_redis import Redis as UpstashRedisClient  # Upstash kliens átnevezve
 from redis import Redis as FlaskSessionRedisClient  # Hivatalos kliens importálva
 
-# from my_app.backend.game import Game
-from game import Game
+from my_app.backend.game import Game
 
 load_dotenv()
 
@@ -1117,33 +1116,3 @@ def force_restart_by_client_id():
 @app.route("/error_page", methods=["GET"])
 def error_page():
     return render_template("error.html")
-
-
-if __name__ == "__main__":
-    # Győződjön meg róla, hogy az adatbázis táblái létrejönnek.
-    # EZ FONTOS FEJLESZTÉSI CÉLRA, HOGY A SÉMA SZINKRONBAN LEGYEN A MODELLJEKKEL.
-    # A 'db.create_all()' létrehozza a táblákat, ha még nem léteznek.
-    # Ha a táblák már léteznek, nem történik semmi (nem módosítja, nem törli).
-    # Éles környezetben (produkcióban) erre adatbázis migráló eszközöket (pl. Alembic) használnak!
-    with app.app_context():  # <<-- Ez a Flask alkalmazás környezetét állítja be
-        db.create_all()  # <<-- Ez hozza létre az adatbázis tábláit (ha még nincsenek)
-        #       a User osztályod definíciója alapján, beleértve a client_id-t is.
-        # print("Adatbázis táblák ellenőrizve/létrehozva (fejlesztési mód).")
-
-        # Opcionális: Ellenőrizzük, hogy van-e már legalább egy felhasználó az adatbázisban.
-        # Ha nincs, létrehozunk egy alapértelmezett tesztfelhasználót 1000 tokennel.
-        # Ez segít a legelső indításkor, hogy legyen egy kiinduló felhasználó a játékhoz.
-        if not User.query.first():  # Lekérdezi az első felhasználót a DB-ből
-            test_user = (
-                User()
-            )  # Létrehoz egy új User példányt (ez generálja az ID-t és a client_id-t is)
-            db.session.add(test_user)  # Hozzáadja a felhasználót a sessionhöz
-            db.session.commit()  # Elmenti a felhasználót az adatbázisba
-            # print(
-            #    f"Létrehozva egy inicializált felhasználó ezzel az azonosítóval: {test_user.id}"
-            # )
-
-    # A Flask alkalmazás futtatása debug módban.
-    # 'debug=True' automatikusan újraindítja a szervert a kódváltozásokra, és részletes hibaüzeneteket ad.
-    # 'port=5000' explicit módon beállítja a portot.
-    app.run(debug=True, port=5000)

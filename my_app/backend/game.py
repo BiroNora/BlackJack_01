@@ -5,8 +5,8 @@ import random
 from collections import Counter
 from typing import Any, Dict
 
-from hand_state import HandState
-from winner_state import WinnerState
+from my_app.backend.hand_state import HandState
+from my_app.backend.winner_state import WinnerState
 
 NONE = 0
 
