@@ -56,7 +56,7 @@ class Game:
         # self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
         self.ranks = ["A", "K", "Q", "J", "9"]
         self.deck = []
-        self.deck_len = 104
+        self.deck_len_init = 104
         self.bet: int = 0
         self.bet_list = []
         self.is_round_active = False
@@ -518,13 +518,13 @@ class Game:
         if len(self.deck) > 0:
             return len(self.deck)
         else:
-            return self.deck_len
+            return self.deck_len_init
 
     def get_is_round_active(self):
         return self.is_round_active
 
     def serialize_for_client_init(self):
-        return {"deckLen": self.get_deck_len()}
+        return {"deckLen": self.deck_len_init}
 
     def serialize_for_client_bets(self):
         return {
