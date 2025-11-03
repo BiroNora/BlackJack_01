@@ -404,14 +404,11 @@ def initialize_session():
     game_instance = Game()
 
     if redis_data_raw:
+        redis_client.delete(redis_key)
+        print(f"Régi Redis kulcs ({redis_key}) törölve az új session indításakor.")
         try:
-            if isinstance(redis_data_raw, bytes):
-                redis_data_str = redis_data_raw.decode("utf-8")
-            else:
-                redis_data_str = redis_data_raw
-
-            redis_data = json.loads(redis_data_str)
-            game_instance = Game.deserialize(redis_data)
+            game_instance.clear_up()
+            game_instance.deck_len = game_instance.deck_len_init
         except Exception as e:
             # Hiba esetén új játék indítása
             print(
