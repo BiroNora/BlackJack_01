@@ -412,6 +412,7 @@ def initialize_session():
 
             redis_data = json.loads(redis_data_str)
             game_instance = Game.deserialize(redis_data)
+            game_instance.deck_len = game_instance.deck_len_init
         except Exception as e:
             # Hiba esetén új játék indítása
             print(
