@@ -432,10 +432,7 @@ def initialize_session():
             {
                 "status": "success",
                 "message": "User and game session initialized.",
-                "user_id": user.id,
-                "client_id": user.client_id,
                 "tokens": user.tokens,
-                # EBBEN VAN BENNE MINDEN, pl. a deckLen is!
                 "game_state": game_state_for_client,
                 "game_state_hint": "USER_SESSION_INITIALIZED",
             }
