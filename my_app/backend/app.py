@@ -698,6 +698,7 @@ def double_request(user, game):
                 "double_amount": amount_deducted,
                 "current_tokens": user.tokens,
                 "game_state": game_state_for_client,
+                "game_state_hint": "DOUBLE_RECIEVED",
             }
         ),
         200,
@@ -994,6 +995,7 @@ def split_double_request(user, game):
                 "double_amount": amount_deducted,
                 "current_tokens": user.tokens,
                 "game_state": game_state_for_client,
+                "game_state_hint": "DOUBLE_RECIEVED",
             }
         ),
         200,
