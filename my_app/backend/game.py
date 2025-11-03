@@ -69,7 +69,7 @@ class Game:
         # card3 = self.deck.pop(0)
         # card4 = self.deck.pop(0)
         card2 = "♦9"
-        card4 = "♠2"
+        card4 = "♠A"
         card1 = "♦10"
         card3 = "♠10"
 
@@ -332,7 +332,7 @@ class Game:
             for hand_id, is_stated in sorted(self.players_index.items())
             if is_stated is False
         )
-
+        print("335: ", self.players_index)
         # next() adja vissza a legelső (legkisebb) False állapotú ID-t
         return next(unplayed_id_generator, None)
 

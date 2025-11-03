@@ -497,7 +497,6 @@ def bet(user, game):
         jsonify(
             {
                 "status": "success",
-                "bet_placed": bet_amount,
                 "current_tokens": user.tokens,
                 "game_state": game_state_for_client,
                 "game_state_hint": "BET_SUCCESSFULLY_PLACED",
@@ -533,7 +532,6 @@ def retake_bet(user, game):
         jsonify(
             {
                 "status": "success",
-                "bet_retaken": amount_to_return,
                 "current_tokens": user.tokens,
                 "game_state": game_state_for_client,
                 "game_state_hint": "BET_SUCCESSFULLY_RETRAKEN",
@@ -625,7 +623,6 @@ def ins_request(user, game):
             {
                 "status": "success",
                 "message": "Insurance placed successfully.",
-                "insurance_amount": insurance_amount,
                 "current_tokens": user.tokens,
                 "game_state": game_state_for_client,
                 "game_state_hint": "INSURANCE_PROCESSED",
@@ -698,6 +695,7 @@ def double_request(user, game):
                 "double_amount": amount_deducted,
                 "current_tokens": user.tokens,
                 "game_state": game_state_for_client,
+                "game_state_hint": "DOUBLE_RECIEVED",
             }
         ),
         200,
@@ -819,7 +817,6 @@ def split_request(user, game):
             {
                 "status": "success",
                 "message": "Split hand placed successfully.",
-                "split_amount": bet_amount,
                 "current_tokens": user.tokens,
                 "game_state": game_state_for_client,
                 "game_state_hint": "SPLIT_SUCCESS",
@@ -991,9 +988,9 @@ def split_double_request(user, game):
             {
                 "status": "success",
                 "message": "Double placed successfully.",
-                "double_amount": amount_deducted,
                 "current_tokens": user.tokens,
                 "game_state": game_state_for_client,
+                "game_state_hint": "DOUBLE_RECIEVED",
             }
         ),
         200,
