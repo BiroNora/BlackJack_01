@@ -53,7 +53,8 @@ class Game:
         self.split_req: int = 0
         self.unmasked_sum_sent = False
         self.suits = ["♥", "♦", "♣", "♠"]
-        self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+        # self.ranks = ["A", "K", "Q", "J", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+        self.ranks = ["A", "K", "Q", "J", "9", "10"]
         self.deck = []
         self.deck_len_init = 104
         self.bet: int = 0
@@ -63,11 +64,14 @@ class Game:
     def initialize_new_round(self):
         self.clear_up()
 
-        card1 = self.deck.pop(0)
+        #card1 = self.deck.pop(0)
         card2 = self.deck.pop(0)
-        card3 = self.deck.pop(0)
+        #card3 = self.deck.pop(0)
         card4 = self.deck.pop(0)
 
+        #player_hand = [card1, card3]
+        card1 = "♥10"
+        card3 = "♣Q"
         player_hand = [card1, card3]
         dealer_hand = [card2, card4]
         dealer_masked = [" ✪ ", card4]
@@ -519,20 +523,20 @@ class Game:
         return self.is_round_active
 
     def serialize_for_client_init(self):
-        return {"deckLen": self.deck_len_init}
+        return {"deck_len": self.deck_len_init}
 
     def serialize_for_client_bets(self):
         return {
             "bet": self.bet,
             "bet_list": self.bet_list,
-            "deckLen": self.get_deck_len(),
+            "deck_len": self.get_deck_len(),
         }
 
     def serialize_initial_and_hit_state(self):
         return {
             "player": self.player,
             "dealer_masked": self.dealer_masked,
-            "deckLen": self.get_deck_len(),
+            "deck_len": self.get_deck_len(),
             "bet": self.bet,
             "is_round_active": self.is_round_active,
         }
@@ -541,7 +545,7 @@ class Game:
         state = {
             "player": self.player,
             "natural_21": self.natural_21,
-            "deckLen": self.get_deck_len(),
+            "deck_len": self.get_deck_len(),
             "bet": self.bet,
             "is_round_active": self.is_round_active,
         }
@@ -556,7 +560,7 @@ class Game:
     def serialize_double_state(self):
         return {
             "player": self.player,
-            "deckLen": self.get_deck_len(),
+            "deck_len": self.get_deck_len(),
             "is_round_active": self.is_round_active,
         }
 
@@ -564,7 +568,7 @@ class Game:
         return {
             "player": self.player,
             "dealer_unmasked": self.dealer_unmasked,
-            "deckLen": self.get_deck_len(),
+            "deck_len": self.get_deck_len(),
             "bet": self.bet,
             "winner": self.winner,
             "is_round_active": self.is_round_active,
@@ -587,8 +591,8 @@ class Game:
             "dealer_masked": self.dealer_masked,
             "aces": self.aces,
             "players": sorted_players_list,
-            "splitReq": self.split_req,
-            "deckLen": self.get_deck_len(),
+            "split_req": self.split_req,
+            "deck_len": self.get_deck_len(),
             "bet": self.bet,
             "is_round_active": self.is_round_active,
         }
@@ -600,8 +604,8 @@ class Game:
             "player": self.player,
             "aces": self.aces,
             "players": sorted_players_list,
-            "splitReq": self.split_req,
-            "deckLen": self.get_deck_len(),
+            "split_req": self.split_req,
+            "deck_len": self.get_deck_len(),
             "bet": self.bet,
             "is_round_active": self.is_round_active,
         }
@@ -626,8 +630,8 @@ class Game:
             "dealer_unmasked": self.dealer_unmasked,
             "aces": self.aces,
             "players": sorted_players_list,
-            "splitReq": self.split_req,
-            "deckLen": self.get_deck_len(),
+            "split_req": self.split_req,
+            "deck_len": self.get_deck_len(),
             "bet": self.bet,
             "is_round_active": self.is_round_active,
         }
@@ -640,8 +644,8 @@ class Game:
             "dealer_unmasked": self.dealer_unmasked,
             "players": sorted_players_list,
             "winner": self.winner,
-            "splitReq": self.split_req,
-            "deckLen": self.get_deck_len(),
+            "split_req": self.split_req,
+            "deck_len": self.get_deck_len(),
             "bet": self.bet,
             "is_round_active": self.is_round_active,
         }
@@ -661,9 +665,9 @@ class Game:
             "hand_counter": self.hand_counter,
             "players": sorted_players_list,
             "players_index": self.players_index,
-            "splitReq": self.split_req,
+            "split_req": self.split_req,
             "unmasked_sum_sent": self.unmasked_sum_sent,
-            "deckLen": self.get_deck_len(),
+            "deck_len": self.get_deck_len(),
             "bet": self.bet,
             "bet_list": self.bet_list,
             "is_round_active": self.is_round_active,
@@ -683,9 +687,9 @@ class Game:
         game.hand_counter = data["hand_counter"]
         game.players = {hand["id"]: hand for hand in data["players"]}
         game.players_index = data.get("players_index", {})
-        game.split_req = data["splitReq"]
+        game.split_req = data["split_req"]
         game.unmasked_sum_sent = data["unmasked_sum_sent"]
-        game.deck_len = data["deckLen"]
+        game.deck_len = data["deck_len"]
         game.bet = data["bet"]
         game.bet_list = data["bet_list"]
         game.is_round_active = data.get("is_round_active", False)

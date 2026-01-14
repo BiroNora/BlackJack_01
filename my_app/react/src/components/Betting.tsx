@@ -19,7 +19,7 @@ const Betting: React.FC<BettingProps> = ({
   onStartGame,
   isWFSR,
 }) => {
-  const { tokens, bet, deckLen } = gameState;
+  const { tokens, bet, deck_len } = gameState;
 
   const [showButtons, setShowButtons] = useState(false);
   const timeoutIdRef = useRef<number | null>(null);
@@ -43,7 +43,7 @@ const Betting: React.FC<BettingProps> = ({
   };
 
   const handleStartGame = async () => {
-    const shouldShuffle = deckLen === 0 || deckLen === 104 || deckLen < 60;
+    const shouldShuffle = deck_len === 0 || deck_len === 104 || deck_len < 60;
     onStartGame(shouldShuffle);
   };
 

@@ -27,8 +27,8 @@ export interface GameStateData {
   natural_21: number;
   winner: number;
   players: Record<string, PlayerData>;
-  splitReq: number;
-  deckLen: number;
+  split_req: number;
+  deck_len: number;
   tokens: number;
   bet: number;
   bet_list: number[];
@@ -60,8 +60,8 @@ export interface DealerUnmaskedData {
 }
 
 export type GameStateForClient = {
-    // A deckLen az egyetlen mező, amit a serialize_for_client_init(self) visszaküld.
-    deckLen: number;
+  // A deck_len az egyetlen mező, amit a serialize_for_client_init(self) visszaküld.
+  deck_len: number;
 };
 
 export type SessionInitResponse = {
@@ -70,7 +70,7 @@ export type SessionInitResponse = {
   user_id: string;
   client_id: string;
   tokens: number;
-  game_state: GameStateForClient; // deckLen
+  game_state: GameStateForClient; // deck_len
   game_state_hint: "USER_SESSION_INITIALIZED";
 };
 
@@ -80,7 +80,7 @@ export type TokensResponse = {
 };
 
 export type DeckLenResponse = {
-  deckLen: number;
+  deck_len: number;
   message: string;
 };
 

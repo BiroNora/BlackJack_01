@@ -7,19 +7,19 @@ interface CardsProps {
 }
 
 const Cards: React.FC<CardsProps> = ({ gameState, initDeckLen }) => {
-  const { deckLen } = gameState;
-  const [displayedDeckLen, setDisplayedDeckLen] = useState(deckLen);
+  const { deck_len } = gameState;
+  const [displayedDeckLen, setDisplayedDeckLen] = useState(deck_len);
   const [tmp, setTmp] = useState(initDeckLen);
 
   useEffect(() => {
     setDisplayedDeckLen(tmp!);
-    if (initDeckLen !== null && initDeckLen > deckLen) {
+    if (initDeckLen !== null && initDeckLen > deck_len) {
       const interval = setInterval(() => {
         setDisplayedDeckLen((prevDisplayedLen) => {
-          if (prevDisplayedLen <= deckLen) {
+          if (prevDisplayedLen <= deck_len) {
             clearInterval(interval);
-            setTmp(deckLen);
-            return deckLen;
+            setTmp(deck_len);
+            return deck_len;
           }
           return prevDisplayedLen - 1;
         });
@@ -27,9 +27,9 @@ const Cards: React.FC<CardsProps> = ({ gameState, initDeckLen }) => {
 
       return () => clearInterval(interval);
     } else {
-      setDisplayedDeckLen(deckLen);
+      setDisplayedDeckLen(deck_len);
     }
-  }, [deckLen, initDeckLen, tmp]);
+  }, [deck_len, initDeckLen, tmp]);
 
   return (
     <div className="cards merriweather" id="cards">
