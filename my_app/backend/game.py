@@ -294,7 +294,7 @@ class Game:
 
         player_sum = self.sum(hand, True)
         can_split = False if self.aces else self.can_split(hand)
-        player_state = self.hand_state(player_sum, True) if is_first else 10
+        player_state = self.hand_state(player_sum, True) if is_first else HandState.UNDER_21
         player = {
             "id": hand_id,
             "hand": hand,
